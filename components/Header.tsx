@@ -22,7 +22,7 @@ export default function Header(){
                 >
                     
                     {/* logo and name */}
-                    
+
                     <div className='flex items-center justify-between md:w-auto w-full'>
                         <a href="#" className='flex items-center py-5 px-2 flex-1'>
                             <Wallet color="#000000"/>
@@ -40,12 +40,12 @@ export default function Header(){
 
                     {/* CTA */}
                     <div className='w-1/3 flex justify-end gap-6 px-4 ' >
-                        <button className='bg-black rounded-lg font-bold px-10 py-2 bg-green-700 text-white'>
+                        <button className='whitespace-nowrap rounded-lg font-bold px-10 py-2 bg-green-700 text-white'>
                             Get Started
                         </button>
-                        <button className='bg-white rounded-lg font-bold px-10 py-2 text-gray-500'>
+                        <button className='hidden lg:flex whitespace-nowrap bg-white rounded-lg font-bold px-10 py-2 text-gray-500'>
                             Sign in
-                            </button>
+                        </button>
 
                     </div>
                     
