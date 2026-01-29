@@ -8,6 +8,113 @@ export default function Home() {
       <p className="mt-2 text-gray-600">
         Next.js + Tailwind is working. ✅
       </p>
+      <h1 className="text-3xl font-bold">Budgetly</h1>
+      <p className="mt-2 text-gray-600">
+        Next.js + Tailwind is working. ✅
+      </p>
+      <h1 className="text-3xl font-bold">Budgetly</h1>
+      <p className="mt-2 text-gray-600">
+        Next.js + Tailwind is working. ✅
+      </p>
+      <h1 className="text-3xl font-bold">Budgetly</h1>
+      <p className="mt-2 text-gray-600">
+        Next.js + Tailwind is working. ✅
+      </p>
+      <h1 className="text-3xl font-bold">Budgetly</h1>
+      <p className="mt-2 text-gray-600">
+        Next.js + Tailwind is working. ✅
+      </p>
+      <h1 className="text-3xl font-bold">Budgetly</h1>
+      <p className="mt-2 text-gray-600">
+        Next.js + Tailwind is working. ✅
+      </p>
+      <h1 className="text-3xl font-bold">Budgetly</h1>
+      <p className="mt-2 text-gray-600">
+        Next.js + Tailwind is working. ✅
+      </p>
+      <h1 className="text-3xl font-bold">Budgetly</h1>
+      <p className="mt-2 text-gray-600">
+        Next.js + Tailwind is working. ✅
+      </p>
+      <h1 className="text-3xl font-bold">Budgetly</h1>
+      <p className="mt-2 text-gray-600">
+        Next.js + Tailwind is working. ✅
+      </p><h1 className="text-3xl font-bold">Budgetly</h1>
+      <p className="mt-2 text-gray-600">
+        Next.js + Tailwind is working. ✅
+      </p>
+      <h1 className="text-3xl font-bold">Budgetly</h1>
+      <p className="mt-2 text-gray-600">
+        Next.js + Tailwind is working. ✅
+      </p>
+      <h1 className="text-3xl font-bold">Budgetly</h1>
+      <p className="mt-2 text-gray-600">
+        Next.js + Tailwind is working. ✅
+      </p>
+      <h1 className="text-3xl font-bold">Budgetly</h1>
+      <p className="mt-2 text-gray-600">
+        Next.js + Tailwind is working. ✅
+      </p>
+      <h1 className="text-3xl font-bold">Budgetly</h1>
+      <p className="mt-2 text-gray-600">
+        Next.js + Tailwind is working. ✅
+      </p>
+      <h1 className="text-3xl font-bold">Budgetly</h1>
+      <p className="mt-2 text-gray-600">
+        Next.js + Tailwind is working. ✅
+      </p>
+      <h1 className="text-3xl font-bold">Budgetly</h1>
+      <p className="mt-2 text-gray-600">
+        Next.js + Tailwind is working. ✅
+      </p>
+      <h1 className="text-3xl font-bold">Budgetly</h1>
+      <p className="mt-2 text-gray-600">
+        Next.js + Tailwind is working. ✅
+      </p>
+      <h1 className="text-3xl font-bold">Budgetly</h1>
+      <p className="mt-2 text-gray-600">
+        Next.js + Tailwind is working. ✅
+      </p>
+      <h1 className="text-3xl font-bold">Budgetly</h1>
+      <p className="mt-2 text-gray-600">
+        Next.js + Tailwind is working. ✅
+      </p>
+      <h1 className="text-3xl font-bold">Budgetly</h1>
+      <p className="mt-2 text-gray-600">
+        Next.js + Tailwind is working. ✅
+      </p>
+      <h1 className="text-3xl font-bold">Budgetly</h1>
+      <p className="mt-2 text-gray-600">
+        Next.js + Tailwind is working. ✅
+      </p>
+      <h1 className="text-3xl font-bold">Budgetly</h1>
+      <p className="mt-2 text-gray-600">
+        Next.js + Tailwind is working. ✅
+      </p>
+      <h1 className="text-3xl font-bold">Budgetly</h1>
+      <p className="mt-2 text-gray-600">
+        Next.js + Tailwind is working. ✅
+      </p>
+      <h1 className="text-3xl font-bold">Budgetly</h1>
+      <p className="mt-2 text-gray-600">
+        Next.js + Tailwind is working. ✅
+      </p>
+      <h1 className="text-3xl font-bold">Budgetly</h1>
+      <p className="mt-2 text-gray-600">
+        Next.js + Tailwind is working. ✅
+      </p>
+      <h1 className="text-3xl font-bold">Budgetly</h1>
+      <p className="mt-2 text-gray-600">
+        Next.js + Tailwind is working. ✅
+      </p>
+      <h1 className="text-3xl font-bold">Budgetly</h1>
+      <p className="mt-2 text-gray-600">
+        Next.js + Tailwind is working. ✅
+      </p>
+      <h1 className="text-3xl font-bold">Budgetly</h1>
+      <p className="mt-2 text-gray-600">
+        Next.js + Tailwind is working. ✅
+      </p>
       
 
     </main>
