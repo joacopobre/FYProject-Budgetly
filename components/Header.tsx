@@ -53,7 +53,7 @@ export default function Header() {
           <div className="flex items-center justify-between gap-6">
             {/* logo and name */}
             <div className="flex w-full items-center justify-between md:w-auto">
-              <a href="#" className="flex flex-1 items-center px-2 py-5">
+              <a href="/" className="flex flex-1 items-center px-2 py-5">
                 <Wallet color="#000000" />
               </a>
             </div>
@@ -61,7 +61,7 @@ export default function Header() {
             {/* nav links */}
             <div
               id="navigation-menu"
-              className="hidden items-center justify-center font-semibold md:flex md:flex-row md:space-x-8"
+              className="hidden items-center justify-center font-light md:flex md:flex-row md:space-x-8"
             >
               <a href="#">Features</a>
               <a href="#">Demo</a>
@@ -73,13 +73,13 @@ export default function Header() {
             <div className="flex w-1/3 justify-end gap-6 px-4">
               <button
                 type="button"
-                className="rounded-lg bg-green-700 px-10 py-2 font-bold whitespace-nowrap text-white"
+                className="rounded-lg bg-primary px-10 py-2 font-light whitespace-nowrap text-white"
               >
                 Get Started
               </button>
               <button
                 type="button"
-                className="hidden rounded-lg bg-white px-10 py-2 font-bold whitespace-nowrap text-gray-500 lg:flex"
+                className="hidden rounded-lg bg-white px-10 py-2 font-light whitespace-nowrap text-gray-500 lg:flex"
               >
                 Sign in
               </button>
