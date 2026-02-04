@@ -49,7 +49,7 @@ export default function Marquee() {
       <div
         key={`${i}-${idx}`}
         className="shrink-0 rounded-xl bg-white"
-        style={{ width: ITEM_WIDTH, height: 160 }}
+        style={{ width: ITEM_WIDTH, height: 360 }}
       />
     ))}
   </div>
