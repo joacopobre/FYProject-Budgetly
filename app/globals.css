@@ -22,6 +22,19 @@
     --foreground: #ededed;
   }
 }
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(calc(-1 * var(--marquee-distance))); }
+}
+
+.animate-marquee {
+  animation: marquee var(--marquee-duration, 30s) linear infinite;
+  will-change: transform;
+}
+.edge-fade {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 10%, #000 90%, transparent);
+}
 
 body {
   background: var(--background);

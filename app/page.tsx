@@ -1,11 +1,11 @@
 import Header from '../components/Header'
-import InfiniteMarquee from '@/components/InfiniteMarquee'
+import InfiniteMarquee from '../components/InfiniteMarquee'
 
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col bg-gray-100 text-center text-black">
       <Header />
-      <main className="flex flex-col px-10 py-50 md:py-70">
+      <section className="flex flex-col px-10 py-50 md:py-70">
         <section className="flex flex-col items-center justify-center gap-10 text-center">
           <h1 className="xl:text-6xlm text-3xl font-semibold md:max-w-2xl md:text-5xl lg:text-5xl xl:max-w-3xl xl:text-6xl">
             Take control of your finances with clarity and confidence
@@ -21,7 +21,10 @@ export default function Home() {
             Get Started
           </button>
         </section>
-      </main>
+        <div className="relative w-full overflow-hidden edge-fade">
+          <InfiniteMarquee />
+        </div>
+      </section>
     </main>
   )
 }
