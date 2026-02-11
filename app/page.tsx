@@ -3,7 +3,7 @@ import InfiniteMarquee from '../components/InfiniteMarquee'
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col bg-gray-100 pb-10 text-center text-black">
+    <main className="flex min-h-screen flex-col bg-gray-100 text-center text-black">
       <Header />
       {/* Hero */}
       <section className="flex flex-col gap-30 px-10 pt-50 pb-40 md:gap-40 md:pt-70">
@@ -98,10 +98,10 @@ export default function Home() {
         <h2 className="mt-15 mb-7 text-4xl font-semibold text-white md:text-7xl">
           How It Works
         </h2>
-        <p className="mb-7 text-xl font-semibold text-gray-100 md:text-2xl">
+        <p className="mb-7 px-10 text-md font-medium text-gray-100  md:text-2xl">
           Track, organise, and understand your finances in just a few steps.
         </p>
-        <button className="mx-auto mb-7 rounded-xl bg-white px-7 py-2 font-medium text-green-700">
+        <button className="mx-auto mb-7 rounded-xl bg-white px-12 py-2 font-medium text-green-700">
           Get Started
         </button>
 
@@ -161,14 +161,14 @@ export default function Home() {
       {/* testimonials */}
       <section id="testimonials" className="bg-green-700 py-16">
         <div className="mx-auto flex w-full max-w-screen-xl flex-col items-center px-6 text-center text-white md:px-10">
-          <h2 className="text-3xl font-semibold md:text-7xl">Testimonials</h2>
+          <h2 className="text-4xl font-semibold md:text-7xl">Testimonials</h2>
           <p className="mt-3 max-w-2xl text-base text-white/80 md:text-lg">
             Hear from people using Budgetly to stay on track.
           </p>
           <div className="mt-12 grid w-full justify-items-center gap-5 items-start md:grid-cols-2 xl:grid-cols-4">
             <div className="flex w-full flex-col items-center rounded-4xl border-4 border-green-500 bg-gray-100 px-6 py-6">
               <div className="h-30 w-30 rounded-full bg-amber-300"></div>
-              <h2 className="mt-6 text-xl font-medium text-black">Person 1</h2>
+              <h3 className="mt-6 text-xl font-medium text-black">Person 1</h3>
               <p className="mt-4 text-gray-700">
                 Lorem ipsum dolor sit amet consectetur. Euismod arcu commodo risus duis nisl
                 risus et congue. Cum aliquam ornare ipsum placerat non posuere sed.
@@ -177,7 +177,7 @@ export default function Home() {
 
             <div className="flex w-full flex-col items-center rounded-4xl border-4 border-green-500 bg-gray-100 px-6 py-6">
               <div className="h-30 w-30 rounded-full bg-amber-300"></div>
-              <h2 className="mt-6 text-xl font-medium text-black">Person 2</h2>
+              <h3 className="mt-6 text-xl font-medium text-black">Person 2</h3>
               <p className="mt-4 text-gray-700">
                 Lorem ipsum dolor sit amet consectetur. Euismod arcu commodo risus duis nisl
                 risus et congue. Cum aliquam ornare ipsum placerat non posuere sed.Lorem
@@ -188,7 +188,7 @@ export default function Home() {
 
             <div className="flex w-full flex-col items-center rounded-4xl border-4 border-green-500 bg-gray-100 px-6 py-6">
               <div className="h-30 w-30 rounded-full bg-amber-300"></div>
-              <h2 className="mt-6 text-xl font-medium text-black">Person 3</h2>
+              <h3 className="mt-6 text-xl font-medium text-black">Person 3</h3>
               <p className="mt-4 text-gray-700">
                 Lorem ipsum dolor sit amet consectetur. Euismod arcu commodo risus duis nisl
                 risus et congue. Cum aliquam ornare ipsum placerat non posuere sed.
@@ -197,7 +197,7 @@ export default function Home() {
 
             <div className="flex w-full flex-col items-center rounded-4xl border-4 border-green-500 bg-gray-100 px-6 py-6">
               <div className="h-30 w-30 rounded-full bg-amber-300"></div>
-              <h2 className="mt-6 text-xl font-medium text-black">Person 4</h2>
+              <h3 className="mt-6 text-xl font-medium text-black">Person 4</h3>
               <p className="mt-4 text-gray-700">
                 Lorem ipsum dolor sit amet consectetur. Euismod arcu commodo risus duis nisl
                 risus et congue. Cum aliquam ornare ipsum placerat non posuere sed.Lorem
@@ -208,6 +208,12 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className='bg-black py-50 w-full flex justify-center text-center '> 
+        <p className='text-white m-auto'> ALL RELEVANT INFO FOR FOOTER</p>
+      </footer>
+
     </main>
   )
 }
