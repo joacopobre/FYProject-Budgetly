@@ -1,50 +1,50 @@
-"use client";
-import { useState, useEffect } from "react";
-import { Menu, X, Wallet } from "lucide-react";
+'use client'
+import { useState, useEffect } from 'react'
+import { Menu, X, Wallet } from 'lucide-react'
 
 export default function Header() {
-  const [isOpen, setIsOpen] = useState(false);
-  const handleClick = () => setIsOpen((prev) => !prev);
+  const [isOpen, setIsOpen] = useState(false)
+  const handleClick = () => setIsOpen(prev => !prev)
 
   // useEffect to change isOpen when window expanded
   useEffect(() => {
-    const mq = window.matchMedia("(min-width:768px)");
+    const mq = window.matchMedia('(min-width:768px)')
 
-    if (mq.matches) setIsOpen(false);
+    if (mq.matches) setIsOpen(false)
 
     const onChange = (e: MediaQueryListEvent) => {
-      if (e.matches) setIsOpen(false);
-    };
+      if (e.matches) setIsOpen(false)
+    }
 
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
 
   // useEffect to clsoe mobile menue with esc
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) return
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setIsOpen(false);
+      if (e.key === 'Escape') {
+        setIsOpen(false)
       }
-    };
-    window.addEventListener("keydown", onKeyDown);
+    }
+    window.addEventListener('keydown', onKeyDown)
 
     return () => {
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [isOpen]);
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [isOpen])
 
   // Prevent background scroll while nav bar menu open
   useEffect(() => {
-    if (!isOpen) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    if (!isOpen) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
     return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [isOpen]);
+      document.body.style.overflow = prev
+    }
+  }, [isOpen])
 
   return (
     <header>
@@ -73,7 +73,7 @@ export default function Header() {
             <div className="flex w-1/3 justify-end gap-6 px-4">
               <button
                 type="button"
-                className="rounded-lg bg-primary px-10 py-2 font-light whitespace-nowrap text-white"
+                className="bg-primary rounded-lg px-10 py-2 font-light whitespace-nowrap text-white"
               >
                 Get Started
               </button>
@@ -92,7 +92,7 @@ export default function Header() {
               onClick={handleClick}
               aria-expanded={isOpen}
               aria-controls="mobile-menu"
-              aria-label={isOpen ? "Close menu" : "Open menu"}
+              aria-label={isOpen ? 'Close menu' : 'Open menu'}
             >
               {isOpen ? <X /> : <Menu />}
             </button>
@@ -105,32 +105,16 @@ export default function Header() {
               className="relative z-50 border-t border-white/20 px-6 py-4 md:hidden"
             >
               <div className="flex flex-col gap-6">
-                <a
-                  href="#features"
-                  onClick={() => setIsOpen(false)}
-                  className="p-2"
-                >
+                <a href="#features" onClick={() => setIsOpen(false)} className="p-2">
                   Features
                 </a>
-                <a
-                  href="#demo"
-                  onClick={() => setIsOpen(false)}
-                  className="p-2"
-                >
+                <a href="#demo" onClick={() => setIsOpen(false)} className="p-2">
                   Demo
                 </a>
-                <a
-                  href="#about"
-                  onClick={() => setIsOpen(false)}
-                  className="p-2"
-                >
+                <a href="#about" onClick={() => setIsOpen(false)} className="p-2">
                   About
                 </a>
-                <a
-                  href="#contact"
-                  onClick={() => setIsOpen(false)}
-                  className="p-2"
-                >
+                <a href="#contact" onClick={() => setIsOpen(false)} className="p-2">
                   Contact
                 </a>
               </div>
@@ -139,5 +123,5 @@ export default function Header() {
         </div>
       </nav>
     </header>
-  );
+  )
 }

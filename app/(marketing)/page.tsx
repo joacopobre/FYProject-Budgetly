@@ -1,5 +1,5 @@
-import Header from '../components/Header'
-import InfiniteMarquee from '../components/InfiniteMarquee'
+import Header from '../../components/Header'
+import InfiniteMarquee from '../../components/InfiniteMarquee'
 
 export default function Home() {
   return (
@@ -98,7 +98,7 @@ export default function Home() {
         <h2 className="mt-15 mb-7 text-4xl font-semibold text-white md:text-7xl">
           How It Works
         </h2>
-        <p className="mb-7 px-10 text-md font-medium text-gray-100  md:text-2xl">
+        <p className="text-md mb-7 px-10 font-medium text-gray-100 md:text-2xl">
           Track, organise, and understand your finances in just a few steps.
         </p>
         <button className="mx-auto mb-7 rounded-xl bg-white px-12 py-2 font-medium text-green-700">
@@ -165,13 +165,13 @@ export default function Home() {
           <p className="mt-3 max-w-2xl text-base text-white/80 md:text-lg">
             Hear from people using Budgetly to stay on track.
           </p>
-          <div className="mt-12 grid w-full justify-items-center gap-5 items-start md:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-12 grid w-full items-start justify-items-center gap-5 md:grid-cols-2 xl:grid-cols-4">
             <div className="flex w-full flex-col items-center rounded-4xl border-4 border-green-500 bg-gray-100 px-6 py-6">
               <div className="h-30 w-30 rounded-full bg-amber-300"></div>
               <h3 className="mt-6 text-xl font-medium text-black">Person 1</h3>
               <p className="mt-4 text-gray-700">
-                Lorem ipsum dolor sit amet consectetur. Euismod arcu commodo risus duis nisl
-                risus et congue. Cum aliquam ornare ipsum placerat non posuere sed.
+                Lorem ipsum dolor sit amet consectetur. Euismod arcu commodo risus duis
+                nisl risus et congue. Cum aliquam ornare ipsum placerat non posuere sed.
               </p>
             </div>
 
@@ -179,10 +179,11 @@ export default function Home() {
               <div className="h-30 w-30 rounded-full bg-amber-300"></div>
               <h3 className="mt-6 text-xl font-medium text-black">Person 2</h3>
               <p className="mt-4 text-gray-700">
-                Lorem ipsum dolor sit amet consectetur. Euismod arcu commodo risus duis nisl
-                risus et congue. Cum aliquam ornare ipsum placerat non posuere sed.Lorem
-                ipsum dolor sit amet consectetur. Euismod arcu commodo risus duis nisl risus
-                et congue. Cum aliquam ornare ipsum placerat non posuere sed.
+                Lorem ipsum dolor sit amet consectetur. Euismod arcu commodo risus duis
+                nisl risus et congue. Cum aliquam ornare ipsum placerat non posuere
+                sed.Lorem ipsum dolor sit amet consectetur. Euismod arcu commodo risus
+                duis nisl risus et congue. Cum aliquam ornare ipsum placerat non posuere
+                sed.
               </p>
             </div>
 
@@ -190,8 +191,8 @@ export default function Home() {
               <div className="h-30 w-30 rounded-full bg-amber-300"></div>
               <h3 className="mt-6 text-xl font-medium text-black">Person 3</h3>
               <p className="mt-4 text-gray-700">
-                Lorem ipsum dolor sit amet consectetur. Euismod arcu commodo risus duis nisl
-                risus et congue. Cum aliquam ornare ipsum placerat non posuere sed.
+                Lorem ipsum dolor sit amet consectetur. Euismod arcu commodo risus duis
+                nisl risus et congue. Cum aliquam ornare ipsum placerat non posuere sed.
               </p>
             </div>
 
@@ -199,10 +200,11 @@ export default function Home() {
               <div className="h-30 w-30 rounded-full bg-amber-300"></div>
               <h3 className="mt-6 text-xl font-medium text-black">Person 4</h3>
               <p className="mt-4 text-gray-700">
-                Lorem ipsum dolor sit amet consectetur. Euismod arcu commodo risus duis nisl
-                risus et congue. Cum aliquam ornare ipsum placerat non posuere sed.Lorem
-                ipsum dolor sit amet consectetur. Euismod arcu commodo risus duis nisl risus
-                et congue. Cum aliquam ornare ipsum placerat non posuere sed.
+                Lorem ipsum dolor sit amet consectetur. Euismod arcu commodo risus duis
+                nisl risus et congue. Cum aliquam ornare ipsum placerat non posuere
+                sed.Lorem ipsum dolor sit amet consectetur. Euismod arcu commodo risus
+                duis nisl risus et congue. Cum aliquam ornare ipsum placerat non posuere
+                sed.
               </p>
             </div>
           </div>
@@ -210,10 +212,9 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className='bg-black py-50 w-full flex justify-center text-center '> 
-        <p className='text-white m-auto'> ALL RELEVANT INFO FOR FOOTER</p>
+      <footer className="flex w-full justify-center bg-black py-50 text-center">
+        <p className="m-auto text-white"> ALL RELEVANT INFO FOR FOOTER</p>
       </footer>
-
     </main>
   )
 }
