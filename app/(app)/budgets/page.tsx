@@ -1,7 +1,7 @@
 'use client'
 
-import { constants } from 'buffer'
-import { useState, useEffect, use } from 'react'
+import { X } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 export default function BudgetsPage() {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
@@ -170,43 +170,74 @@ export default function BudgetsPage() {
       </div>
       {isModalOpen && (
         <div
-          className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
           onClick={() => setIsModalOpen(false)}
         >
           <div
-            className="flex w-full max-w-md flex-col bg-white p-10"
+            className="flex w-full max-w-lg flex-col gap-6 rounded-2xl border border-gray-200 bg-white p-8 shadow-2xl"
             onClick={e => e.stopPropagation()}
           >
-            <h2> Add budget</h2>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">Add budget</h2>
+                <p className="mt-1 text-sm text-gray-500">Create a new budget with a limit.</p>
+              </div>
+              <button
+                type="button"
+                className="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
+                onClick={closeModal}
+              >
+                <X className="size-4" />
+              </button>
+            </div>
 
-            <label htmlFor="name"> Budget name</label>
-            <input
-              id="name"
-              value={name}
-              onChange={e => {
-                setName(e.currentTarget.value)
-              }}
-              type="text"
-              className="border"
-            />
+            <div className="flex flex-col gap-4">
+              <label className="flex flex-col gap-2 text-sm font-medium text-gray-700" htmlFor="name">
+                Budget name
+                <input
+                  id="name"
+                  value={name}
+                  onChange={e => {
+                    setName(e.currentTarget.value)
+                  }}
+                  type="text"
+                  className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                  placeholder="e.g. Groceries"
+                />
+              </label>
 
-            <label htmlFor="limit"> Limit</label>
-            <input
-              id="limit"
-              value={limit}
-              onChange={e => {
-                setLimit(e.currentTarget.value)
-              }}
-              type="number"
-              className="border"
-            />
+              <label className="flex flex-col gap-2 text-sm font-medium text-gray-700" htmlFor="limit">
+                Limit
+                <input
+                  id="limit"
+                  value={limit}
+                  onChange={e => {
+                    setLimit(e.currentTarget.value)
+                  }}
+                  type="number"
+                  min="0"
+                  className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                  placeholder="0.00"
+                />
+              </label>
+            </div>
 
-            <button type="button" className="border p-3" onClick={closeModal}>
-              Cancel
-            </button>
-            <button type="button" className="border p-3" onClick={handleSave}>
-              Save
-            </button>
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-end sm:gap-2">
+              <button
+                type="button"
+                className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
+                onClick={closeModal}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
+                onClick={handleSave}
+              >
+                Save
+              </button>
+            </div>
           </div>
         </div>
       )}
