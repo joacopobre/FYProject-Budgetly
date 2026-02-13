@@ -85,7 +85,7 @@ export default function BudgetsPage() {
   }, [isModalOpen])
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-screen-xl flex-col gap-8 px-5 py-10 md:px-8 lg:px-12">
+    <main className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-8 px-5 py-10 md:px-8 lg:px-12">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <h1 className="text-4xl font-semibold text-gray-800 md:text-5xl">Budgets</h1>
         <button
