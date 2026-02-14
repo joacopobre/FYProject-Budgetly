@@ -1,9 +1,13 @@
 'use client'
 
-import { useEffect, useState,useCallback } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { transactionsData } from '@/staticData/transactions'
+import type { TxType, MonthFilter, TypeFilter } from '@/types/transactions'
+const formatMoney = (value: number) =>
+  `${value < 0 ? '-' : ''}$${Math.abs(value).toFixed(2)}`
 
-const formatMoney = (value: number) => `${value < 0 ? '-' : ''}$${Math.abs(value).toFixed(2)}`
+const monthOptions = ['All time', 'This month', 'Last month', 'This year'] as const
+const typeOptions = ['All types', 'Income', 'Expense'] as const
 
 export default function Transactions() {
   const [transactions, setTransactions] = useState(transactionsData)
@@ -12,8 +16,50 @@ export default function Transactions() {
   const [date, setDate] = useState('')
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState('')
-  const [type, setType] = useState<'Income' | 'Expense'>('Expense')
+  const [type, setType] = useState<TxType>('Expense')
   const [amount, setAmount] = useState('')
+  const [isTypeMenuOpen, setIsTypeMenuOpen] = useState(false)
+  const typeMenuRef = useRef<HTMLDivElement>(null)
+  const [filterMonth, setFilterMonth] = useState<MonthFilter>('All time')
+  const [filterType, setFilterType] = useState<TypeFilter>('All types')
+  const [isMonthMenuOpen, setIsMonthMenuOpen] = useState(false)
+  const [isFilterTypeMenuOpen, setIsFilterTypeMenuOpen] = useState(false)
+  const monthMenuRef = useRef<HTMLDivElement>(null)
+  const filterTypeMenuRef = useRef<HTMLDivElement>(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const filteredTransactions = transactions
+    .filter(tx => {
+      if (searchTerm === '') return true
+      const normalized = searchTerm.toLowerCase()
+      return (
+        tx.description.toLowerCase().includes(normalized) ||
+        tx.category.toLowerCase().includes(normalized)
+      )
+    })
+    .filter(tx => {
+      if (filterType === 'All types') return true
+      return tx.type === filterType
+    })
+    .filter(tx => {
+      if (filterMonth === 'All time') return true
+      //Date now and date from transaction
+      const now = new Date()
+      const txDate = new Date(tx.date)
+      // Month and year now
+      const nowMonth = now.getMonth()
+      const nowYear = now.getFullYear()
+      // Month and year from transaction
+      const txMonth = txDate.getMonth()
+      const txYear = txDate.getFullYear()
+
+      const nowLastMonth = nowMonth === 0 ? 11 : nowMonth - 1
+      const lastMonthYear = nowMonth === 0 ? nowYear - 1 : nowYear
+      if (filterMonth === 'This month') return txMonth === nowMonth && txYear === nowYear
+      if (filterMonth === 'Last month')
+        return txMonth === nowLastMonth && txYear === lastMonthYear
+      if (filterMonth === 'This year') return txYear === nowYear
+      return true
+    })
 
   const closeModal = useCallback(() => {
     setIsModalOpen(false)
@@ -23,10 +69,10 @@ export default function Transactions() {
     setType('Expense')
     setAmount('')
     setEditingId(null)
-  },[]
-)
+    setIsTypeMenuOpen(false)
+  }, [])
 
-  const openModal = (tx?: typeof transactionsData[number]) => {
+  const openModal = (tx?: (typeof transactionsData)[number]) => {
     if (tx) {
       setEditingId(tx.id)
       setDate(tx.date)
@@ -51,16 +97,30 @@ export default function Transactions() {
     const validatedCategory = category.trim()
     const numericAmount = Number(amount)
 
-    if (!validatedDate || !validatedDescription || !validatedCategory || isNaN(numericAmount) || numericAmount <= 0)
+    if (
+      !validatedDate ||
+      !validatedDescription ||
+      !validatedCategory ||
+      isNaN(numericAmount) ||
+      numericAmount <= 0
+    )
       return
 
-    const signedAmount = type === 'Income' ? Math.abs(numericAmount) : -Math.abs(numericAmount)
+    const signedAmount =
+      type === 'Income' ? Math.abs(numericAmount) : -Math.abs(numericAmount)
 
     if (editingId !== null) {
       setTransactions(prev =>
         prev.map(tx =>
           tx.id === editingId
-            ? { ...tx, date: validatedDate, description: validatedDescription, category: validatedCategory, type, amount: signedAmount }
+            ? {
+                ...tx,
+                date: validatedDate,
+                description: validatedDescription,
+                category: validatedCategory,
+                type,
+                amount: signedAmount,
+              }
             : tx,
         ),
       )
@@ -98,6 +158,25 @@ export default function Transactions() {
     }
   }, [isModalOpen, closeModal])
 
+  useEffect(() => {
+    if (!isTypeMenuOpen && !isMonthMenuOpen && !isFilterTypeMenuOpen) return
+    const onClickAway = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node
+      if (typeMenuRef.current && typeMenuRef.current.contains(target)) return
+      if (monthMenuRef.current && monthMenuRef.current.contains(target)) return
+      if (filterTypeMenuRef.current && filterTypeMenuRef.current.contains(target)) return
+      setIsTypeMenuOpen(false)
+      setIsMonthMenuOpen(false)
+      setIsFilterTypeMenuOpen(false)
+    }
+    document.addEventListener('mousedown', onClickAway)
+    document.addEventListener('touchstart', onClickAway)
+    return () => {
+      document.removeEventListener('mousedown', onClickAway)
+      document.removeEventListener('touchstart', onClickAway)
+    }
+  }, [isTypeMenuOpen, isMonthMenuOpen, isFilterTypeMenuOpen])
+
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-screen-xl flex-col gap-8 px-5 py-10 md:px-8 lg:px-12">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -115,15 +194,79 @@ export default function Transactions() {
         <div className="flex w-full flex-col gap-3 md:flex-row md:items-center md:gap-3">
           <input
             type="text"
+            value={searchTerm}
+            onChange={e => {
+              setSearchTerm(e.currentTarget.value)
+            }}
             placeholder="Search transactions..."
             className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800 transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
           />
-          <select className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800 transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 md:w-44">
-            <option>This month</option>
-          </select>
-          <select className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800 transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 md:w-32">
-            <option>All types</option>
-          </select>
+          <div className="relative w-full md:w-44" ref={monthMenuRef}>
+            <button
+              type="button"
+              onClick={() => setIsMonthMenuOpen(prev => !prev)}
+              className="flex w-full items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-800 transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+            >
+              {filterMonth}
+              <span className="text-xs text-gray-500">▼</span>
+            </button>
+            {isMonthMenuOpen && (
+              <div className="absolute top-full right-0 left-0 z-20 mt-1 w-full rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5">
+                {monthOptions.map(option => (
+                  <button
+                    key={option}
+                    type="button"
+                    className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition hover:bg-gray-100 ${
+                      option === filterMonth
+                        ? 'font-semibold text-emerald-600'
+                        : 'text-gray-700'
+                    }`}
+                    onClick={() => {
+                      setFilterMonth(option)
+                      setIsMonthMenuOpen(false)
+                    }}
+                  >
+                    {option}
+                    {option === filterMonth && (
+                      <span className="text-emerald-600">✓</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="relative w-full md:w-32" ref={filterTypeMenuRef}>
+            <button
+              type="button"
+              onClick={() => setIsFilterTypeMenuOpen(prev => !prev)}
+              className="flex w-full items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-800 transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+            >
+              {filterType}
+              <span className="text-xs text-gray-500">▼</span>
+            </button>
+            {isFilterTypeMenuOpen && (
+              <div className="absolute top-full right-0 left-0 z-20 mt-1 w-full rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5">
+                {typeOptions.map(option => (
+                  <button
+                    key={option}
+                    type="button"
+                    className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition hover:bg-gray-100 ${
+                      option === filterType
+                        ? 'font-semibold text-emerald-600'
+                        : 'text-gray-700'
+                    }`}
+                    onClick={() => {
+                      setFilterType(option)
+                      setIsFilterTypeMenuOpen(false)
+                    }}
+                  >
+                    {option}
+                    {option === filterType && <span className="text-emerald-600">✓</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -141,7 +284,7 @@ export default function Transactions() {
             </tr>
           </thead>
           <tbody>
-            {transactions.map(tx => {
+            {filteredTransactions.map(tx => {
               const isIncome = tx.amount > 0
               const amountColor = isIncome ? 'text-emerald-600' : 'text-rose-600'
               return (
@@ -182,7 +325,7 @@ export default function Transactions() {
 
       {/* Cards for mobile */}
       <div className="space-y-3 md:hidden">
-        {transactions.map(tx => {
+        {filteredTransactions.map(tx => {
           const isIncome = tx.amount > 0
           const amountColor = isIncome ? 'text-emerald-600' : 'text-rose-600'
           return (
@@ -241,7 +384,9 @@ export default function Transactions() {
                 <h2 className="text-xl font-semibold text-gray-900">
                   {editingId !== null ? 'Edit transaction' : 'Add transaction'}
                 </h2>
-                <p className="mt-1 text-sm text-gray-500">Enter details for this transaction.</p>
+                <p className="mt-1 text-sm text-gray-500">
+                  Enter details for this transaction.
+                </p>
               </div>
               <button
                 type="button"
@@ -253,56 +398,92 @@ export default function Transactions() {
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <label className="flex flex-col gap-2 text-sm font-medium text-gray-700" htmlFor="date">
+              <label
+                className="flex flex-col gap-2 text-sm font-medium text-gray-700"
+                htmlFor="date"
+              >
                 Date
                 <input
                   id="date"
                   type="date"
                   value={date}
                   onChange={e => setDate(e.target.value)}
-                  className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                  className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
                 />
               </label>
-              <label className="flex flex-col gap-2 text-sm font-medium text-gray-700" htmlFor="type">
-                Type
-                <select
-                  id="type"
-                  value={type}
-                  onChange={e => setType(e.target.value as 'Income' | 'Expense')}
-                  className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+              <div
+                className="relative flex flex-col gap-2 text-sm font-medium text-gray-700"
+                ref={typeMenuRef}
+              >
+                <span>Type</span>
+                <button
+                  type="button"
+                  onClick={() => setIsTypeMenuOpen(prev => !prev)}
+                  className="flex items-center justify-between rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
                 >
-                  <option>Expense</option>
-                  <option>Income</option>
-                </select>
-              </label>
+                  {type}
+                  <span className="text-xs text-gray-500">▼</span>
+                </button>
+                {isTypeMenuOpen && (
+                  <div className="absolute top-full right-0 left-0 z-50 mt-1 w-full rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5">
+                    {['Expense', 'Income'].map(option => (
+                      <button
+                        key={option}
+                        type="button"
+                        className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition hover:bg-gray-100 ${
+                          option === type
+                            ? 'font-semibold text-emerald-600'
+                            : 'text-gray-700'
+                        }`}
+                        onClick={() => {
+                          setType(option as 'Income' | 'Expense')
+                          setIsTypeMenuOpen(false)
+                        }}
+                      >
+                        {option}
+                        {option === type && <span className="text-emerald-600">✓</span>}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <label className="flex flex-col gap-2 text-sm font-medium text-gray-700" htmlFor="description">
+              <label
+                className="flex flex-col gap-2 text-sm font-medium text-gray-700"
+                htmlFor="description"
+              >
                 Description
                 <input
                   id="description"
                   type="text"
                   value={description}
                   onChange={e => setDescription(e.target.value)}
-                  className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                  className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
                   placeholder="e.g. Coffee"
                 />
               </label>
-              <label className="flex flex-col gap-2 text-sm font-medium text-gray-700" htmlFor="category">
+              <label
+                className="flex flex-col gap-2 text-sm font-medium text-gray-700"
+                htmlFor="category"
+              >
                 Category
                 <input
                   id="category"
                   type="text"
                   value={category}
                   onChange={e => setCategory(e.target.value)}
-                  className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                  className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
                   placeholder="e.g. Food"
                 />
               </label>
             </div>
 
-            <label className="flex flex-col gap-2 text-sm font-medium text-gray-700" htmlFor="amount">
+            <label
+              className="flex flex-col gap-2 text-sm font-medium text-gray-700"
+              htmlFor="amount"
+            >
               Amount
               <input
                 id="amount"
@@ -310,7 +491,7 @@ export default function Transactions() {
                 min="0"
                 value={amount}
                 onChange={e => setAmount(e.target.value)}
-                className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
                 placeholder="0.00"
               />
             </label>
