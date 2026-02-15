@@ -16,7 +16,7 @@ export default function RootLayout({
   return (
     <html className="bg-gray-200">
       <body className={switzer.className}>
-        <div id="wrapper" className="flex min-h-screen flex-col text-black">
+        <div id="wrapper" className="flex flex-col text-black">
           <AppNav />
           <main className="bg-gray-200 pt-24">{children}</main>
         </div>
