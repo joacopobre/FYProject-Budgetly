@@ -1,19 +1,24 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useContext } from 'react'
 import { ChevronDown, X } from 'lucide-react'
 
 import { calculateDashboardStats } from '@/lib/transactions/calculateDashboardStats'
 import { formatMoney } from '@/lib/transactions/formatMoney'
-import { transactionsData } from '@/staticData/transactions'
+
+import { TransactionsContext } from '@/context/TransactionsContext'
 
 export default function Dashboard() {
   const [trendFilter, setTrendFilter] = useState('This Month')
   const [isOpen, setIsOpen] = useState(false)
   const trendMenuRef = useRef<HTMLDivElement>(null)
 
-  const stats = calculateDashboardStats(transactionsData)
+  const context = useContext(TransactionsContext)
+  if (!context) throw new Error('TransactionsContext missing')
+  const { transactions } = context
+
+  const stats = calculateDashboardStats(transactions)
 
   const handleClick = () => setIsOpen(prev => !prev)
 

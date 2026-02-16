@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState, useContext } from 'react'
 import { TransactionModal } from '@/components/transactions/TransactionModal'
 import { TransactionsFilters } from '@/components/transactions/TransactionsFilters'
 import { TransactionsHeader } from '@/components/transactions/TransactionsHeader'
@@ -8,14 +8,18 @@ import { TransactionsMobileList } from '@/components/transactions/TransactionsMo
 import { TransactionsTable } from '@/components/transactions/TransactionsTable'
 import { filterTransactions } from '@/lib/transactions/filterTransactions'
 import { formatMoney } from '@/lib/transactions/formatMoney'
-import { transactionsData } from '@/staticData/transactions'
 import type { MonthFilter, Transaction, TypeFilter, TxType } from '@/types/transactions'
+import { TransactionsContext } from '@/context/TransactionsContext'
 
 const monthOptions = ['All time', 'This month', 'Last month', 'This year'] as const
 const typeOptions = ['All types', 'Income', 'Expense'] as const
 
 export default function Transactions() {
-  const [transactions, setTransactions] = useState<Transaction[]>(transactionsData)
+  //constext for transactions
+  const context = useContext(TransactionsContext)
+  if (!context) throw new Error('TransactionsContext missing')
+  const { transactions, setTransactions } = context
+
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [date, setDate] = useState('')
