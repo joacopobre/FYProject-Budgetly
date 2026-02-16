@@ -3,14 +3,15 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState, useContext } from 'react'
 import { ChevronDown, X } from 'lucide-react'
-
+import { filterByDateRange, type TrendRange } from '@/lib/transactions/filterByDateRange'
 import { calculateDashboardStats } from '@/lib/transactions/calculateDashboardStats'
 import { formatMoney } from '@/lib/transactions/formatMoney'
-
+import { buildTrendSeries } from '@/lib/transactions/buildTrendSeries'
 import { TransactionsContext } from '@/context/TransactionsContext'
 
 export default function Dashboard() {
-  const [trendFilter, setTrendFilter] = useState('This Month')
+  const [trendFilter, setTrendFilter] = useState<TrendRange>('This Month')
+
   const [isOpen, setIsOpen] = useState(false)
   const trendMenuRef = useRef<HTMLDivElement>(null)
 
@@ -18,11 +19,13 @@ export default function Dashboard() {
   if (!context) throw new Error('TransactionsContext missing')
   const { transactions } = context
 
-  const stats = calculateDashboardStats(transactions)
+  const filtered = filterByDateRange(transactions, trendFilter)
+  const trendSeries = buildTrendSeries(filtered)
+  const stats = calculateDashboardStats(filtered)
 
   const handleClick = () => setIsOpen(prev => !prev)
 
-  const applyFilter = (filter: string): void => {
+  const applyFilter = (filter: TrendRange): void => {
     setTrendFilter(filter)
     handleClick()
   }
@@ -149,7 +152,30 @@ export default function Dashboard() {
           <div className="rounded-2xl border border-gray-200 bg-white px-5 py-6 md:px-6 md:py-7 lg:px-8 lg:py-8">
             <div className="space-y-6 md:grid md:grid-cols-[1.2fr_0.8fr] md:items-start md:gap-6 md:space-y-0 lg:gap-8">
               <div className="space-y-4">
-                <div className="h-56 w-full rounded-xl bg-gradient-to-b from-gray-200 via-gray-100 to-white md:h-64 lg:h-72" />
+                <div className="h-56 w-full overflow-y-auto rounded-xl bg-gradient-to-b from-gray-200 via-gray-100 to-white p-4 md:h-64 lg:h-72">
+                  {trendSeries.length === 0 ? (
+                    <p className="text-sm text-gray-500">No data for this period</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {trendSeries.map(point => (
+                        <div
+                          key={point.label}
+                          className="flex items-center justify-between rounded-lg bg-white/70 px-3 py-2 text-sm"
+                        >
+                          <span className="font-medium text-gray-700">{point.label}</span>
+                          <div className="flex items-center gap-4">
+                            <span className="font-semibold text-emerald-600">
+                              {formatMoney(point.income)}
+                            </span>
+                            <span className="font-semibold text-rose-600">
+                              {formatMoney(point.expenses)}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="space-y-3 rounded-xl border border-gray-100 bg-gray-50 px-4 py-4">
                 <div className="flex items-center justify-between text-sm text-gray-700">
