@@ -1,12 +1,8 @@
 import type { Metadata } from 'next'
-import '../globals.css'
-import { switzer } from '../fonts'
-import AppNav from '@/components/AppNav'
 
-export const metadata: Metadata = {
-  title: 'Budgetly',
-  description: 'Personal budgeting app',
-}
+import AppNav from '@/components/AppNav'
+import { TransactionsProvider } from '@/context/TransactionsContext'
+
 
 export default function RootLayout({
   children,
@@ -14,13 +10,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html className="bg-gray-200">
-      <body className={switzer.className}>
-        <div id="wrapper" className="flex min-h-screen flex-col text-black">
-          <AppNav />
-          <main className="bg-gray-200 pt-24">{children}</main>
-        </div>
-      </body>
-    </html>
+    <TransactionsProvider>
+      <div id="wrapper" className="bg-gray-200 text-black">
+        <AppNav />
+        <main className="bg-gray-200 pt-24">{children}</main>
+      </div>
+    </TransactionsProvider>
   )
 }
