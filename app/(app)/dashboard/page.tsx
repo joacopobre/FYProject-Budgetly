@@ -8,6 +8,10 @@ import { calculateDashboardStats } from '@/lib/transactions/calculateDashboardSt
 import { formatMoney } from '@/lib/transactions/formatMoney'
 import { buildTrendSeries } from '@/lib/transactions/buildTrendSeries'
 import { TransactionsContext } from '@/context/TransactionsContext'
+import { TrendChart } from '@/components/dashboard/TrendChart'
+import { RecentTransactions } from '@/components/dashboard/RecentTransactions'
+import { buildBalanceSeries } from '@/lib/transactions/buildBalanceSeries'
+import { BalanceSparkline } from '@/components/dashboard/BalanceSparkline'
 
 export default function Dashboard() {
   const [trendFilter, setTrendFilter] = useState<TrendRange>('This Month')
@@ -22,6 +26,9 @@ export default function Dashboard() {
   const filtered = filterByDateRange(transactions, trendFilter)
   const trendSeries = buildTrendSeries(filtered)
   const stats = calculateDashboardStats(filtered)
+
+  const glanceStats = calculateDashboardStats(transactions)
+  const balanceSeries = buildBalanceSeries(transactions)
 
   const handleClick = () => setIsOpen(prev => !prev)
 
@@ -65,10 +72,12 @@ export default function Dashboard() {
                 Balance
               </p>
               <span className="text-3xl font-semibold text-gray-800 md:text-4xl">
-                {formatMoney(stats.balance)}
+                {formatMoney(glanceStats.balance)}
               </span>
             </div>
-            <div className="mt-4 h-1 rounded-full bg-gradient-to-r from-emerald-400 to-green-500" />
+            <div className="mt-4">
+              <BalanceSparkline data={balanceSeries} />
+            </div>
           </div>
 
           <div className="flex flex-col gap-3">
@@ -151,50 +160,8 @@ export default function Dashboard() {
           </div>
           <div className="rounded-2xl border border-gray-200 bg-white px-5 py-6 md:px-6 md:py-7 lg:px-8 lg:py-8">
             <div className="space-y-6 md:grid md:grid-cols-[1.2fr_0.8fr] md:items-start md:gap-6 md:space-y-0 lg:gap-8">
-              <div className="space-y-4">
-                <div className="h-56 w-full overflow-y-auto rounded-xl bg-gradient-to-b from-gray-200 via-gray-100 to-white p-4 md:h-64 lg:h-72">
-                  {trendSeries.length === 0 ? (
-                    <p className="text-sm text-gray-500">No data for this period</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {trendSeries.map(point => (
-                        <div
-                          key={point.label}
-                          className="flex items-center justify-between rounded-lg bg-white/70 px-3 py-2 text-sm"
-                        >
-                          <span className="font-medium text-gray-700">{point.label}</span>
-                          <div className="flex items-center gap-4">
-                            <span className="font-semibold text-emerald-600">
-                              {formatMoney(point.income)}
-                            </span>
-                            <span className="font-semibold text-rose-600">
-                              {formatMoney(point.expenses)}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="space-y-3 rounded-xl border border-gray-100 bg-gray-50 px-4 py-4">
-                <div className="flex items-center justify-between text-sm text-gray-700">
-                  <span>Category A</span>
-                  <span className="font-semibold">$240</span>
-                </div>
-                <div className="flex items-center justify-between text-sm text-gray-700">
-                  <span>Category B</span>
-                  <span className="font-semibold">$180</span>
-                </div>
-                <div className="flex items-center justify-between text-sm text-gray-700">
-                  <span>Category C</span>
-                  <span className="font-semibold">$120</span>
-                </div>
-                <div className="flex items-center justify-between text-sm text-gray-700">
-                  <span>Category D</span>
-                  <span className="font-semibold">$90</span>
-                </div>
-              </div>
+              <TrendChart data={trendSeries} />
+              <RecentTransactions transactions={transactions} />
             </div>
           </div>
         </section>
