@@ -1,19 +1,30 @@
 'use client'
 
 import { X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useContext } from 'react'
+import { BudgetsContext } from '@/context/BudgetsContext'
+import { TransactionsContext } from '@/context/TransactionsContext'
+import { Budget } from '@/types/budgets'
 
 export default function BudgetsPage() {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
-  const [budgets, setBudgets] = useState([
-    { id: 1, name: 'Groceries', spent: 320, limit: 500 },
-    { id: 2, name: 'Rent', spent: 1200, limit: 1200 },
-    { id: 3, name: 'Transport', spent: 90, limit: 150 },
-    { id: 4, name: 'Entertainment', spent: 140, limit: 250 },
-  ])
+  // const [budgets, setBudgets] = useState([
+  //   { id: 1, name: 'Groceries', spent: 320, limit: 500 },
+  //   { id: 2, name: 'Rent', spent: 1200, limit: 1200 },
+  //   { id: 3, name: 'Transport', spent: 90, limit: 150 },
+  //   { id: 4, name: 'Entertainment', spent: 140, limit: 250 },
+  // ])
+
   const [name, setName] = useState<string>('')
   const [limit, setLimit] = useState<string>('')
   const [editingBudgetId, setEditingBudgetId] = useState<null | number>(null)
+  const context = useContext(BudgetsContext)
+  if (!context) throw new Error('BudgetsContext missing')
+  const { budgets, setBudgets } = context
+
+  const txContext = useContext(TransactionsContext)
+  if (!txContext) throw new Error('TransactionsContext missing')
+  const { transactions } = txContext
 
   const handleDelete = (id: number) => {
     setBudgets(prev => prev.filter(budget => budget.id !== id))
@@ -39,10 +50,12 @@ export default function BudgetsPage() {
         }),
       )
     } else {
-      const newBudget = {
+      const newBudget: Budget = {
         id: Date.now(),
         name: validatedName,
-        spent: 0,
+        category: 'Groceries',
+        period: 'Monthly',
+        createdAt: new Date().toISOString(),
         limit: validatedLimit,
       }
       setBudgets(prev => [...prev, newBudget])
@@ -105,7 +118,21 @@ export default function BudgetsPage() {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {budgets.map(budget => {
           const safeLimit = budget.limit > 0 ? budget.limit : 0
-          const safeSpent = budget.spent < 0 ? 0 : budget.spent
+          const now = new Date()
+          const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+          const spent = transactions
+            .filter(tx => {
+              const txDate = new Date(tx.date)
+              const inRange =
+                budget.period === 'Monthly'
+                  ? txDate.getMonth() === now.getMonth() &&
+                    txDate.getFullYear() === now.getFullYear()
+                  : txDate >= weekAgo && txDate <= now
+              return tx.category === budget.category && tx.amount < 0 && inRange
+            })
+            .reduce((sum, tx) => sum + Math.abs(tx.amount), 0)
+
+          const safeSpent = spent
           const overBudget = safeLimit > 0 && safeSpent > safeLimit
           const progress =
             safeLimit > 0 ? Math.min(100, Math.round((safeSpent / safeLimit) * 100)) : 0
@@ -170,7 +197,7 @@ export default function BudgetsPage() {
       </div>
       {isModalOpen && (
         <div
-          className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
+          className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm"
           onClick={() => setIsModalOpen(false)}
         >
           <div
@@ -180,7 +207,9 @@ export default function BudgetsPage() {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-xl font-semibold text-gray-900">Add budget</h2>
-                <p className="mt-1 text-sm text-gray-500">Create a new budget with a limit.</p>
+                <p className="mt-1 text-sm text-gray-500">
+                  Create a new budget with a limit.
+                </p>
               </div>
               <button
                 type="button"
@@ -192,7 +221,10 @@ export default function BudgetsPage() {
             </div>
 
             <div className="flex flex-col gap-4">
-              <label className="flex flex-col gap-2 text-sm font-medium text-gray-700" htmlFor="name">
+              <label
+                className="flex flex-col gap-2 text-sm font-medium text-gray-700"
+                htmlFor="name"
+              >
                 Budget name
                 <input
                   id="name"
@@ -201,12 +233,15 @@ export default function BudgetsPage() {
                     setName(e.currentTarget.value)
                   }}
                   type="text"
-                  className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                  className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
                   placeholder="e.g. Groceries"
                 />
               </label>
 
-              <label className="flex flex-col gap-2 text-sm font-medium text-gray-700" htmlFor="limit">
+              <label
+                className="flex flex-col gap-2 text-sm font-medium text-gray-700"
+                htmlFor="limit"
+              >
                 Limit
                 <input
                   id="limit"
@@ -216,7 +251,7 @@ export default function BudgetsPage() {
                   }}
                   type="number"
                   min="0"
-                  className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                  className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
                   placeholder="0.00"
                 />
               </label>
