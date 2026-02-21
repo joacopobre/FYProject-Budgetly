@@ -4,16 +4,11 @@ import { X } from 'lucide-react'
 import { useEffect, useState, useContext } from 'react'
 import { BudgetsContext } from '@/context/BudgetsContext'
 import { TransactionsContext } from '@/context/TransactionsContext'
-import { Budget } from '@/types/budgets'
+import { Budget, BudgetKind } from '@/types/budgets'
 
 export default function BudgetsPage() {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
-  // const [budgets, setBudgets] = useState([
-  //   { id: 1, name: 'Groceries', spent: 320, limit: 500 },
-  //   { id: 2, name: 'Rent', spent: 1200, limit: 1200 },
-  //   { id: 3, name: 'Transport', spent: 90, limit: 150 },
-  //   { id: 4, name: 'Entertainment', spent: 140, limit: 250 },
-  // ])
+  const [budgetKind, setBudgetKind] = useState<BudgetKind>('SPEND')
 
   const [name, setName] = useState<string>('')
   const [limit, setLimit] = useState<string>('')
@@ -30,11 +25,52 @@ export default function BudgetsPage() {
     setBudgets(prev => prev.filter(budget => budget.id !== id))
   }
 
+  const handleAddFunds = (budgetId: number) => {
+    const raw = prompt('Enter amount to add: ')
+    if (!raw) return
+
+    const amount = Number(raw)
+    if (isNaN(amount) || amount <= 0) return
+
+    setBudgets(prev =>
+      prev.map(budget => {
+        if (budget.id !== budgetId) return budget
+        else {
+          const newBalance = budget.balance + amount
+          return {
+            ...budget,
+            balance: newBalance,
+          }
+        }
+      }),
+    )
+  }
+
+  const handleWithdrawFunds = (budgetId: number) => {
+    const raw = prompt('Enter amount to withdraw:')
+    if (!raw) return
+
+    const amount = Number(raw)
+    if (isNaN(amount) || amount <= 0) return
+    setBudgets(prev =>
+      prev.map(budget => {
+        if (budget.id !== budgetId) return budget
+        else {
+          const newBalance = Math.max(0, budget.balance - amount)
+          return {
+            ...budget,
+            balance: newBalance,
+          }
+        }
+      }),
+    )
+  }
+
   const handleSave = () => {
     const validatedName = name.trim()
     const validatedLimit = Number(limit)
 
-    if (validatedLimit <= 0 || validatedName === '' || isNaN(validatedLimit)) return
+    if (validatedName === '') return
     //if we are edditing..
     if (editingBudgetId !== null) {
       setBudgets(prev =>
@@ -43,20 +79,25 @@ export default function BudgetsPage() {
             return {
               ...budget,
               name: validatedName,
-              limit: validatedLimit,
+              kind: budgetKind,
+              target: budgetKind === 'SAVE' ? validatedLimit : undefined,
             }
           }
           return budget
         }),
       )
     } else {
+      const isSave = budgetKind === 'SAVE'
+      const validatedTarget = Number(limit)
+
+      if (isSave && (isNaN(validatedTarget) || validatedTarget <= 0)) return
       const newBudget: Budget = {
         id: Date.now(),
         name: validatedName,
-        category: 'Groceries',
-        period: 'Monthly',
+        kind: budgetKind,
         createdAt: new Date().toISOString(),
-        limit: validatedLimit,
+        balance: 0,
+        target: isSave ? validatedTarget : undefined,
       }
       setBudgets(prev => [...prev, newBudget])
     }
@@ -109,6 +150,7 @@ export default function BudgetsPage() {
             setName('')
             setLimit('')
             setIsModalOpen(true)
+            setBudgetKind('SPEND')
           }}
         >
           Add budget
@@ -117,35 +159,31 @@ export default function BudgetsPage() {
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {budgets.map(budget => {
-          const safeLimit = budget.limit > 0 ? budget.limit : 0
-          const now = new Date()
-          const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-          const spent = transactions
-            .filter(tx => {
-              const txDate = new Date(tx.date)
-              const inRange =
-                budget.period === 'Monthly'
-                  ? txDate.getMonth() === now.getMonth() &&
-                    txDate.getFullYear() === now.getFullYear()
-                  : txDate >= weekAgo && txDate <= now
-              return tx.category === budget.category && tx.amount < 0 && inRange
-            })
-            .reduce((sum, tx) => sum + Math.abs(tx.amount), 0)
-
-          const safeSpent = spent
-          const overBudget = safeLimit > 0 && safeSpent > safeLimit
-          const progress =
-            safeLimit > 0 ? Math.min(100, Math.round((safeSpent / safeLimit) * 100)) : 0
-          const fillWidth = overBudget ? '100%' : `${progress}%`
-          const fillClass = overBudget
-            ? 'bg-gradient-to-r from-amber-300 via-amber-400 to-rose-500'
-            : 'bg-gradient-to-r from-emerald-300 via-emerald-400 to-emerald-600'
-          const statusLabel = overBudget
-            ? `Over by $${safeSpent - safeLimit}`
-            : `${progress}% used`
           const formatMoney = (value: number) => `$${value.toFixed(2)}`
-          const limitLabel = safeLimit > 0 ? formatMoney(safeLimit) : '—'
-          const spentLabel = formatMoney(safeSpent)
+
+          const isSave = budget.kind === 'SAVE'
+          const current = budget.balance
+          const target = budget.target ?? 0
+
+          const progress =
+            isSave && target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0
+
+          const fillWidth = isSave ? `${progress}%` : '100%'
+
+          const fillClass = isSave
+            ? 'bg-gradient-to-r from-emerald-300 via-emerald-400 to-emerald-600'
+            : 'bg-gradient-to-r from-sky-300 via-sky-400 to-sky-600'
+
+          const statusLabel = isSave
+            ? target > 0
+              ? `${progress}% to goal`
+              : 'No goal set'
+            : `Available: ${formatMoney(current)}`
+
+          const rightLabel = isSave
+            ? `${formatMoney(current)} / ${target > 0 ? formatMoney(target) : '—'}`
+            : formatMoney(current)
+
           return (
             <div
               key={budget.id}
@@ -153,9 +191,7 @@ export default function BudgetsPage() {
             >
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-800">{budget.name}</h2>
-                <span className="text-sm font-medium text-gray-500">
-                  {spentLabel} / {limitLabel}
-                </span>
+                <span className="text-sm font-medium text-gray-500">{rightLabel}</span>
               </div>
 
               <div className="h-2 w-full rounded-full bg-gray-100">
@@ -166,22 +202,45 @@ export default function BudgetsPage() {
               </div>
 
               <div className="flex items-center justify-between text-sm text-gray-600">
-                <span className={overBudget ? 'font-semibold text-amber-700' : ''}>
-                  {statusLabel}
-                </span>
+                <span>{statusLabel}</span>
+
                 <div className="flex items-center gap-2">
+                  {/* Add funds */}
+                  <button
+                    type="button"
+                    className="rounded-lg border border-emerald-200 px-3 py-1 text-xs font-medium text-emerald-600 transition hover:bg-emerald-50"
+                    onClick={() => {
+                      handleAddFunds(budget.id)
+                    }}
+                  >
+                    Add
+                  </button>
+
+                  {/* Withdraw funds */}
+                  <button
+                    type="button"
+                    className="rounded-lg border border-amber-200 px-3 py-1 text-xs font-medium text-amber-600 transition hover:bg-amber-50"
+                    onClick={() => handleWithdrawFunds(budget.id)}
+                  >
+                    Withdraw
+                  </button>
+
+                  {/* Edit */}
                   <button
                     type="button"
                     className="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 transition hover:bg-gray-100"
                     onClick={() => {
                       setEditingBudgetId(budget.id)
                       setName(budget.name)
-                      setLimit(String(budget.limit))
+                      setLimit(String(budget.target ?? ''))
+                      setBudgetKind(budget.kind)
                       setIsModalOpen(true)
                     }}
                   >
                     Edit
                   </button>
+
+                  {/* Delete */}
                   <button
                     type="button"
                     className="rounded-lg border border-rose-200 px-3 py-1 text-xs font-medium text-rose-600 transition hover:bg-rose-50"
@@ -195,6 +254,7 @@ export default function BudgetsPage() {
           )
         })}
       </div>
+      {/* Modal Card */}
       {isModalOpen && (
         <div
           className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm"
@@ -219,7 +279,7 @@ export default function BudgetsPage() {
                 <X className="size-4" />
               </button>
             </div>
-
+            {/* Modal section */}
             <div className="flex flex-col gap-4">
               <label
                 className="flex flex-col gap-2 text-sm font-medium text-gray-700"
@@ -237,24 +297,49 @@ export default function BudgetsPage() {
                   placeholder="e.g. Groceries"
                 />
               </label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setBudgetKind('SPEND')}
+                  className={`flex-1 rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                    budgetKind === 'SPEND'
+                      ? 'bg-blue-600 text-white'
+                      : 'border border-gray-200 text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  Spend
+                </button>
 
-              <label
-                className="flex flex-col gap-2 text-sm font-medium text-gray-700"
-                htmlFor="limit"
-              >
-                Limit
-                <input
-                  id="limit"
-                  value={limit}
-                  onChange={e => {
-                    setLimit(e.currentTarget.value)
-                  }}
-                  type="number"
-                  min="0"
-                  className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
-                  placeholder="0.00"
-                />
-              </label>
+                <button
+                  type="button"
+                  onClick={() => setBudgetKind('SAVE')}
+                  className={`flex-1 rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                    budgetKind === 'SAVE'
+                      ? 'bg-green-600 text-white'
+                      : 'border border-gray-200 text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  Save
+                </button>
+              </div>
+
+              {budgetKind === 'SAVE' && (
+                <label
+                  className="flex flex-col gap-2 text-sm font-medium text-gray-700"
+                  htmlFor="limit"
+                >
+                  Goal amount
+                  <input
+                    id="limit"
+                    value={limit}
+                    onChange={e => setLimit(e.currentTarget.value)}
+                    type="number"
+                    min="0"
+                    className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                    placeholder="0.00"
+                  />
+                </label>
+              )}
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:justify-end sm:gap-2">
