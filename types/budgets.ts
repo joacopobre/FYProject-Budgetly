@@ -1,8 +1,15 @@
+export type BudgetKind = 'SPEND' | 'SAVE'
+
 export type Budget = {
   id: number
   name: string
-  category: string
-  limit: number
-  period: 'Monthly' | 'Weekly'
+  kind: BudgetKind
+
+  // how much money is currently inside this pot
+  balance: number
+
+  // optional goal (useful mainly for SAVE pots)
+  target?: number
+
   createdAt: string
 }
