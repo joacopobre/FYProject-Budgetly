@@ -11,4 +11,5 @@ export type Transaction = {
   category: string
   type: TxType
   amount: number
+  budgetId?: number | null
 }
