@@ -1,7 +1,14 @@
 export type BudgetKind = 'SPEND' | 'SAVE'
 
+export type BudgetEvent = {
+  id: string
+  date: string
+  delta: number
+  note?: string
+}
+
 export type Budget = {
-  id: number
+  id: string
   name: string
   kind: BudgetKind
 
@@ -12,4 +19,6 @@ export type Budget = {
   target?: number
 
   createdAt: string
+
+  events: BudgetEvent[]
 }
