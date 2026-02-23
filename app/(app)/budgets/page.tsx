@@ -3,14 +3,19 @@
 import { X, ChevronDown } from 'lucide-react'
 import { useEffect, useState, useContext } from 'react'
 import { BudgetsContext } from '@/context/BudgetsContext'
-import { TransactionsContext } from '@/context/TransactionsContext'
 import { Budget, BudgetKind } from '@/types/budgets'
-import { filterByRollingWindow } from '@/lib/budgets/filterByRollingWindow'
 import { createUuid } from '@/lib/budgets/createUuidBudget'
 import { BudgetLineChart } from '@/components/budgets/BudgetLineChart'
 import { buildBudgetBalanceSeries } from '@/lib/budgets/buildBudgetBalanceSeries'
 
 export default function BudgetsPage() {
+  const [isFundModalOpen, setIsFundModalOpen] = useState(false)
+  const [fundMode, setFundMode] = useState<'ADD' | 'WITHDRAW' | null>(null)
+  const [activeBudgetId, setActiveBudgetId] = useState<string | null>(null)
+  const [fundAmount, setFundAmount] = useState('')
+  const [fundNote, setFundNote] = useState('')
+  const [isFundNoteOpen, setIsFundNoteOpen] = useState(false)
+
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [budgetKind, setBudgetKind] = useState<BudgetKind>('SPEND')
 
@@ -22,10 +27,6 @@ export default function BudgetsPage() {
   if (!context) throw new Error('BudgetsContext missing')
   const { budgets, setBudgets } = context
 
-  const txContext = useContext(TransactionsContext)
-  if (!txContext) throw new Error('TransactionsContext missing')
-  const { transactions } = txContext
-
   const [expandedBudgetId, setExpandedBudgetId] = useState<string | null>(null)
 
   const toggleExpandBudget = (budgetId: string) => {
@@ -36,63 +37,46 @@ export default function BudgetsPage() {
     setBudgets(prev => prev.filter(budget => budget.id !== id))
   }
 
-  const handleAddFunds = (budgetId: string) => {
-    const raw = prompt('Enter amount to add: ')
-    if (!raw) return
-
-    const amount = Number(raw)
-    if (isNaN(amount) || amount <= 0) return
+  const handleConfirmFunds = (
+    id: string | null,
+    fund: string | null,
+    mode: 'ADD' | 'WITHDRAW' | null,
+  ) => {
+    if (id === null) return
+    if (mode === null) return
+    const fundAmount = Number(fund)
+    if (isNaN(fundAmount) || fundAmount <= 0) return
 
     setBudgets(prev =>
-      prev.map(budget => {
-        if (budget.id !== budgetId) return budget
+      prev.map(b => {
+        if (b.id !== id) return b
         else {
-          const newBalance = budget.balance + amount
+          const delta =
+            mode === 'WITHDRAW' ? -Math.min(fundAmount, b.balance) : +fundAmount
+          const newBalance = b.balance + delta
+          const newEvent = {
+            id: createUuid(),
+            date: new Date().toISOString(),
+            delta,
+            note: fundNote.trim() || undefined,
+          }
           return {
-            ...budget,
+            ...b,
             balance: newBalance,
-            events: [
-              ...(budget.events ?? []),
-              {
-                id: createUuid(),
-                date: new Date().toISOString(),
-                delta: amount,
-              },
-            ],
+            events: [...b.events, newEvent],
           }
         }
       }),
     )
+    closeFundModal()
   }
-
-  const handleWithdrawFunds = (budgetId: string) => {
-    const raw = prompt('Enter amount to withdraw:')
-    if (!raw) return
-
-    const amount = Number(raw)
-    if (isNaN(amount) || amount <= 0) return
-
-    setBudgets(prev =>
-      prev.map(budget => {
-        if (budget.id !== budgetId) return budget
-
-        const actual = Math.min(amount, budget.balance)
-        const newBalance = budget.balance - actual
-
-        return {
-          ...budget,
-          balance: newBalance,
-          events: [
-            ...(budget.events ?? []),
-            {
-              id: createUuid(),
-              date: new Date().toISOString(),
-              delta: -actual,
-            },
-          ],
-        }
-      }),
-    )
+  const closeFundModal = () => {
+    setActiveBudgetId(null)
+    setFundMode(null)
+    setFundAmount('')
+    setFundNote('')
+    setIsFundModalOpen(false)
+    setIsFundNoteOpen(false)
   }
 
   const handleSave = () => {
@@ -193,7 +177,9 @@ export default function BudgetsPage() {
       document.body.style.overflow = prev
     }
   }, [isModalOpen])
+  const activeBudget = activeBudgetId ? budgets.find(b => b.id === activeBudgetId) : null
 
+  const formatMoney = (value: number) => `$${value.toFixed(2)}`
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-8 px-5 py-10 md:px-8 lg:px-12">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -214,7 +200,7 @@ export default function BudgetsPage() {
         </button>
       </div>
 
-      <div className="grid items-start grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2 lg:grid-cols-3">
         {budgets.map(budget => {
           const chartData = buildBudgetBalanceSeries(budget.events ?? [], 30)
 
@@ -286,7 +272,12 @@ export default function BudgetsPage() {
                     type="button"
                     className="rounded-lg border border-emerald-200 px-3 py-1 text-xs font-medium text-emerald-600 transition hover:bg-emerald-50"
                     onClick={() => {
-                      handleAddFunds(budget.id)
+                      setFundMode('ADD')
+                      setActiveBudgetId(budget.id)
+                      setFundAmount('')
+                      setFundNote('')
+                      setIsFundModalOpen(true)
+                      setIsFundNoteOpen(false)
                     }}
                   >
                     Add
@@ -296,7 +287,14 @@ export default function BudgetsPage() {
                   <button
                     type="button"
                     className="rounded-lg border border-amber-200 px-3 py-1 text-xs font-medium text-amber-600 transition hover:bg-amber-50"
-                    onClick={() => handleWithdrawFunds(budget.id)}
+                    onClick={() => {
+                      setFundMode('WITHDRAW')
+                      setActiveBudgetId(budget.id)
+                      setFundAmount('')
+                      setFundNote('')
+                      setIsFundModalOpen(true)
+                      setIsFundNoteOpen(false)
+                    }}
                   >
                     Withdraw
                   </button>
@@ -451,6 +449,129 @@ export default function BudgetsPage() {
               >
                 Save
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Add / Withdraw Modal */}
+      {isFundModalOpen && (
+        <div
+          className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm"
+          onClick={() => closeFundModal()}
+        >
+          <div
+            className="flex w-full max-w-lg flex-col gap-6 rounded-2xl border border-gray-200 bg-white p-8 shadow-2xl"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {fundMode === 'ADD' ? 'Add Funds' : 'Withdraw Funds'}
+                </h2>
+
+                {activeBudget && (
+                  <p className="mt-1 text-sm text-gray-500">
+                    Current balance:{' '}
+                    <span className="font-medium text-gray-700">
+                      {formatMoney(activeBudget.balance)}
+                    </span>
+                  </p>
+                )}
+              </div>
+
+              <button
+                type="button"
+                className="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
+                onClick={closeFundModal}
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <label
+                className="flex flex-col  text-sm font-medium text-gray-700"
+                htmlFor="fund"
+              >
+                {fundMode === 'ADD' ? 'Amount to add:' : 'Amount to withdraw:'}
+
+                {fundMode === 'WITHDRAW' && activeBudget && (
+                  <span className="text-xs text-gray-400 mb-2">
+                    Max available: {formatMoney(activeBudget.balance)}
+                  </span>
+                )}
+
+                <input
+                  id="fund"
+                  type="number"
+                  className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                  placeholder="e.g. 100"
+                  value={fundAmount}
+                  onChange={e => {
+                    setFundAmount(e.currentTarget.value)
+                  }}
+                />
+              </label>
+              <div className="flex gap-3">
+                {isFundNoteOpen ? (
+                  <button
+                    type="button"
+                    className="cursor-pointer rounded-xl px-4 py-2 text-sm text-gray-400 transition hover:bg-gray-200 hover:text-gray-500"
+                    onClick={() => {
+                      setIsFundNoteOpen(false)
+                      setFundNote('')
+                    }}
+                  >
+                    <X className="size-4" />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="cursor-pointer rounded-xl px-4 py-2 text-sm text-gray-400 transition hover:bg-gray-200 hover:text-gray-500"
+                    onClick={() => {
+                      setIsFundNoteOpen(true)
+                    }}
+                  >
+                    + add note
+                  </button>
+                )}
+                {isFundNoteOpen && (
+                  <label
+                    className="flex flex-col gap-2 text-sm font-medium text-gray-700"
+                    htmlFor="note"
+                  >
+                    <input
+                      id="note"
+                      type="text"
+                      className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                      placeholder="e.g. rent"
+                      value={fundNote}
+                      onChange={e => {
+                        setFundNote(e.currentTarget.value)
+                      }}
+                    />
+                  </label>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-3 sm:flex-row sm:justify-end sm:gap-2">
+                <button
+                  type="button"
+                  className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
+                  onClick={() => {
+                    handleConfirmFunds(activeBudgetId, fundAmount, fundMode)
+                  }}
+                >
+                  Save
+                </button>
+                <button
+                  type="button"
+                  className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
+                  onClick={() => closeFundModal()}
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         </div>
