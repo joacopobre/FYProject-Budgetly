@@ -1,10 +1,14 @@
 'use client'
 
-import { X } from 'lucide-react'
+import { X, ChevronDown } from 'lucide-react'
 import { useEffect, useState, useContext } from 'react'
 import { BudgetsContext } from '@/context/BudgetsContext'
 import { TransactionsContext } from '@/context/TransactionsContext'
 import { Budget, BudgetKind } from '@/types/budgets'
+import { filterByRollingWindow } from '@/lib/budgets/filterByRollingWindow'
+import { createUuid } from '@/lib/budgets/createUuidBudget'
+import { BudgetLineChart } from '@/components/budgets/BudgetLineChart'
+import { buildBudgetBalanceSeries } from '@/lib/budgets/buildBudgetBalanceSeries'
 
 export default function BudgetsPage() {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
@@ -12,7 +16,8 @@ export default function BudgetsPage() {
 
   const [name, setName] = useState<string>('')
   const [limit, setLimit] = useState<string>('')
-  const [editingBudgetId, setEditingBudgetId] = useState<null | number>(null)
+  const [startingAmount, setStartingAmount] = useState<string>('')
+  const [editingBudgetId, setEditingBudgetId] = useState<null | string>(null)
   const context = useContext(BudgetsContext)
   if (!context) throw new Error('BudgetsContext missing')
   const { budgets, setBudgets } = context
@@ -21,11 +26,17 @@ export default function BudgetsPage() {
   if (!txContext) throw new Error('TransactionsContext missing')
   const { transactions } = txContext
 
-  const handleDelete = (id: number) => {
+  const [expandedBudgetId, setExpandedBudgetId] = useState<string | null>(null)
+
+  const toggleExpandBudget = (budgetId: string) => {
+    setExpandedBudgetId(prev => (prev === budgetId ? null : budgetId))
+  }
+
+  const handleDelete = (id: string) => {
     setBudgets(prev => prev.filter(budget => budget.id !== id))
   }
 
-  const handleAddFunds = (budgetId: number) => {
+  const handleAddFunds = (budgetId: string) => {
     const raw = prompt('Enter amount to add: ')
     if (!raw) return
 
@@ -40,27 +51,45 @@ export default function BudgetsPage() {
           return {
             ...budget,
             balance: newBalance,
+            events: [
+              ...(budget.events ?? []),
+              {
+                id: createUuid(),
+                date: new Date().toISOString(),
+                delta: amount,
+              },
+            ],
           }
         }
       }),
     )
   }
 
-  const handleWithdrawFunds = (budgetId: number) => {
+  const handleWithdrawFunds = (budgetId: string) => {
     const raw = prompt('Enter amount to withdraw:')
     if (!raw) return
 
     const amount = Number(raw)
     if (isNaN(amount) || amount <= 0) return
+
     setBudgets(prev =>
       prev.map(budget => {
         if (budget.id !== budgetId) return budget
-        else {
-          const newBalance = Math.max(0, budget.balance - amount)
-          return {
-            ...budget,
-            balance: newBalance,
-          }
+
+        const actual = Math.min(amount, budget.balance)
+        const newBalance = budget.balance - actual
+
+        return {
+          ...budget,
+          balance: newBalance,
+          events: [
+            ...(budget.events ?? []),
+            {
+              id: createUuid(),
+              date: new Date().toISOString(),
+              delta: -actual,
+            },
+          ],
         }
       }),
     )
@@ -89,15 +118,41 @@ export default function BudgetsPage() {
     } else {
       const isSave = budgetKind === 'SAVE'
       const validatedTarget = Number(limit)
+      const hasStartingAmount = startingAmount.trim() !== ''
+      const validatedStartingAmount = Number(startingAmount)
 
       if (isSave && (isNaN(validatedTarget) || validatedTarget <= 0)) return
+      if (
+        !isSave &&
+        hasStartingAmount &&
+        (isNaN(validatedStartingAmount) || validatedStartingAmount < 0)
+      )
+        return
+
+      const initialBalance = !isSave
+        ? hasStartingAmount
+          ? validatedStartingAmount
+          : 0
+        : 0
+
       const newBudget: Budget = {
-        id: Date.now(),
+        id: createUuid(),
         name: validatedName,
         kind: budgetKind,
         createdAt: new Date().toISOString(),
-        balance: 0,
+        balance: initialBalance,
         target: isSave ? validatedTarget : undefined,
+        events:
+          initialBalance > 0
+            ? [
+                {
+                  id: createUuid(),
+                  date: new Date().toISOString(),
+                  delta: initialBalance,
+                  note: 'Initial allocation',
+                },
+              ]
+            : [],
       }
       setBudgets(prev => [...prev, newBudget])
     }
@@ -106,6 +161,7 @@ export default function BudgetsPage() {
 
   const closeModal = () => {
     setLimit('')
+    setStartingAmount('')
     setName('')
     setIsModalOpen(false)
     setEditingBudgetId(null)
@@ -149,6 +205,7 @@ export default function BudgetsPage() {
             setEditingBudgetId(null)
             setName('')
             setLimit('')
+            setStartingAmount('')
             setIsModalOpen(true)
             setBudgetKind('SPEND')
           }}
@@ -157,8 +214,10 @@ export default function BudgetsPage() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid items-start grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {budgets.map(budget => {
+          const chartData = buildBudgetBalanceSeries(budget.events ?? [], 30)
+
           const formatMoney = (value: number) => `$${value.toFixed(2)}`
 
           const isSave = budget.kind === 'SAVE'
@@ -191,15 +250,32 @@ export default function BudgetsPage() {
             >
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-800">{budget.name}</h2>
-                <span className="text-sm font-medium text-gray-500">{rightLabel}</span>
+                <span className="text-sm font-medium text-gray-500">
+                  {rightLabel}{' '}
+                  <button type="button" onClick={() => toggleExpandBudget(budget.id)}>
+                    {expandedBudgetId === budget.id ? <X /> : <ChevronDown />}
+                  </button>
+                </span>
               </div>
 
-              <div className="h-2 w-full rounded-full bg-gray-100">
-                <div
-                  className={`h-full rounded-full ${fillClass}`}
-                  style={{ width: fillWidth }}
-                />
-              </div>
+              {expandedBudgetId === budget.id ? (
+                chartData.length === 0 ? (
+                  <div className="mt-2 rounded-xl bg-gray-50 p-4 text-sm text-gray-500">
+                    No activity yet — add or withdraw funds to see the trend.
+                  </div>
+                ) : (
+                  <div className="mt-2 rounded-xl bg-gray-50 p-4">
+                    <BudgetLineChart data={chartData} />
+                  </div>
+                )
+              ) : (
+                <div className="h-2 w-full rounded-full bg-gray-100">
+                  <div
+                    className={`h-full rounded-full ${fillClass}`}
+                    style={{ width: fillWidth }}
+                  />
+                </div>
+              )}
 
               <div className="flex items-center justify-between text-sm text-gray-600">
                 <span>{statusLabel}</span>
@@ -333,6 +409,24 @@ export default function BudgetsPage() {
                     id="limit"
                     value={limit}
                     onChange={e => setLimit(e.currentTarget.value)}
+                    type="number"
+                    min="0"
+                    className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                    placeholder="0.00"
+                  />
+                </label>
+              )}
+
+              {budgetKind === 'SPEND' && editingBudgetId === null && (
+                <label
+                  className="flex flex-col gap-2 text-sm font-medium text-gray-700"
+                  htmlFor="startingAmount"
+                >
+                  Starting amount
+                  <input
+                    id="startingAmount"
+                    value={startingAmount}
+                    onChange={e => setStartingAmount(e.currentTarget.value)}
                     type="number"
                     min="0"
                     className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
