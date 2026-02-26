@@ -3,10 +3,12 @@
 import { X, ChevronDown } from 'lucide-react'
 import { useEffect, useState, useContext } from 'react'
 import { BudgetsContext } from '@/context/BudgetsContext'
-import { Budget, BudgetKind } from '@/types/budgets'
+import type { Budget, BudgetKind } from '@/types/budgets'
 import { createUuid } from '@/lib/budgets/createUuidBudget'
 import { BudgetLineChart } from '@/components/budgets/BudgetLineChart'
 import { buildBudgetBalanceSeries } from '@/lib/budgets/buildBudgetBalanceSeries'
+import { TransactionsContext } from '@/context/TransactionsContext'
+import { Transaction } from '@/types/transactions'
 
 export default function BudgetsPage() {
   const [isFundModalOpen, setIsFundModalOpen] = useState(false)
@@ -27,6 +29,10 @@ export default function BudgetsPage() {
   if (!context) throw new Error('BudgetsContext missing')
   const { budgets, setBudgets } = context
 
+  const txContext = useContext(TransactionsContext)
+  if (!txContext) throw new Error('TransactionsContext missing')
+  const { setTransactions } = txContext
+
   const [expandedBudgetId, setExpandedBudgetId] = useState<string | null>(null)
 
   const toggleExpandBudget = (budgetId: string) => {
@@ -42,32 +48,52 @@ export default function BudgetsPage() {
     fund: string | null,
     mode: 'ADD' | 'WITHDRAW' | null,
   ) => {
-    if (id === null) return
-    if (mode === null) return
-    const fundAmount = Number(fund)
-    if (isNaN(fundAmount) || fundAmount <= 0) return
+    if (!id || !mode) return
 
+    const amount = Number(fund)
+    if (isNaN(amount) || amount <= 0) return
+
+    const budget = budgets.find(b => b.id === id)
+    if (!budget) return
+
+    const delta = mode === 'WITHDRAW' ? -Math.min(amount, budget.balance) : amount
+
+    const newEvent = {
+      id: createUuid(),
+      date: new Date().toISOString(),
+      delta,
+      note: fundNote.trim() || undefined,
+    }
+
+    // 1) update budgets
     setBudgets(prev =>
-      prev.map(b => {
-        if (b.id !== id) return b
-        else {
-          const delta =
-            mode === 'WITHDRAW' ? -Math.min(fundAmount, b.balance) : +fundAmount
-          const newBalance = b.balance + delta
-          const newEvent = {
-            id: createUuid(),
-            date: new Date().toISOString(),
-            delta,
-            note: fundNote.trim() || undefined,
-          }
-          return {
-            ...b,
-            balance: newBalance,
-            events: [...b.events, newEvent],
-          }
-        }
-      }),
+      prev.map(b =>
+        b.id !== id
+          ? b
+          : {
+              ...b,
+              balance: b.balance + delta,
+              events: [...b.events, newEvent],
+            },
+      ),
     )
+
+    // 2) add a mirrored transfer transaction (account side)
+    setTransactions(prev => [
+      ...prev,
+      {
+        id: Date.now(),
+        date: new Date().toISOString(),
+        description:
+          mode === 'ADD' ? `Transfer to ${budget.name}` : `Transfer from ${budget.name}`,
+        category: 'Transfer',
+        type: 'Transfer',
+        amount: -delta, // mirror of budget delta
+        source: 'ACCOUNT',
+        budgetId: id,
+      },
+    ])
+
     closeFundModal()
   }
   const closeFundModal = () => {
@@ -106,18 +132,10 @@ export default function BudgetsPage() {
       const validatedStartingAmount = Number(startingAmount)
 
       if (isSave && (isNaN(validatedTarget) || validatedTarget <= 0)) return
-      if (
-        !isSave &&
-        hasStartingAmount &&
-        (isNaN(validatedStartingAmount) || validatedStartingAmount < 0)
-      )
+      if (hasStartingAmount && (isNaN(validatedStartingAmount) || validatedStartingAmount < 0))
         return
 
-      const initialBalance = !isSave
-        ? hasStartingAmount
-          ? validatedStartingAmount
-          : 0
-        : 0
+      const initialBalance = hasStartingAmount ? validatedStartingAmount : 0
 
       const newBudget: Budget = {
         id: createUuid(),
@@ -139,6 +157,20 @@ export default function BudgetsPage() {
             : [],
       }
       setBudgets(prev => [...prev, newBudget])
+
+      if (initialBalance > 0) {
+        const transferTx: Transaction = {
+          id: Date.now(),
+          date: new Date().toISOString(),
+          description: `Initial transfer to ${validatedName}`,
+          category: 'Transfer',
+          type: 'Transfer',
+          amount: -initialBalance,
+          source: 'ACCOUNT',
+          budgetId: newBudget.id,
+        }
+        setTransactions(prev => [...prev, transferTx])
+      }
     }
     closeModal()
   }
@@ -415,12 +447,12 @@ export default function BudgetsPage() {
                 </label>
               )}
 
-              {budgetKind === 'SPEND' && editingBudgetId === null && (
+              {editingBudgetId === null && (
                 <label
                   className="flex flex-col gap-2 text-sm font-medium text-gray-700"
                   htmlFor="startingAmount"
                 >
-                  Starting amount
+                  {budgetKind === 'SAVE' ? 'Initial deposit' : 'Starting amount'}
                   <input
                     id="startingAmount"
                     value={startingAmount}
@@ -490,13 +522,13 @@ export default function BudgetsPage() {
 
             <div className="flex flex-col gap-4">
               <label
-                className="flex flex-col  text-sm font-medium text-gray-700"
+                className="flex flex-col text-sm font-medium text-gray-700"
                 htmlFor="fund"
               >
                 {fundMode === 'ADD' ? 'Amount to add:' : 'Amount to withdraw:'}
 
                 {fundMode === 'WITHDRAW' && activeBudget && (
-                  <span className="text-xs text-gray-400 mb-2">
+                  <span className="mb-2 text-xs text-gray-400">
                     Max available: {formatMoney(activeBudget.balance)}
                   </span>
                 )}
