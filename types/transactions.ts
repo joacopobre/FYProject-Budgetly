@@ -1,8 +1,10 @@
-export type TxType = 'Income' | 'Expense'
+export type TxType = 'Income' | 'Expense' | 'Transfer'
 
 export type MonthFilter = 'All time' | 'This month' | 'Last month' | 'This year'
 
-export type TypeFilter = 'All types' | 'Income' | 'Expense'
+export type TypeFilter = 'All types' | 'Income' | 'Expense' | 'Transfer'
+
+export type TxSource = 'ACCOUNT' | 'BUDGET'
 
 export type Transaction = {
   id: number
@@ -11,5 +13,6 @@ export type Transaction = {
   category: string
   type: TxType
   amount: number
-  budgetId?: number | null
+  budgetId?: string | null
+  source: TxSource
 }
