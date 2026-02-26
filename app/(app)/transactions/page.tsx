@@ -8,8 +8,15 @@ import { TransactionsMobileList } from '@/components/transactions/TransactionsMo
 import { TransactionsTable } from '@/components/transactions/TransactionsTable'
 import { filterTransactions } from '@/lib/transactions/filterTransactions'
 import { formatMoney } from '@/lib/transactions/formatMoney'
-import type { MonthFilter, Transaction, TypeFilter, TxType } from '@/types/transactions'
+import type {
+  MonthFilter,
+  Transaction,
+  TypeFilter,
+  TxSource,
+  TxType,
+} from '@/types/transactions'
 import { TransactionsContext } from '@/context/TransactionsContext'
+import { BudgetsContext } from '@/context/BudgetsContext'
 
 const monthOptions = ['All time', 'This month', 'Last month', 'This year'] as const
 const typeOptions = ['All types', 'Income', 'Expense'] as const
@@ -19,6 +26,9 @@ export default function Transactions() {
   const context = useContext(TransactionsContext)
   if (!context) throw new Error('TransactionsContext missing')
   const { transactions, setTransactions } = context
+  const budgetsContext = useContext(BudgetsContext)
+  if (!budgetsContext) throw new Error('BudgetsContext missing')
+  const { budgets } = budgetsContext
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -27,6 +37,8 @@ export default function Transactions() {
   const [category, setCategory] = useState('')
   const [type, setType] = useState<TxType>('Expense')
   const [amount, setAmount] = useState('')
+  const [source, setSource] = useState<TxSource>('ACCOUNT')
+  const [budgetId, setBudgetId] = useState<string | null>(null)
   const [filterMonth, setFilterMonth] = useState<MonthFilter>('All time')
   const [filterType, setFilterType] = useState<TypeFilter>('All types')
   const [isMonthMenuOpen, setIsMonthMenuOpen] = useState(false)
@@ -40,6 +52,12 @@ export default function Transactions() {
         searchTerm,
         filterType,
         filterMonth,
+      }).sort((a, b) => {
+        const aTime = new Date(a.date).getTime()
+        const bTime = new Date(b.date).getTime()
+        const byDate = (Number.isNaN(bTime) ? 0 : bTime) - (Number.isNaN(aTime) ? 0 : aTime)
+        if (byDate !== 0) return byDate
+        return b.id - a.id
       }),
     [transactions, searchTerm, filterType, filterMonth],
   )
@@ -51,6 +69,8 @@ export default function Transactions() {
     setCategory('')
     setType('Expense')
     setAmount('')
+    setSource('ACCOUNT')
+    setBudgetId(null)
     setEditingId(null)
   }, [])
 
@@ -62,6 +82,8 @@ export default function Transactions() {
       setCategory(tx.category)
       setType(tx.type)
       setAmount(String(Math.abs(tx.amount)))
+      setSource(tx.source ?? 'ACCOUNT')
+      setBudgetId(tx.budgetId ?? null)
     } else {
       setEditingId(null)
       setDate('')
@@ -69,6 +91,8 @@ export default function Transactions() {
       setCategory('')
       setType('Expense')
       setAmount('')
+      setSource('ACCOUNT')
+      setBudgetId(null)
     }
     setIsModalOpen(true)
   }
@@ -102,6 +126,8 @@ export default function Transactions() {
                 category: validatedCategory,
                 type,
                 amount: signedAmount,
+                source,
+                budgetId: source === 'BUDGET' ? budgetId : null,
               }
             : tx,
         ),
@@ -116,6 +142,8 @@ export default function Transactions() {
           category: validatedCategory,
           type,
           amount: signedAmount,
+          source,
+          budgetId: source === 'BUDGET' ? budgetId : null,
         },
       ])
     }
@@ -124,6 +152,12 @@ export default function Transactions() {
 
   const handleDeleteTransaction = (id: number) => {
     setTransactions(prev => prev.filter(tx => tx.id !== id))
+  }
+
+  const getSourceLabel = (tx: Transaction) => {
+    if (tx.source === 'ACCOUNT') return 'Account'
+    const match = budgets.find(b => b.id === tx.budgetId)
+    return match?.name ?? 'Budget'
   }
 
   return (
@@ -150,6 +184,7 @@ export default function Transactions() {
         onEdit={openModal}
         onDelete={handleDeleteTransaction}
         formatMoney={formatMoney}
+        getSourceLabel={getSourceLabel}
       />
 
       <TransactionsMobileList
@@ -157,6 +192,7 @@ export default function Transactions() {
         onEdit={openModal}
         onDelete={handleDeleteTransaction}
         formatMoney={formatMoney}
+        getSourceLabel={getSourceLabel}
       />
 
       <TransactionModal
@@ -174,6 +210,10 @@ export default function Transactions() {
         setType={setType}
         amount={amount}
         setAmount={setAmount}
+        source={source}
+        setSource={setSource}
+        budgetId={budgetId}
+        setBudgetId={setBudgetId}
       />
     </main>
   )
