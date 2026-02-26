@@ -7,9 +7,16 @@ type Props = {
   onEdit: (tx: Transaction) => void
   onDelete: (id: number) => void
   formatMoney: (value: number) => string
+  getSourceLabel: (tx: Transaction) => string
 }
 
-export function TransactionsMobileList({ transactions, onEdit, onDelete, formatMoney }: Props) {
+export function TransactionsMobileList({
+  transactions,
+  onEdit,
+  onDelete,
+  formatMoney,
+  getSourceLabel,
+}: Props) {
   return (
     <div className="space-y-3 md:hidden">
       {transactions.map(tx => {
@@ -31,6 +38,7 @@ export function TransactionsMobileList({ transactions, onEdit, onDelete, formatM
               <span>{tx.category}</span>
               <span className={`font-semibold ${amountColor}`}>{formatMoney(tx.amount)}</span>
             </div>
+            <div className="text-xs text-gray-500">From: {getSourceLabel(tx)}</div>
             <div className="flex items-center justify-end gap-2">
               <button
                 type="button"

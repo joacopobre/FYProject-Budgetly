@@ -8,6 +8,7 @@ export const transactionsData: Transaction[] = [
     category: 'Food',
     type: 'Expense',
     amount: -82.35,
+    source: 'ACCOUNT',
   },
   {
     id: 2,
@@ -16,6 +17,7 @@ export const transactionsData: Transaction[] = [
     category: 'Income',
     type: 'Income',
     amount: 2200,
+    source: 'ACCOUNT',
   },
   {
     id: 3,
@@ -24,6 +26,7 @@ export const transactionsData: Transaction[] = [
     category: 'Transport',
     type: 'Expense',
     amount: -45.5,
+    source: 'ACCOUNT',
   },
   {
     id: 4,
@@ -32,6 +35,7 @@ export const transactionsData: Transaction[] = [
     category: 'Food',
     type: 'Expense',
     amount: -6.25,
+    source: 'ACCOUNT',
   },
   {
     id: 5,
@@ -40,6 +44,7 @@ export const transactionsData: Transaction[] = [
     category: 'Misc',
     type: 'Income',
     amount: 120,
+    source: 'ACCOUNT',
   },
   {
     id: 6,
@@ -48,6 +53,7 @@ export const transactionsData: Transaction[] = [
     category: 'Health',
     type: 'Expense',
     amount: -55,
+    source: 'ACCOUNT',
   },
   {
     id: 7,
@@ -56,6 +62,7 @@ export const transactionsData: Transaction[] = [
     category: 'Utilities',
     type: 'Expense',
     amount: -62.9,
+    source: 'ACCOUNT',
   },
   {
     id: 8,
@@ -64,6 +71,7 @@ export const transactionsData: Transaction[] = [
     category: 'Income',
     type: 'Income',
     amount: 480,
+    source: 'ACCOUNT',
   },
   {
     id: 9,
@@ -72,6 +80,7 @@ export const transactionsData: Transaction[] = [
     category: 'Food',
     type: 'Expense',
     amount: -38.4,
+    source: 'ACCOUNT',
   },
   {
     id: 10,
@@ -80,6 +89,7 @@ export const transactionsData: Transaction[] = [
     category: 'Utilities',
     type: 'Expense',
     amount: -74.15,
+    source: 'ACCOUNT',
   },
   {
     id: 11,
@@ -88,6 +98,7 @@ export const transactionsData: Transaction[] = [
     category: 'Income',
     type: 'Income',
     amount: 950,
+    source: 'ACCOUNT',
   },
   {
     id: 12,
@@ -96,6 +107,7 @@ export const transactionsData: Transaction[] = [
     category: 'Shopping',
     type: 'Expense',
     amount: -210.75,
+    source: 'ACCOUNT',
   },
   {
     id: 13,
@@ -104,6 +116,7 @@ export const transactionsData: Transaction[] = [
     category: 'Health',
     type: 'Expense',
     amount: -24.2,
+    source: 'ACCOUNT',
   },
   {
     id: 14,
@@ -112,6 +125,7 @@ export const transactionsData: Transaction[] = [
     category: 'Income',
     type: 'Income',
     amount: 2200,
+    source: 'ACCOUNT',
   },
   {
     id: 15,
@@ -120,6 +134,7 @@ export const transactionsData: Transaction[] = [
     category: 'Housing',
     type: 'Expense',
     amount: -1200,
+    source: 'ACCOUNT',
   },
   {
     id: 16,
@@ -128,6 +143,7 @@ export const transactionsData: Transaction[] = [
     category: 'Transport',
     type: 'Expense',
     amount: -52,
+    source: 'ACCOUNT',
   },
   {
     id: 17,
@@ -136,6 +152,7 @@ export const transactionsData: Transaction[] = [
     category: 'Entertainment',
     type: 'Expense',
     amount: -95,
+    source: 'ACCOUNT',
   },
   {
     id: 18,
@@ -144,6 +161,7 @@ export const transactionsData: Transaction[] = [
     category: 'Income',
     type: 'Income',
     amount: 300,
+    source: 'ACCOUNT',
   },
   {
     id: 19,
@@ -152,6 +170,7 @@ export const transactionsData: Transaction[] = [
     category: 'Food',
     type: 'Expense',
     amount: -129.6,
+    source: 'ACCOUNT',
   },
   {
     id: 20,
@@ -160,6 +179,7 @@ export const transactionsData: Transaction[] = [
     category: 'Insurance',
     type: 'Expense',
     amount: -310,
+    source: 'ACCOUNT',
   },
   {
     id: 21,
@@ -168,6 +188,7 @@ export const transactionsData: Transaction[] = [
     category: 'Income',
     type: 'Income',
     amount: 640,
+    source: 'ACCOUNT',
   },
   {
     id: 22,
@@ -176,6 +197,7 @@ export const transactionsData: Transaction[] = [
     category: 'Travel',
     type: 'Expense',
     amount: -186.45,
+    source: 'ACCOUNT',
   },
   {
     id: 23,
@@ -184,6 +206,7 @@ export const transactionsData: Transaction[] = [
     category: 'Entertainment',
     type: 'Expense',
     amount: -14.99,
+    source: 'ACCOUNT',
   },
   {
     id: 24,
@@ -192,5 +215,6 @@ export const transactionsData: Transaction[] = [
     category: 'Income',
     type: 'Income',
     amount: 260,
+    source: 'ACCOUNT',
   },
 ]

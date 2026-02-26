@@ -7,6 +7,7 @@ type Props = {
   onEdit: (tx: Transaction) => void
   onDelete: (id: number) => void
   formatMoney: (value: number) => string
+  getSourceLabel: (tx: Transaction) => string
 }
 
 export function TransactionsTable({
@@ -14,6 +15,7 @@ export function TransactionsTable({
   onEdit,
   onDelete,
   formatMoney,
+  getSourceLabel,
 }: Props) {
   return (
     <div className="hidden overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm md:block">
@@ -25,6 +27,7 @@ export function TransactionsTable({
               <th className="px-4 py-3 text-left">Description</th>
               <th className="px-4 py-3 text-left">Category</th>
               <th className="px-4 py-3 text-left">Type</th>
+              <th className="px-4 py-3 text-left">From</th>
               <th className="px-4 py-3 text-right">Amount</th>
               <th className="px-4 py-3 text-right">Actions</th>
             </tr>
@@ -35,10 +38,11 @@ export function TransactionsTable({
               const amountColor = isIncome ? 'text-emerald-600' : 'text-rose-600'
               return (
                 <tr key={tx.id} className="border-t border-gray-100">
-                  <td className="px-4 py-3">{tx.date}</td>
+                  <td className="px-4 py-3">{new Date(tx.date).toISOString().slice(0, 10)}</td>
                   <td className="px-4 py-3">{tx.description}</td>
                   <td className="px-4 py-3">{tx.category}</td>
                   <td className="px-4 py-3">{tx.type}</td>
+                  <td className="px-4 py-3">{getSourceLabel(tx)}</td>
                   <td className={`px-4 py-3 text-right font-semibold ${amountColor}`}>
                     {formatMoney(tx.amount)}
                   </td>

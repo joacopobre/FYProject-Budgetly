@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import type { TxType } from '@/types/transactions'
+import { useContext, useEffect, useRef, useState } from 'react'
+import type { TxSource, TxType } from '@/types/transactions'
+import { BudgetsContext } from '@/context/BudgetsContext'
 
 type Props = {
   isOpen: boolean
@@ -18,6 +19,10 @@ type Props = {
   setType: (v: TxType) => void
   amount: string
   setAmount: (v: string) => void
+  source: TxSource
+  setSource: (v: TxSource) => void
+  budgetId: string | null
+  setBudgetId: (v: string | null) => void
 }
 
 const typeOptions: TxType[] = ['Expense', 'Income']
@@ -37,9 +42,21 @@ export function TransactionModal({
   setType,
   amount,
   setAmount,
+  source,
+  setSource,
+  budgetId,
+  setBudgetId,
 }: Props) {
   const [isTypeMenuOpen, setIsTypeMenuOpen] = useState(false)
   const typeMenuRef = useRef<HTMLDivElement>(null)
+
+  const [isFromMenuOpen, setIsFromMenuOpen] = useState(false)
+  const fromMenuRef = useRef<HTMLDivElement>(null)
+
+  // get budgets via context
+  const context = useContext(BudgetsContext)
+  if (!context) throw new Error('BudgetsContext missing')
+  const { budgets } = context
 
   useEffect(() => {
     if (!isOpen) return
@@ -56,10 +73,13 @@ export function TransactionModal({
   }, [isOpen, onClose])
 
   useEffect(() => {
-    if (!isTypeMenuOpen) return
+    if (!isTypeMenuOpen && !isFromMenuOpen) return
     const onClickAway = (e: MouseEvent | TouchEvent) => {
-      if (typeMenuRef.current && typeMenuRef.current.contains(e.target as Node)) return
+      const target = e.target as Node
+      if (typeMenuRef.current && typeMenuRef.current.contains(target)) return
+      if (fromMenuRef.current && fromMenuRef.current.contains(target)) return
       setIsTypeMenuOpen(false)
+      setIsFromMenuOpen(false)
     }
     document.addEventListener('mousedown', onClickAway)
     document.addEventListener('touchstart', onClickAway)
@@ -67,7 +87,7 @@ export function TransactionModal({
       document.removeEventListener('mousedown', onClickAway)
       document.removeEventListener('touchstart', onClickAway)
     }
-  }, [isTypeMenuOpen])
+  }, [isTypeMenuOpen, isFromMenuOpen])
 
   if (!isOpen) return null
 
@@ -85,7 +105,9 @@ export function TransactionModal({
             <h2 className="text-xl font-semibold text-gray-900">
               {editingId ? 'Edit transaction' : 'Add transaction'}
             </h2>
-            <p className="mt-1 text-sm text-gray-500">Enter details for this transaction.</p>
+            <p className="mt-1 text-sm text-gray-500">
+              Enter details for this transaction.
+            </p>
           </div>
           <button
             type="button"
@@ -98,14 +120,17 @@ export function TransactionModal({
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <label className="flex flex-col gap-2 text-sm font-medium text-gray-700" htmlFor="date">
+          <label
+            className="flex flex-col gap-2 text-sm font-medium text-gray-700"
+            htmlFor="date"
+          >
             Date
             <input
               id="date"
               type="date"
               value={date}
               onChange={e => setDate(e.target.value)}
-              className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+              className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
             />
           </label>
           <div
@@ -116,13 +141,14 @@ export function TransactionModal({
             <button
               type="button"
               onClick={() => setIsTypeMenuOpen(prev => !prev)}
-              className="flex items-center justify-between rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+              className="flex items-center justify-between rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
             >
               {type}
               <span className="text-xs text-gray-500">▼</span>
             </button>
+
             {isTypeMenuOpen && (
-              <div className="absolute left-0 right-0 top-full z-50 mt-1 w-full rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5">
+              <div className="absolute top-full right-0 left-0 z-50 mt-1 w-full rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5">
                 {typeOptions.map(option => (
                   <button
                     key={option}
@@ -145,31 +171,40 @@ export function TransactionModal({
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <label className="flex flex-col gap-2 text-sm font-medium text-gray-700" htmlFor="description">
+          <label
+            className="flex flex-col gap-2 text-sm font-medium text-gray-700"
+            htmlFor="description"
+          >
             Description
             <input
               id="description"
               type="text"
               value={description}
               onChange={e => setDescription(e.target.value)}
-              className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+              className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
               placeholder="e.g. Coffee"
             />
           </label>
-          <label className="flex flex-col gap-2 text-sm font-medium text-gray-700" htmlFor="category">
+          <label
+            className="flex flex-col gap-2 text-sm font-medium text-gray-700"
+            htmlFor="category"
+          >
             Category
             <input
               id="category"
               type="text"
               value={category}
               onChange={e => setCategory(e.target.value)}
-              className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+              className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
               placeholder="e.g. Food"
             />
           </label>
         </div>
 
-        <label className="flex flex-col gap-2 text-sm font-medium text-gray-700" htmlFor="amount">
+        <label
+          className="flex flex-col gap-2 text-sm font-medium text-gray-700"
+          htmlFor="amount"
+        >
           Amount
           <input
             id="amount"
@@ -177,10 +212,69 @@ export function TransactionModal({
             min="0"
             value={amount}
             onChange={e => setAmount(e.target.value)}
-            className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+            className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
             placeholder="0.00"
           />
         </label>
+
+        <div
+          className="relative flex flex-col gap-2 text-sm font-medium text-gray-700"
+          ref={fromMenuRef}
+        >
+          <span>From</span>
+          <button
+            type="button"
+            onClick={() => {
+              setIsFromMenuOpen(prev => !prev)
+            }}
+            className="flex items-center justify-between rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+          >
+            {source === 'ACCOUNT'
+              ? 'Account'
+              : budgets.find(b => b.id === budgetId)?.name ?? 'Budget'}
+            <span className="text-xs text-gray-500">▼</span>
+          </button>
+
+          {isFromMenuOpen && (
+            <div className="absolute top-full right-0 left-0 z-50 mt-1 w-full rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5">
+              <button
+                type="button"
+                className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition hover:bg-gray-100 ${
+                  source === 'ACCOUNT' ? 'font-semibold text-emerald-600' : 'text-gray-700'
+                }`}
+                onClick={() => {
+                  setSource('ACCOUNT')
+                  setBudgetId(null)
+                  setIsFromMenuOpen(false)
+                }}
+              >
+                Account
+                {source === 'ACCOUNT' && <span className="text-emerald-600">✓</span>}
+              </button>
+              {budgets.map(budget => (
+                <button
+                  key={budget.id}
+                  type="button"
+                  className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition hover:bg-gray-100 ${
+                    source === 'BUDGET' && budgetId === budget.id
+                      ? 'font-semibold text-emerald-600'
+                      : 'text-gray-700'
+                  }`}
+                  onClick={() => {
+                    setSource('BUDGET')
+                    setBudgetId(budget.id)
+                    setIsFromMenuOpen(false)
+                  }}
+                >
+                  {budget.name}
+                  {source === 'BUDGET' && budgetId === budget.id && (
+                    <span className="text-emerald-600">✓</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-end sm:gap-2">
           <button
@@ -202,5 +296,3 @@ export function TransactionModal({
     </div>
   )
 }
-
-
