@@ -12,3 +12,64 @@ generator client {
 datasource db {
   provider = "sqlite"
 }
+
+enum BudgetKind {
+  SPEND
+  SAVE
+}
+
+enum TxType {
+  Income
+  Expense
+  Transfer
+}
+
+enum TxSource {
+  ACCOUNT
+  BUDGET
+}
+
+model Budget {
+  id        String      @id @default(cuid())
+  name      String
+  kind      BudgetKind
+  balance   Float       @default(0)
+  target    Float?
+  createdAt DateTime    @default(now())
+
+  events    BudgetEvent[]
+  txs       Transaction[]
+
+  @@index([kind])
+}
+
+model BudgetEvent {
+  id       String   @id @default(cuid())
+  date     DateTime @default(now())
+  delta    Float
+  note     String?
+
+  budgetId String
+  budget   Budget   @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+
+  @@index([budgetId])
+  @@index([date])
+}
+
+model Transaction {
+  id          Int      @id @default(autoincrement())
+  date        DateTime @default(now())
+  description String
+  category    String
+  type        TxType
+  amount      Float
+  source      TxSource @default(ACCOUNT)
+
+  budgetId    String?
+  budget      Budget?  @relation(fields: [budgetId], references: [id], onDelete: SetNull)
+
+  @@index([date])
+  @@index([type])
+  @@index([source])
+  @@index([budgetId])
+}
