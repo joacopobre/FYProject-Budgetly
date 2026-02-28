@@ -20,6 +20,7 @@ export const TransactionsContext = createContext<TransactionsContextValue | unde
 
 const STORAGE_KEY = 'budgetly:transactions'
 
+
 export function TransactionsProvider({ children }: { children: React.ReactNode }) {
   const [transactions, setTransactions] = useState<Transaction[]>(transactionsData)
   //load from localStorage on mount
