@@ -36,10 +36,14 @@ model Budget {
   target    Float?
   createdAt DateTime    @default(now())
 
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   events    BudgetEvent[]
   txs       Transaction[]
 
   @@index([kind])
+  @@index([userId])
 }
 
 model BudgetEvent {
@@ -64,6 +68,9 @@ model Transaction {
   amount      Float
   source      TxSource @default(ACCOUNT)
 
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   budgetId    String?
   budget      Budget?  @relation(fields: [budgetId], references: [id], onDelete: SetNull)
 
@@ -71,6 +78,7 @@ model Transaction {
   @@index([type])
   @@index([source])
   @@index([budgetId])
+  @@index([userId])
 }
 
 model User {
@@ -82,6 +90,9 @@ model User {
 
   accounts      Account[]
   sessions      Session[]
+
+  budgets       Budget[]
+  transactions  Transaction[]
 }
 
 model Account {
