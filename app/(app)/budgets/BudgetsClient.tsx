@@ -7,10 +7,16 @@ import type { Budget, BudgetKind } from '@/types/budgets'
 import { createUuid } from '@/lib/budgets/createUuidBudget'
 import { BudgetLineChart } from '@/components/budgets/BudgetLineChart'
 import { buildBudgetBalanceSeries } from '@/lib/budgets/buildBudgetBalanceSeries'
-import { TransactionsContext } from '@/context/TransactionsContext'
 import { Transaction } from '@/types/transactions'
+import { TransactionsContext } from '@/context/TransactionsContext'
 
-export default function BudgetsClient() {
+type Props = {
+  initialBudgets: Budget[]
+}
+
+export default function BudgetsClient({ initialBudgets }: Props) {
+  console.log('initialBudgets', initialBudgets)
+
   const [isFundModalOpen, setIsFundModalOpen] = useState(false)
   const [fundMode, setFundMode] = useState<'ADD' | 'WITHDRAW' | null>(null)
   const [activeBudgetId, setActiveBudgetId] = useState<string | null>(null)
@@ -43,7 +49,7 @@ export default function BudgetsClient() {
     setBudgets(prev => prev.filter(budget => budget.id !== id))
   }
 
-  const handleConfirmFunds = (
+  const handleConfirmFunds = async (
     id: string | null,
     fund: string | null,
     mode: 'ADD' | 'WITHDRAW' | null,
@@ -51,49 +57,27 @@ export default function BudgetsClient() {
     if (!id || !mode) return
 
     const amount = Number(fund)
-    if (isNaN(amount) || amount <= 0) return
+    if (!Number.isFinite(amount) || amount <= 0) return
 
-    const budget = budgets.find(b => b.id === id)
-    if (!budget) return
+    const res = await fetch(`/api/budgets/${id}/events`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mode,
+        amount,
+        note: fundNote.trim() || undefined,
+      }),
+    })
 
-    const delta = mode === 'WITHDRAW' ? -Math.min(amount, budget.balance) : amount
+    if (!res.ok) return
 
-    const newEvent = {
-      id: createUuid(),
-      date: new Date().toISOString(),
-      delta,
-      note: fundNote.trim() || undefined,
-    }
+    const data = await res.json()
 
-    // 1) update budgets
-    setBudgets(prev =>
-      prev.map(b =>
-        b.id !== id
-          ? b
-          : {
-              ...b,
-              balance: b.balance + delta,
-              events: [...b.events, newEvent],
-            },
-      ),
-    )
+    const updatedBudget: Budget = data.budget
+    const createdTransactions: Transaction[] = data.transactions
 
-    // 2) add a mirrored transfer transaction (account side)
-    setTransactions(prev => [
-      ...prev,
-      {
-        id: Date.now(),
-        date: new Date().toISOString(),
-        description:
-          mode === 'ADD' ? `Transfer to ${budget.name}` : `Transfer from ${budget.name}`,
-        category: 'Transfer',
-        type: 'Transfer',
-        amount: -delta, // mirror of budget delta
-        source: 'ACCOUNT',
-        budgetId: id,
-      },
-    ])
-
+    setBudgets(prev => prev.map(b => (b.id === updatedBudget.id ? updatedBudget : b)))
+    setTransactions(prev => [...createdTransactions, ...prev])
     closeFundModal()
   }
   const closeFundModal = () => {
@@ -105,26 +89,37 @@ export default function BudgetsClient() {
     setIsFundNoteOpen(false)
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const validatedName = name.trim()
     const validatedLimit = Number(limit)
 
     if (validatedName === '') return
-    //if we are edditing..
+    //if we are editing..
     if (editingBudgetId !== null) {
-      setBudgets(prev =>
-        prev.map(budget => {
-          if (budget.id === editingBudgetId) {
-            return {
-              ...budget,
-              name: validatedName,
-              kind: budgetKind,
-              target: budgetKind === 'SAVE' ? validatedLimit : undefined,
-            }
-          }
-          return budget
+      const isSave = budgetKind === 'SAVE'
+      const target = isSave ? validatedLimit : undefined
+
+      // optional: validate SAVE target before hitting the API
+      if (isSave && (isNaN(validatedLimit) || validatedLimit <= 0)) return
+
+      const res = await fetch(`/api/budgets/${editingBudgetId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: validatedName,
+          kind: budgetKind,
+          target,
         }),
-      )
+      })
+
+      if (!res.ok) return
+
+      const updatedBudget: Budget = await res.json()
+
+      setBudgets(prev => prev.map(b => (b.id === updatedBudget.id ? updatedBudget : b)))
+
+      closeModal()
+      return
     } else {
       const isSave = budgetKind === 'SAVE'
       const validatedTarget = Number(limit)
@@ -140,41 +135,24 @@ export default function BudgetsClient() {
 
       const initialBalance = hasStartingAmount ? validatedStartingAmount : 0
 
-      const newBudget: Budget = {
-        id: createUuid(),
-        name: validatedName,
-        kind: budgetKind,
-        createdAt: new Date().toISOString(),
-        balance: initialBalance,
-        target: isSave ? validatedTarget : undefined,
-        events:
-          initialBalance > 0
-            ? [
-                {
-                  id: createUuid(),
-                  date: new Date().toISOString(),
-                  delta: initialBalance,
-                  note: 'Initial allocation',
-                },
-              ]
-            : [],
-      }
-      setBudgets(prev => [...prev, newBudget])
+      const res = await fetch('/api/budgets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: validatedName,
+          kind: budgetKind,
+          target: isSave ? validatedTarget : undefined,
+          startingAmount: hasStartingAmount ? validatedStartingAmount : undefined,
+        }),
+      })
 
-      if (initialBalance > 0) {
-        const transferTx: Transaction = {
-          id: Date.now(),
-          date: new Date().toISOString(),
-          description: `Initial transfer to ${validatedName}`,
-          category: 'Transfer',
-          type: 'Transfer',
-          amount: -initialBalance,
-          source: 'ACCOUNT',
-          budgetId: newBudget.id,
-        }
-        setTransactions(prev => [...prev, transferTx])
-      }
+      if (!res.ok) return
+
+      const createdBudget: Budget = await res.json()
+
+      setBudgets(prev => [...prev, createdBudget])
     }
+
     closeModal()
   }
 
@@ -212,9 +190,11 @@ export default function BudgetsClient() {
       document.body.style.overflow = prev
     }
   }, [isModalOpen])
+
   const activeBudget = activeBudgetId ? budgets.find(b => b.id === activeBudgetId) : null
 
   const formatMoney = (value: number) => `$${value.toFixed(2)}`
+
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-8 px-5 py-10 md:px-8 lg:px-12">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
