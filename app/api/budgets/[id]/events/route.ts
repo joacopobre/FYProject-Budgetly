@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getAuthSession } from '@/lib/auth'
-
-export const runtime = 'nodejs'
+import type { Transaction } from '@prisma/client'
 
 type Body = {
   mode: 'ADD' | 'WITHDRAW'
@@ -10,54 +9,117 @@ type Body = {
   note?: string
 }
 
-export async function POST(
-  req: Request,
-  ctx: { params: Promise<{ id: string }> }, // Next 15+ "params must be awaited"
-) {
+type Ctx = { params: Promise<{ id: string }> }
+
+export async function POST(req: Request, { params }: Ctx) {
   const session = await getAuthSession()
-  if (!session?.user?.id)
+  if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  const { id } = await ctx.params
-
-  let body: Body
-  try {
-    body = (await req.json()) as Body
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
+
+  const { id: budgetId } = await params
+  const body = (await req.json()) as Body
 
   const amount = Number(body.amount)
   if (!Number.isFinite(amount) || amount <= 0) {
-    return NextResponse.json({ error: 'Amount must be > 0' }, { status: 400 })
+    return NextResponse.json({ error: 'Invalid amount' }, { status: 400 })
   }
 
-  // Find budget and ensure it belongs to the logged-in user
-  const budget = await prisma.budget.findFirst({
-    where: { id, userId: session.user.id },
-    select: { id: true, balance: true },
-  })
+  const mode = body.mode
+  if (mode !== 'ADD' && mode !== 'WITHDRAW') {
+    return NextResponse.json({ error: 'Invalid mode' }, { status: 400 })
+  }
 
-  if (!budget) return NextResponse.json({ error: 'Budget not found' }, { status: 404 })
+  try {
+    const result = await prisma.$transaction(async tx => {
+      const budget = await tx.budget.findFirst({
+        where: { id: budgetId, userId: session.user.id },
+        select: { id: true, name: true, balance: true },
+      })
 
-  const delta = body.mode === 'WITHDRAW' ? -Math.min(amount, budget.balance) : amount
+      if (!budget) throw new Error('NOT_FOUND')
+      if (mode === 'WITHDRAW' && budget.balance < amount)
+        throw new Error('INSUFFICIENT_FUNDS')
 
-  // Transaction: create event + update balance together
-  const updated = await prisma.$transaction(async tx => {
-    await tx.budgetEvent.create({
-      data: {
-        budgetId: budget.id,
-        delta,
-        note: body.note?.trim() || null,
-      },
+      const delta = mode === 'ADD' ? amount : -amount
+
+      await tx.budgetEvent.create({
+        data: {
+          budgetId: budget.id,
+          delta,
+          note: body.note?.trim() || null,
+        },
+      })
+
+      const updated = await tx.budget.update({
+        where: { id: budget.id },
+        data: { balance: budget.balance + delta },
+        include: { events: true },
+      })
+
+      let createdTransactions: Transaction[] = []
+
+      if (mode === 'ADD') {
+        const t1 = await tx.transaction.create({
+          data: {
+            userId: session.user.id,
+            type: 'Transfer',
+            source: 'ACCOUNT',
+            amount: -amount,
+            description: `Transfer to ${budget.name}`,
+            category: 'Transfer',
+            budgetId: budget.id,
+          },
+        })
+        const t2 = await tx.transaction.create({
+          data: {
+            userId: session.user.id,
+            type: 'Transfer',
+            source: 'BUDGET',
+            amount,
+            description: `Transfer from Account`,
+            category: 'Transfer',
+            budgetId: budget.id,
+          },
+        })
+        createdTransactions = [t1, t2]
+      } else {
+        const t1 = await tx.transaction.create({
+          data: {
+            userId: session.user.id,
+            type: 'Transfer',
+            source: 'BUDGET',
+            amount: -amount,
+            description: `Transfer to Account`,
+            category: 'Transfer',
+            budgetId: budget.id,
+          },
+        })
+        const t2 = await tx.transaction.create({
+          data: {
+            userId: session.user.id,
+            type: 'Transfer',
+            source: 'ACCOUNT',
+            amount,
+            description: `Transfer from ${budget.name}`,
+            category: 'Transfer',
+            budgetId: budget.id,
+          },
+        })
+        createdTransactions = [t1, t2]
+      }
+
+      return { budget: updated, transactions: createdTransactions }
     })
 
-    return tx.budget.update({
-      where: { id: budget.id },
-      data: { balance: { increment: delta } },
-      include: { events: { orderBy: { date: 'asc' } } },
-    })
-  })
-
-  return NextResponse.json(updated)
+    return NextResponse.json(result)
+  } catch (err: any) {
+    if (err?.message === 'NOT_FOUND') {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    }
+    if (err?.message === 'INSUFFICIENT_FUNDS') {
+      return NextResponse.json({ error: 'Insufficient funds' }, { status: 400 })
+    }
+    throw err
+  }
 }
