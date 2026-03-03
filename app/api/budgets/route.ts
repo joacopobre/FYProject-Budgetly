@@ -24,6 +24,7 @@ export async function GET() {
 
   return NextResponse.json(budgets)
 }
+
 export async function POST(req: Request) {
   const session = await getAuthSession()
   if (!session?.user?.id) {

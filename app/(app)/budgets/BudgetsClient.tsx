@@ -7,7 +7,8 @@ import type { Budget, BudgetKind } from '@/types/budgets'
 import { createUuid } from '@/lib/budgets/createUuidBudget'
 import { BudgetLineChart } from '@/components/budgets/BudgetLineChart'
 import { buildBudgetBalanceSeries } from '@/lib/budgets/buildBudgetBalanceSeries'
-
+import { Transaction } from '@/types/transactions'
+import { TransactionsContext } from '@/context/TransactionsContext'
 
 type Props = {
   initialBudgets: Budget[]
@@ -34,7 +35,9 @@ export default function BudgetsClient({ initialBudgets }: Props) {
   if (!context) throw new Error('BudgetsContext missing')
   const { budgets, setBudgets } = context
 
-  
+  const txContext = useContext(TransactionsContext)
+  if (!txContext) throw new Error('TransactionsContext missing')
+  const { setTransactions } = txContext
 
   const [expandedBudgetId, setExpandedBudgetId] = useState<string | null>(null)
 
@@ -45,7 +48,6 @@ export default function BudgetsClient({ initialBudgets }: Props) {
   const handleDelete = (id: string) => {
     setBudgets(prev => prev.filter(budget => budget.id !== id))
   }
-
 
   const handleConfirmFunds = async (
     id: string | null,
@@ -69,11 +71,13 @@ export default function BudgetsClient({ initialBudgets }: Props) {
 
     if (!res.ok) return
 
-    const updatedBudget: Budget = await res.json()
+    const data = await res.json()
 
-    // Replace the one budget in state with the updated one from DB
+    const updatedBudget: Budget = data.budget
+    const createdTransactions: Transaction[] = data.transactions
+
     setBudgets(prev => prev.map(b => (b.id === updatedBudget.id ? updatedBudget : b)))
-
+    setTransactions(prev => [...createdTransactions, ...prev])
     closeFundModal()
   }
   const closeFundModal = () => {
