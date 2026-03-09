@@ -56,7 +56,8 @@ export async function POST(req: Request) {
       : 0
 
   // If you want to record an initial event when startingAmount > 0
-  const created = await prisma.$transaction(async tx => {
+  type TxClient = Parameters<Parameters<typeof prisma.$transaction>[0]>[0]
+  const created = await prisma.$transaction(async (tx: TxClient) => {
     const budget = await tx.budget.create({
       data: {
         name,
