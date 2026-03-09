@@ -109,7 +109,7 @@ export default function TransactionsClient({ initialTransactions }: Props) {
     setIsModalOpen(true)
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const validatedDate = date.trim()
     const validatedDescription = description.trim()
     const validatedCategory = category.trim()
@@ -128,27 +128,10 @@ export default function TransactionsClient({ initialTransactions }: Props) {
       type === 'Income' ? Math.abs(numericAmount) : -Math.abs(numericAmount)
 
     if (editingId !== null) {
-      setTransactions(prev =>
-        prev.map(tx =>
-          tx.id === editingId
-            ? {
-                ...tx,
-                date: validatedDate,
-                description: validatedDescription,
-                category: validatedCategory,
-                type,
-                amount: signedAmount,
-                source,
-                budgetId: source === 'BUDGET' ? budgetId : null,
-              }
-            : tx,
-        ),
-      )
-    } else {
-      setTransactions(prev => [
-        ...prev,
-        {
-          id: Date.now(),
+      const res = await fetch(`/api/transactions/${editingId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           date: validatedDate,
           description: validatedDescription,
           category: validatedCategory,
@@ -156,13 +139,63 @@ export default function TransactionsClient({ initialTransactions }: Props) {
           amount: signedAmount,
           source,
           budgetId: source === 'BUDGET' ? budgetId : null,
+        }),
+      })
+
+      if (!res.ok) return
+
+      const updated = await res.json()
+
+      setTransactions(prev =>
+        prev.map(tx =>
+          tx.id === updated.id
+            ? {
+                ...updated,
+                date: new Date(updated.date).toISOString(),
+              }
+            : tx,
+        ),
+      )
+
+      closeModal()
+      return
+    } else {
+      const res = await fetch('/api/transactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          date: validatedDate,
+          description: validatedDescription,
+          category: validatedCategory,
+          type,
+          amount: signedAmount,
+          source,
+          budgetId: source === 'BUDGET' ? budgetId : null,
+        }),
+      })
+
+      if (!res.ok) return
+
+      const created = await res.json()
+
+      setTransactions(prev => [
+        {
+          ...created,
+          date: new Date(created.date).toISOString(),
         },
+        ...prev,
       ])
     }
     closeModal()
   }
 
-  const handleDeleteTransaction = (id: number) => {
+  const handleDeleteTransaction = async (id: number) => {
+    const res = await fetch(`/api/transactions/${id}`, {
+      method: 'DELETE',
+    })
+
+    if (!res.ok) return
+
     setTransactions(prev => prev.filter(tx => tx.id !== id))
   }
 
