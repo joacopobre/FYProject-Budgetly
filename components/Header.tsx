@@ -1,10 +1,12 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { Menu, X, Wallet } from 'lucide-react'
+import { Menu, X, Wallet, ArrowRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
+  const { data: session } = useSession()
   const router = useRouter()
   const handleClick = () => setIsOpen(prev => !prev)
 
@@ -73,20 +75,33 @@ export default function Header() {
 
             {/* CTA */}
             <div className="flex w-1/3 justify-end gap-6 px-4">
-              <button
-                type="button"
-                className="bg-primary rounded-lg px-10 py-2 font-light whitespace-nowrap text-white"
-                onClick={() => router.push('/login')}
-              >
-                Get Started
-              </button>
-              <button
-                type="button"
-                className="hidden rounded-lg bg-white px-10 py-2 font-light whitespace-nowrap text-gray-500 lg:flex"
-                onClick={() => router.push('/login')}
-              >
-                Sign in
-              </button>
+              {session?.user ? (
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-2 rounded-lg bg-black px-6 py-2 font-light whitespace-nowrap text-white"
+                  onClick={() => router.push('/dashboard')}
+                >
+                  Dashboard
+                  <ArrowRight className="size-4" />
+                </button>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    className="bg-primary rounded-lg px-10 py-2 font-light whitespace-nowrap text-white"
+                    onClick={() => router.push('/login')}
+                  >
+                    Get Started
+                  </button>
+                  <button
+                    type="button"
+                    className="hidden rounded-lg bg-white px-10 py-2 font-light whitespace-nowrap text-gray-500 lg:flex"
+                    onClick={() => router.push('/login')}
+                  >
+                    Sign in
+                  </button>
+                </>
+              )}
             </div>
 
             {/* Hamburguer Menu icon */}

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import BudgetsClient from './BudgetsClient'
 import { getAuthSession } from '@/lib/auth'
 import { redirect } from 'next/navigation'
