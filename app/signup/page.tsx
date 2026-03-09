@@ -1,14 +1,16 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
 
-export default function LoginPage() {
+export default function SignupPage() {
   const router = useRouter()
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -17,7 +19,25 @@ export default function LoginPage() {
     setError('')
     setIsSubmitting(true)
 
-    const result = await signIn('credentials', {
+    const response = await fetch('/api/auth/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name,
+        email,
+        password,
+        confirmPassword,
+      }),
+    })
+
+    const data = (await response.json()) as { error?: string }
+    if (!response.ok) {
+      setIsSubmitting(false)
+      setError(data.error ?? 'Unable to sign up')
+      return
+    }
+
+    const signInResult = await signIn('credentials', {
       email: email.trim().toLowerCase(),
       password,
       redirect: false,
@@ -26,21 +46,28 @@ export default function LoginPage() {
 
     setIsSubmitting(false)
 
-    if (!result || result.error) {
-      setError(result?.error ?? 'Invalid email or password')
+    if (!signInResult || signInResult.error) {
+      setError(signInResult?.error ?? 'Sign in failed after signup')
       return
     }
 
-    router.push(result.url ?? '/dashboard')
+    router.push(signInResult.url ?? '/dashboard')
   }
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-200 px-4">
       <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
-        <h1 className="text-2xl font-semibold text-gray-900">Sign in</h1>
-        <p className="mt-2 text-sm text-gray-500">Sign in with email/password or Google.</p>
+        <h1 className="text-2xl font-semibold text-gray-900">Create account</h1>
+        <p className="mt-2 text-sm text-gray-500">Sign up with email/password or Google.</p>
 
         <form className="mt-6 space-y-3" onSubmit={onSubmit}>
+          <input
+            type="text"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            placeholder="Name (optional)"
+            className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none focus:border-gray-500"
+          />
           <input
             type="email"
             value={email}
@@ -57,13 +84,21 @@ export default function LoginPage() {
             required
             className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none focus:border-gray-500"
           />
+          <input
+            type="password"
+            value={confirmPassword}
+            onChange={e => setConfirmPassword(e.target.value)}
+            placeholder="Confirm password"
+            required
+            className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none focus:border-gray-500"
+          />
           {error ? <p className="text-sm text-red-600">{error}</p> : null}
           <button
             type="submit"
             disabled={isSubmitting}
             className="w-full rounded-xl bg-black px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
           >
-            {isSubmitting ? 'Signing in...' : 'Sign in'}
+            {isSubmitting ? 'Creating account...' : 'Sign up'}
           </button>
         </form>
 
@@ -76,9 +111,9 @@ export default function LoginPage() {
         </button>
 
         <p className="mt-4 text-center text-sm text-gray-600">
-          Don&apos;t have an account?{' '}
-          <Link href="/signup" className="font-semibold text-black underline">
-            Sign up
+          Already have an account?{' '}
+          <Link href="/login" className="font-semibold text-black underline">
+            Sign in
           </Link>
         </p>
       </div>
