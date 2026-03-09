@@ -1,9 +1,11 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { Menu, X, Wallet } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
+  const router = useRouter()
   const handleClick = () => setIsOpen(prev => !prev)
 
   // useEffect to change isOpen when window expanded
@@ -74,12 +76,14 @@ export default function Header() {
               <button
                 type="button"
                 className="bg-primary rounded-lg px-10 py-2 font-light whitespace-nowrap text-white"
+                onClick={() => router.push('/login')}
               >
                 Get Started
               </button>
               <button
                 type="button"
                 className="hidden rounded-lg bg-white px-10 py-2 font-light whitespace-nowrap text-gray-500 lg:flex"
+                onClick={() => router.push('/login')}
               >
                 Sign in
               </button>
