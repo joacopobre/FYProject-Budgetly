@@ -1,5 +1,6 @@
 import Header from '../../components/Header'
 import InfiniteMarquee from '../../components/InfiniteMarquee'
+import GoogleSignInButton from '@/components/auth/GoogleSignInButton'
 
 export default function Home() {
   return (
@@ -15,12 +16,9 @@ export default function Home() {
             Budgetly helps you track spending, set realistic budgets, and understand where
             your money goes.
           </p>
-          <button
-            type="button"
-            className="w-full rounded-lg bg-blue-500 px-10 py-2 font-medium whitespace-nowrap text-white md:w-[320px]"
-          >
+          <GoogleSignInButton className="w-full rounded-lg bg-blue-500 px-10 py-2 font-medium whitespace-nowrap text-white md:w-[320px]">
             Get Started
-          </button>
+          </GoogleSignInButton>
         </section>
         <div className="edge-fade relative w-full overflow-hidden">
           <InfiniteMarquee />
@@ -55,12 +53,9 @@ export default function Home() {
             <p className="text-lg text-gray-500">Monthly insights and charts </p>
           </div>
         </div>
-        <button
-          type="button"
-          className="bg-primary mx-auto my-5 rounded-lg px-12 py-1.5 font-medium text-white lg:px-[72px] lg:py-3 lg:text-xl lg:tracking-wider"
-        >
+        <GoogleSignInButton className="bg-primary mx-auto my-5 rounded-lg px-12 py-1.5 font-medium text-white lg:px-[72px] lg:py-3 lg:text-xl lg:tracking-wider">
           Get Started
-        </button>
+        </GoogleSignInButton>
 
         {/* feature 3 */}
         <div className="my-20 grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-16">
@@ -101,9 +96,9 @@ export default function Home() {
         <p className="text-md mb-7 px-10 font-medium text-gray-100 md:text-2xl">
           Track, organise, and understand your finances in just a few steps.
         </p>
-        <button className="mx-auto mb-7 rounded-xl bg-white px-12 py-2 font-medium text-green-700">
+        <GoogleSignInButton className="mx-auto mb-7 rounded-xl bg-white px-12 py-2 font-medium text-green-700">
           Get Started
-        </button>
+        </GoogleSignInButton>
 
         {/* mobile carousel */}
         <div className="relative md:hidden">
