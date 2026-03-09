@@ -35,6 +35,10 @@ export default function BudgetsClient({ initialBudgets }: Props) {
   if (!context) throw new Error('BudgetsContext missing')
   const { budgets, setBudgets } = context
 
+  useEffect(() => {
+    setBudgets(initialBudgets)
+  }, [initialBudgets, setBudgets])
+
   const txContext = useContext(TransactionsContext)
   if (!txContext) throw new Error('TransactionsContext missing')
   const { setTransactions } = txContext

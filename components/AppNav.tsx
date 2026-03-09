@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
+import { signOut } from 'next-auth/react'
 
 const links = [
   { href: '/dashboard', label: 'Dashboard' },
@@ -69,6 +70,13 @@ export default function AppNav() {
               </Link>
             )
           })}
+          <button
+            type="button"
+            onClick={() => signOut({ callbackUrl: '/login' })}
+            className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
+          >
+            Sign out
+          </button>
         </div>
 
         <button
@@ -108,6 +116,13 @@ export default function AppNav() {
               </Link>
             )
           })}
+          <button
+            type="button"
+            onClick={() => signOut({ callbackUrl: '/login' })}
+            className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
+          >
+            Sign out
+          </button>
         </div>
       )}
     </header>
