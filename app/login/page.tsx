@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { signIn } from 'next-auth/react'
+import { signIn, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
@@ -11,6 +11,12 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  async function onGoogleSignIn() {
+    // Clear any local session first, then force account picker.
+    await signOut({ redirect: false })
+    await signIn('google', { callbackUrl: '/dashboard' }, { prompt: 'select_account' })
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -70,7 +76,7 @@ export default function LoginPage() {
         <button
           type="button"
           className="mt-3 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-gray-800 transition hover:bg-gray-50"
-          onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
+          onClick={onGoogleSignIn}
         >
           Continue with Google
         </button>
