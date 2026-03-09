@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getAuthSession } from '@/lib/auth'
 
+type Ctx = {
+  params: Promise<{ id: string }>
+}
+
 export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params
 
@@ -40,4 +44,26 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
     // If id+userId not found, Prisma throws
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
+}
+export async function DELETE(_req: Request, { params }: Ctx) {
+  const session = await getAuthSession()
+
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { id } = await params
+
+  const deleted = await prisma.budget.deleteMany({
+    where: {
+      id,
+      userId: session.user.id,
+    },
+  })
+
+  if (deleted.count === 0) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  }
+
+  return NextResponse.json({ success: true })
 }
