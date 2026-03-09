@@ -14,7 +14,7 @@ export default function GoogleSignInButton({ className, children }: Props) {
   return (
     <button
       type="button"
-      className={className}
+      className={`${className ?? ''} hover:cursor-pointer`}
       onClick={() => router.push('/login')}
     >
       {children}
