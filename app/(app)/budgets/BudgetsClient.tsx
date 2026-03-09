@@ -45,7 +45,13 @@ export default function BudgetsClient({ initialBudgets }: Props) {
     setExpandedBudgetId(prev => (prev === budgetId ? null : budgetId))
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
+    const res = await fetch(`/api/budgets/${id}`, {
+      method: 'DELETE',
+    })
+
+    if (!res.ok) return
+
     setBudgets(prev => prev.filter(budget => budget.id !== id))
   }
 
