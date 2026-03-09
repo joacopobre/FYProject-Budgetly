@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getAuthSession } from '@/lib/auth'
-import type { Transaction } from '@prisma/client'
 
 type Body = {
   mode: 'ADD' | 'WITHDRAW'
@@ -31,7 +30,8 @@ export async function POST(req: Request, { params }: Ctx) {
   }
 
   try {
-    const result = await prisma.$transaction(async tx => {
+    type TxClient = Parameters<Parameters<typeof prisma.$transaction>[0]>[0]
+    const result = await prisma.$transaction(async (tx: TxClient) => {
       const budget = await tx.budget.findFirst({
         where: { id: budgetId, userId: session.user.id },
         select: { id: true, name: true, balance: true },
@@ -57,7 +57,7 @@ export async function POST(req: Request, { params }: Ctx) {
         include: { events: true },
       })
 
-      let createdTransactions: Transaction[] = []
+      let createdTransactions: Awaited<ReturnType<typeof tx.transaction.create>>[] = []
 
       if (mode === 'ADD') {
         const t1 = await tx.transaction.create({
