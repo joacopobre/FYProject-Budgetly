@@ -11,6 +11,11 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          prompt: "select_account",
+        },
+      },
     }),
     CredentialsProvider({
       name: "Email and Password",
@@ -55,11 +60,15 @@ export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   callbacks: {
     async jwt({ token, user }) {
-      if (user) token.id = user.id
+      // Keep token.id in sync with the current authenticated subject.
+      if (user?.id) token.id = user.id
+      if (token.sub) token.id = token.sub
       return token
     },
     async session({ session, token }) {
-      if (session.user) (session.user as any).id = token.id as string
+      if (session.user) {
+        ;(session.user as any).id = (token.id ?? token.sub) as string
+      }
       return session
     },
   },
