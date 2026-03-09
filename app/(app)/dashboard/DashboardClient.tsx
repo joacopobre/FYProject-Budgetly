@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useRef, useState, useContext } from 'react'
-import { ChevronDown, X } from 'lucide-react'
+import { ChevronDown, Plus, X } from 'lucide-react'
 import { filterByDateRange, type TrendRange } from '@/lib/transactions/filterByDateRange'
 import { calculateDashboardStats } from '@/lib/transactions/calculateDashboardStats'
 import { formatMoney } from '@/lib/transactions/formatMoney'
@@ -72,11 +72,11 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
   }, [isOpen])
 
   return (
-    <div className="mx-auto flex w-full max-w-screen-xl flex-col gap-6 px-5 pt-6 pb-10 md:px-8 lg:px-12">
+    <div className="mx-auto flex w-full max-w-screen-xl flex-col gap-7 px-5 pt-6 pb-12 md:px-8 lg:px-12">
       <h1 className="text-4xl font-bold text-gray-800 md:text-5xl lg:text-6xl">
         Dashboard
       </h1>
-      <section className="flex flex-col gap-4">
+      <section className="flex flex-col gap-5">
         <div className="flex items-baseline justify-between">
           <h2 className="text-3xl font-semibold text-gray-700 md:text-4xl">Glance</h2>
           <span className="text-sm text-gray-400">Overview</span>
@@ -84,7 +84,7 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
 
         {/* Balance */}
         <div className="flex flex-col gap-4 md:grid md:grid-cols-2 md:gap-5">
-          <div className="align-center flex flex-col rounded-2xl border border-gray-200 bg-white px-4 py-6 md:h-full md:px-6 md:py-8">
+          <div className="align-center flex flex-col rounded-xl border border-slate-200 bg-white px-4 py-6 shadow-[0_4px_14px_rgba(15,23,42,0.06)] md:h-full md:px-6 md:py-8">
             <div className="flex justify-between">
               <p className="my-auto text-lg font-medium text-gray-600 md:text-xl">
                 Balance
@@ -99,22 +99,22 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
           </div>
 
           <div className="flex flex-col gap-3">
-            <div className="align-center flex justify-between rounded-2xl border border-gray-200 bg-white px-4 py-4">
-              <p className="text-base font-medium text-gray-600">Income</p>
+            <div className="align-center flex justify-between rounded-xl border border-emerald-100 bg-emerald-50/50 px-4 py-4">
+              <p className="text-base font-medium text-gray-700">Income</p>
               <span className="text-xl font-semibold text-emerald-600">
                 {formatMoney(stats.totalIncome)}
               </span>
             </div>
 
-            <div className="align-center flex justify-between rounded-2xl border border-gray-200 bg-white px-4 py-4">
-              <p className="text-base font-medium text-gray-600">Spent</p>
+            <div className="align-center flex justify-between rounded-xl border border-rose-100 bg-rose-50/45 px-4 py-4">
+              <p className="text-base font-medium text-gray-700">Spent</p>
               <span className="text-xl font-semibold text-rose-600">
                 {formatMoney(stats.totalExpenses)}
               </span>
             </div>
 
-            <div className="align-center flex justify-between rounded-2xl border border-gray-200 bg-white px-4 py-4">
-              <p className="text-base font-medium text-gray-600">Net</p>
+            <div className="align-center flex justify-between rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
+              <p className="text-base font-medium text-gray-700">Net</p>
               <span className="text-xl font-semibold text-gray-800">
                 {formatMoney(stats.balance)}
               </span>
@@ -176,7 +176,7 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
               )}
             </div>
           </div>
-          <div className="rounded-2xl border border-gray-200 bg-white px-5 py-6 md:px-6 md:py-7 lg:px-8 lg:py-8">
+          <div className="rounded-xl border border-slate-200 bg-white px-5 py-6 shadow-[0_4px_14px_rgba(15,23,42,0.06)] md:px-6 md:py-7 lg:px-8 lg:py-8">
             <div className="space-y-6 md:grid md:grid-cols-[1.2fr_0.8fr] md:items-start md:gap-6 md:space-y-0 lg:gap-8">
               <TrendChart data={trendSeries} />
               <RecentTransactions transactions={transactions} />
@@ -209,7 +209,7 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
                 return (
                   <div
                     key={budget.id}
-                    className="rounded-2xl border border-gray-200 bg-white px-5 py-4 shadow-sm"
+                    className="rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-[0_2px_10px_rgba(15,23,42,0.04)]"
                   >
                     <div className="mb-3 flex items-center justify-between">
                       <h3 className="text-lg font-medium text-gray-800">{budget.name}</h3>
@@ -222,7 +222,7 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
 
                     <div className="h-2 w-full rounded-full bg-emerald-50">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-emerald-300 via-emerald-400 to-emerald-600"
+                        className="h-full rounded-full bg-emerald-500"
                         style={{ width: isSave ? `${progress}%` : '100%' }}
                       />
                     </div>
@@ -232,12 +232,17 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
             ) : (
               <Link
                 href="/budgets"
-                className="group rounded-2xl border border-dashed border-gray-300 bg-white px-5 py-6 text-center shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50/40"
+                className="group rounded-xl border border-dashed border-slate-300 bg-white px-6 py-7 text-left shadow-[0_2px_10px_rgba(15,23,42,0.04)] transition hover:border-emerald-300 hover:bg-emerald-50/30"
               >
-                <p className="text-lg font-medium text-gray-700 transition group-hover:text-emerald-700">
-                  No budgets yet
+                <div className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-emerald-100 text-emerald-700">
+                  <Plus className="size-4" />
+                </div>
+                <p className="mt-3 text-base font-semibold text-gray-800 transition group-hover:text-emerald-700">
+                  Create your first budget
                 </p>
-                <p className="mt-1 text-sm text-gray-500">Click to create your first budget</p>
+                <p className="mt-1 text-sm text-gray-500">
+                  Set a target and track your progress each month.
+                </p>
               </Link>
             )}
           </div>

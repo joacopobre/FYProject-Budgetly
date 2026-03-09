@@ -36,11 +36,27 @@ export function TransactionsTable({
             {transactions.map(tx => {
               const isIncome = tx.amount > 0
               const amountColor = isIncome ? 'text-emerald-600' : 'text-rose-600'
+              const categoryColors: Record<string, string> = {
+                Food: 'bg-emerald-500',
+                Groceries: 'bg-lime-500',
+                Rent: 'bg-rose-500',
+                Salary: 'bg-sky-500',
+                Transfer: 'bg-violet-500',
+                Entertainment: 'bg-amber-500',
+                Transport: 'bg-cyan-500',
+                Shopping: 'bg-pink-500',
+              }
+              const categoryDot = categoryColors[tx.category] ?? 'bg-gray-400'
               return (
                 <tr key={tx.id} className="border-t border-gray-100">
                   <td className="px-4 py-3">{new Date(tx.date).toISOString().slice(0, 10)}</td>
                   <td className="px-4 py-3">{tx.description}</td>
-                  <td className="px-4 py-3">{tx.category}</td>
+                  <td className="px-4 py-3">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-gray-50 px-3 py-1 text-xs font-medium text-gray-700">
+                      <span className={`h-2 w-2 rounded-full ${categoryDot}`} />
+                      {tx.category}
+                    </span>
+                  </td>
                   <td className="px-4 py-3">{tx.type}</td>
                   <td className="px-4 py-3">{getSourceLabel(tx)}</td>
                   <td className={`px-4 py-3 text-right font-semibold ${amountColor}`}>
