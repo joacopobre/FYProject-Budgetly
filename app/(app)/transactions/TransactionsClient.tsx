@@ -48,13 +48,9 @@ export default function TransactionsClient({ initialTransactions }: Props) {
   const [isFilterTypeMenuOpen, setIsFilterTypeMenuOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
 
-  const [hydrated, setHydrated] = useState(false)
-
   useEffect(() => {
-    if (hydrated) return
     setTransactions(initialTransactions)
-    setHydrated(true)
-  }, [hydrated, initialTransactions, setTransactions])
+  }, [initialTransactions, setTransactions])
 
   const filteredTransactions = useMemo(
     () =>
