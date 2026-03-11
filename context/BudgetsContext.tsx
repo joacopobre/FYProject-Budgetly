@@ -23,15 +23,11 @@ export function BudgetsProvider({ children }: { children: React.ReactNode }) {
 
   // ✅ load from user-scoped storage
   useEffect(() => {
-    if (!storageKey) {
-      setBudgets([])
-      return
-    }
+    if (!storageKey) return
 
     try {
       const localBudgets = localStorage.getItem(storageKey)
       if (localBudgets) setBudgets(JSON.parse(localBudgets))
-      else setBudgets([])
     } catch {}
   }, [storageKey])
 
