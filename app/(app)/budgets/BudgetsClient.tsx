@@ -1,11 +1,12 @@
 'use client'
 
-import { X, ChevronDown } from 'lucide-react'
-import { useEffect, useState, useContext } from 'react'
+import { ChevronDown, X } from 'lucide-react'
+import { useContext, useEffect, useState } from 'react'
 import { BudgetsContext } from '@/context/BudgetsContext'
 import type { Budget, BudgetKind } from '@/types/budgets'
-import { createUuid } from '@/lib/budgets/createUuidBudget'
 import { BudgetLineChart } from '@/components/budgets/BudgetLineChart'
+import { BudgetModal } from '@/components/budgets/BudgetModal'
+import { FundModal } from '@/components/budgets/FundModal'
 import { buildBudgetBalanceSeries } from '@/lib/budgets/buildBudgetBalanceSeries'
 import { Transaction } from '@/types/transactions'
 import { TransactionsContext } from '@/context/TransactionsContext'
@@ -174,34 +175,7 @@ export default function BudgetsClient({ initialBudgets }: Props) {
     setEditingBudgetId(null)
   }
 
-  useEffect(() => {
-    if (!isModalOpen) return
-
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setIsModalOpen(false)
-      }
-    }
-
-    window.addEventListener('keydown', onKeyDown)
-
-    return () => {
-      window.removeEventListener('keydown', onKeyDown)
-    }
-  }, [isModalOpen])
-
-  useEffect(() => {
-    if (!isModalOpen) return
-
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-
-    return () => {
-      document.body.style.overflow = prev
-    }
-  }, [isModalOpen])
-
-  const activeBudget = activeBudgetId ? budgets.find(b => b.id === activeBudgetId) : null
+  const activeBudget = activeBudgetId ? (budgets.find(b => b.id === activeBudgetId) ?? null) : null
 
   const formatMoney = (value: number) => `$${value.toFixed(2)}`
 
@@ -228,8 +202,6 @@ export default function BudgetsClient({ initialBudgets }: Props) {
       <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2 lg:grid-cols-3">
         {budgets.map(budget => {
           const chartData = buildBudgetBalanceSeries(budget.events ?? [], 30)
-
-          const formatMoney = (value: number) => `$${value.toFixed(2)}`
 
           const isSave = budget.kind === 'SAVE'
           const current = budget.balance
@@ -354,254 +326,33 @@ export default function BudgetsClient({ initialBudgets }: Props) {
           )
         })}
       </div>
-      {/* Modal Card */}
-      {isModalOpen && (
-        <div
-          className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm"
-          onClick={() => setIsModalOpen(false)}
-        >
-          <div
-            className="flex w-full max-w-lg flex-col gap-6 rounded-2xl border border-gray-200 bg-white p-8 shadow-2xl dark:border-white/10 dark:bg-[#0e2318]"
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Add budget</h2>
-                <p className="mt-1 text-sm text-gray-500">
-                  Create a new budget with a limit.
-                </p>
-              </div>
-              <button
-                type="button"
-                className="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
-                onClick={closeModal}
-              >
-                <X className="size-4" />
-              </button>
-            </div>
-            {/* Modal section */}
-            <div className="flex flex-col gap-4">
-              <label
-                className="flex flex-col gap-2 text-sm font-medium text-gray-700"
-                htmlFor="name"
-              >
-                Budget name
-                <input
-                  id="name"
-                  value={name}
-                  onChange={e => {
-                    setName(e.currentTarget.value)
-                  }}
-                  type="text"
-                  className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-white/10 dark:bg-white/8 dark:text-slate-200"
-                  placeholder="e.g. Groceries"
-                />
-              </label>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setBudgetKind('SPEND')}
-                  className={`flex-1 rounded-xl px-4 py-2 text-sm font-semibold transition ${
-                    budgetKind === 'SPEND'
-                      ? 'bg-blue-600 text-white'
-                      : 'border border-gray-200 text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  Spend
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setBudgetKind('SAVE')}
-                  className={`flex-1 rounded-xl px-4 py-2 text-sm font-semibold transition ${
-                    budgetKind === 'SAVE'
-                      ? 'bg-green-600 text-white'
-                      : 'border border-gray-200 text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  Save
-                </button>
-              </div>
-
-              {budgetKind === 'SAVE' && (
-                <label
-                  className="flex flex-col gap-2 text-sm font-medium text-gray-700"
-                  htmlFor="limit"
-                >
-                  Goal amount
-                  <input
-                    id="limit"
-                    value={limit}
-                    onChange={e => setLimit(e.currentTarget.value)}
-                    type="number"
-                    min="0"
-                    className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-white/10 dark:bg-white/8 dark:text-slate-200"
-                    placeholder="0.00"
-                  />
-                </label>
-              )}
-
-              {editingBudgetId === null && (
-                <label
-                  className="flex flex-col gap-2 text-sm font-medium text-gray-700"
-                  htmlFor="startingAmount"
-                >
-                  {budgetKind === 'SAVE' ? 'Initial deposit' : 'Starting amount'}
-                  <input
-                    id="startingAmount"
-                    value={startingAmount}
-                    onChange={e => setStartingAmount(e.currentTarget.value)}
-                    type="number"
-                    min="0"
-                    className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-white/10 dark:bg-white/8 dark:text-slate-200"
-                    placeholder="0.00"
-                  />
-                </label>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-3 sm:flex-row sm:justify-end sm:gap-2">
-              <button
-                type="button"
-                className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
-                onClick={closeModal}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(16,185,129,0.3)] transition hover:from-emerald-600 hover:to-teal-600"
-                onClick={handleSave}
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* Add / Withdraw Modal */}
-      {isFundModalOpen && (
-        <div
-          className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm"
-          onClick={() => closeFundModal()}
-        >
-          <div
-            className="flex w-full max-w-lg flex-col gap-6 rounded-2xl border border-gray-200 bg-white p-8 shadow-2xl dark:border-white/10 dark:bg-[#0e2318]"
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">
-                  {fundMode === 'ADD' ? 'Add Funds' : 'Withdraw Funds'}
-                </h2>
-
-                {activeBudget && (
-                  <p className="mt-1 text-sm text-gray-500">
-                    Current balance:{' '}
-                    <span className="font-medium text-gray-700">
-                      {formatMoney(activeBudget.balance)}
-                    </span>
-                  </p>
-                )}
-              </div>
-
-              <button
-                type="button"
-                className="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
-                onClick={closeFundModal}
-              >
-                <X className="size-4" />
-              </button>
-            </div>
-
-            <div className="flex flex-col gap-4">
-              <label
-                className="flex flex-col text-sm font-medium text-gray-700"
-                htmlFor="fund"
-              >
-                {fundMode === 'ADD' ? 'Amount to add:' : 'Amount to withdraw:'}
-
-                {fundMode === 'WITHDRAW' && activeBudget && (
-                  <span className="mb-2 text-xs text-gray-400">
-                    Max available: {formatMoney(activeBudget.balance)}
-                  </span>
-                )}
-
-                <input
-                  id="fund"
-                  type="number"
-                  className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-white/10 dark:bg-white/8 dark:text-slate-200"
-                  placeholder="e.g. 100"
-                  value={fundAmount}
-                  onChange={e => {
-                    setFundAmount(e.currentTarget.value)
-                  }}
-                />
-              </label>
-              <div className="flex gap-3">
-                {isFundNoteOpen ? (
-                  <button
-                    type="button"
-                    className="cursor-pointer rounded-xl px-4 py-2 text-sm text-gray-400 transition hover:bg-gray-200 hover:text-gray-500"
-                    onClick={() => {
-                      setIsFundNoteOpen(false)
-                      setFundNote('')
-                    }}
-                  >
-                    <X className="size-4" />
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="cursor-pointer rounded-xl px-4 py-2 text-sm text-gray-400 transition hover:bg-gray-200 hover:text-gray-500"
-                    onClick={() => {
-                      setIsFundNoteOpen(true)
-                    }}
-                  >
-                    + add note
-                  </button>
-                )}
-                {isFundNoteOpen && (
-                  <label
-                    className="flex flex-col gap-2 text-sm font-medium text-gray-700"
-                    htmlFor="note"
-                  >
-                    <input
-                      id="note"
-                      type="text"
-                      className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-white/10 dark:bg-white/8 dark:text-slate-200"
-                      placeholder="e.g. rent"
-                      value={fundNote}
-                      onChange={e => {
-                        setFundNote(e.currentTarget.value)
-                      }}
-                    />
-                  </label>
-                )}
-              </div>
-
-              <div className="flex flex-col gap-3 sm:flex-row sm:justify-end sm:gap-2">
-                <button
-                  type="button"
-                  className="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(16,185,129,0.3)] transition hover:from-emerald-600 hover:to-teal-600"
-                  onClick={() => {
-                    handleConfirmFunds(activeBudgetId, fundAmount, fundMode)
-                  }}
-                >
-                  Save
-                </button>
-                <button
-                  type="button"
-                  className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
-                  onClick={() => closeFundModal()}
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <BudgetModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        onSave={handleSave}
+        editingBudgetId={editingBudgetId}
+        name={name}
+        setName={setName}
+        limit={limit}
+        setLimit={setLimit}
+        startingAmount={startingAmount}
+        setStartingAmount={setStartingAmount}
+        budgetKind={budgetKind}
+        setBudgetKind={setBudgetKind}
+      />
+      <FundModal
+        isOpen={isFundModalOpen}
+        onClose={closeFundModal}
+        onConfirm={() => handleConfirmFunds(activeBudgetId, fundAmount, fundMode)}
+        fundMode={fundMode}
+        activeBudget={activeBudget}
+        fundAmount={fundAmount}
+        setFundAmount={setFundAmount}
+        fundNote={fundNote}
+        setFundNote={setFundNote}
+        isFundNoteOpen={isFundNoteOpen}
+        setIsFundNoteOpen={setIsFundNoteOpen}
+      />
     </main>
   )
 }
