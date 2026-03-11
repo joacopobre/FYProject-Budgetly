@@ -50,7 +50,9 @@ export function RecentTransactions({ transactions }: Props) {
                     {formatMoney(tx.amount)}
                   </span>
                 </div>
-                <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">{tx.date}</p>
+                <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">
+                  {new Date(tx.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                </p>
               </div>
             )
           })}
