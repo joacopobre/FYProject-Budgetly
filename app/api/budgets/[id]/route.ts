@@ -54,16 +54,23 @@ export async function DELETE(_req: Request, { params }: Ctx) {
 
   const { id } = await params
 
-  const deleted = await prisma.budget.deleteMany({
-    where: {
-      id,
-      userId: session.user.id,
-    },
+  const budget = await prisma.budget.findFirst({
+    where: { id, userId: session.user.id },
+    select: { balance: true },
   })
 
-  if (deleted.count === 0) {
+  if (!budget) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
+
+  if (budget.balance !== 0) {
+    return NextResponse.json(
+      { error: 'Budget balance must be zero before deleting. Please withdraw all funds first.' },
+      { status: 400 },
+    )
+  }
+
+  await prisma.budget.delete({ where: { id } })
 
   return NextResponse.json({ success: true })
 }
