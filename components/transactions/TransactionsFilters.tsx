@@ -54,81 +54,67 @@ export function TransactionsFilters({
   }, [isMonthMenuOpen, isFilterTypeMenuOpen, setIsFilterTypeMenuOpen, setIsMonthMenuOpen])
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-4 shadow-sm md:flex-row md:items-center md:justify-between md:gap-4">
-      <div className="flex w-full flex-col gap-3 md:flex-row md:items-center md:gap-3">
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={e => {
-            setSearchTerm(e.currentTarget.value)
-          }}
-          placeholder="Search transactions..."
-          className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800 transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
-        />
-        <div className="relative w-full md:w-44" ref={monthMenuRef}>
-          <button
-            type="button"
-            onClick={() => setIsMonthMenuOpen(prev => !prev)}
-            className="flex w-full items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-800 transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
-          >
-            {filterMonth}
-            <span className="text-xs text-gray-500">▼</span>
-          </button>
-          {isMonthMenuOpen && (
-            <div className="absolute top-full right-0 left-0 z-20 mt-1 w-full rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5">
-              {monthOptions.map(option => (
-                <button
-                  key={option}
-                  type="button"
-                  className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition hover:bg-gray-100 ${
-                    option === filterMonth
-                      ? 'font-semibold text-emerald-600'
-                      : 'text-gray-700'
-                  }`}
-                  onClick={() => {
-                    setFilterMonth(option)
-                    setIsMonthMenuOpen(false)
-                  }}
-                >
-                  {option}
-                  {option === filterMonth && <span className="text-emerald-600">✓</span>}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-        <div className="relative w-full md:w-32" ref={filterTypeMenuRef}>
-          <button
-            type="button"
-            onClick={() => setIsFilterTypeMenuOpen(prev => !prev)}
-            className="flex w-full items-center justify-between rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-800 transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
-          >
-            {filterType}
-            <span className="text-xs text-gray-500">▼</span>
-          </button>
-          {isFilterTypeMenuOpen && (
-            <div className="absolute top-full right-0 left-0 z-20 mt-1 w-full rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5">
-              {typeOptions.map(option => (
-                <button
-                  key={option}
-                  type="button"
-                  className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition hover:bg-gray-100 ${
-                    option === filterType
-                      ? 'font-semibold text-emerald-600'
-                      : 'text-gray-700'
-                  }`}
-                  onClick={() => {
-                    setFilterType(option)
-                    setIsFilterTypeMenuOpen(false)
-                  }}
-                >
-                  {option}
-                  {option === filterType && <span className="text-emerald-600">✓</span>}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+    <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-[0_2px_8px_rgba(15,23,42,0.05)] dark:border-white/8 dark:bg-white/6 dark:backdrop-blur-md md:flex-row md:items-center md:gap-3">
+      <input
+        type="text"
+        value={searchTerm}
+        onChange={e => setSearchTerm(e.currentTarget.value)}
+        placeholder="Search transactions..."
+        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800 transition outline-none focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-100 dark:border-white/10 dark:bg-white/8 dark:text-slate-200 dark:placeholder-slate-500 dark:focus:bg-white/12"
+      />
+      <div className="relative w-full md:w-44" ref={monthMenuRef}>
+        <button
+          type="button"
+          onClick={() => setIsMonthMenuOpen(prev => !prev)}
+          className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-white dark:border-white/10 dark:bg-white/8 dark:text-slate-300 dark:hover:bg-white/12"
+        >
+          {filterMonth}
+          <span className="text-slate-400">▾</span>
+        </button>
+        {isMonthMenuOpen && (
+          <div className="absolute top-full right-0 left-0 z-20 mt-1 w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.1)] dark:border-white/10 dark:bg-[#0d2418]">
+            {monthOptions.map(option => (
+              <button
+                key={option}
+                type="button"
+                className={`flex w-full items-center justify-between px-3 py-2.5 text-left text-sm transition hover:bg-slate-50 dark:hover:bg-white/8 ${
+                  option === filterMonth ? 'font-semibold text-emerald-600 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-300'
+                }`}
+                onClick={() => { setFilterMonth(option); setIsMonthMenuOpen(false) }}
+              >
+                {option}
+                {option === filterMonth && <span className="text-emerald-500">✓</span>}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      <div className="relative w-full md:w-36" ref={filterTypeMenuRef}>
+        <button
+          type="button"
+          onClick={() => setIsFilterTypeMenuOpen(prev => !prev)}
+          className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-white dark:border-white/10 dark:bg-white/8 dark:text-slate-300 dark:hover:bg-white/12"
+        >
+          {filterType}
+          <span className="text-slate-400">▾</span>
+        </button>
+        {isFilterTypeMenuOpen && (
+          <div className="absolute top-full right-0 left-0 z-20 mt-1 w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.1)] dark:border-white/10 dark:bg-[#0d2418]">
+            {typeOptions.map(option => (
+              <button
+                key={option}
+                type="button"
+                className={`flex w-full items-center justify-between px-3 py-2.5 text-left text-sm transition hover:bg-slate-50 ${
+                  option === filterType ? 'font-semibold text-emerald-600' : 'text-slate-700'
+                }`}
+                onClick={() => { setFilterType(option); setIsFilterTypeMenuOpen(false) }}
+              >
+                {option}
+                {option === filterType && <span className="text-emerald-500">✓</span>}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

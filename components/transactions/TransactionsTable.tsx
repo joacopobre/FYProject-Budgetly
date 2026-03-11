@@ -18,10 +18,10 @@ export function TransactionsTable({
   getSourceLabel,
 }: Props) {
   return (
-    <div className="hidden overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm md:block">
+    <div className="hidden overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_4px_14px_rgba(15,23,42,0.06)] dark:border-white/8 dark:bg-white/6 dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)] dark:backdrop-blur-md md:block">
       <div className="max-h-[50vh] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:none">
-        <table className="min-w-full text-sm text-gray-700">
-          <thead className="bg-gray-50 text-xs tracking-wide text-gray-500 uppercase">
+        <table className="min-w-full text-sm text-slate-700">
+          <thead className="border-b border-slate-100 bg-slate-50 text-xs tracking-wider text-slate-500 uppercase dark:border-white/8 dark:bg-white/5 dark:text-slate-400">
             <tr>
               <th className="px-4 py-3 text-left">Date</th>
               <th className="px-4 py-3 text-left">Description</th>
@@ -46,19 +46,19 @@ export function TransactionsTable({
                 Transport: 'bg-cyan-500',
                 Shopping: 'bg-pink-500',
               }
-              const categoryDot = categoryColors[tx.category] ?? 'bg-gray-400'
+              const categoryDot = categoryColors[tx.category] ?? 'bg-slate-400'
               return (
-                <tr key={tx.id} className="border-t border-gray-100">
-                  <td className="px-4 py-3">{new Date(tx.date).toISOString().slice(0, 10)}</td>
-                  <td className="px-4 py-3">{tx.description}</td>
+                <tr key={tx.id} className="border-t border-slate-100 transition hover:bg-slate-50/60 dark:border-white/6 dark:hover:bg-white/4">
+                  <td className="px-4 py-3 text-slate-500 dark:text-slate-400">{new Date(tx.date).toISOString().slice(0, 10)}</td>
+                  <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-100">{tx.description}</td>
                   <td className="px-4 py-3">
-                    <span className="inline-flex items-center gap-2 rounded-full bg-gray-50 px-3 py-1 text-xs font-medium text-gray-700">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 dark:bg-white/10 dark:text-slate-300">
                       <span className={`h-2 w-2 rounded-full ${categoryDot}`} />
                       {tx.category}
                     </span>
                   </td>
-                  <td className="px-4 py-3">{tx.type}</td>
-                  <td className="px-4 py-3">{getSourceLabel(tx)}</td>
+                  <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{tx.type}</td>
+                  <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{getSourceLabel(tx)}</td>
                   <td className={`px-4 py-3 text-right font-semibold ${amountColor}`}>
                     {formatMoney(tx.amount)}
                   </td>
@@ -66,7 +66,7 @@ export function TransactionsTable({
                     <div className="flex justify-end gap-2">
                       <button
                         type="button"
-                        className="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 transition hover:bg-gray-100"
+                        className="rounded-lg border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100"
                         onClick={() => onEdit(tx)}
                       >
                         Edit

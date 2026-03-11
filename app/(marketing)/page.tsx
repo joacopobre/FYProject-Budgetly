@@ -19,45 +19,69 @@ export default function Home() {
       title: 'Automatic expense tracking',
       description:
         'Link your accounts and organize spending into categories without manual work.',
+      iconBg: 'bg-emerald-50',
+      iconColor: 'text-emerald-600',
+      accentBar: 'bg-emerald-500',
     },
     {
       icon: ChartNoAxesCombined,
       title: 'Monthly insights that matter',
       description:
         'See where your money goes each month with clear trends and practical summaries.',
+      iconBg: 'bg-teal-50',
+      iconColor: 'text-teal-600',
+      accentBar: 'bg-teal-500',
     },
     {
       icon: PiggyBank,
       title: 'Budgets that stay realistic',
       description:
         'Set spending limits by category and track progress in real time as you move through the month.',
+      iconBg: 'bg-cyan-50',
+      iconColor: 'text-cyan-600',
+      accentBar: 'bg-cyan-500',
     },
     {
       icon: ShieldCheck,
       title: 'Private and secure by default',
       description:
         'Your financial data is protected with modern security practices and encrypted storage.',
+      iconBg: 'bg-green-50',
+      iconColor: 'text-green-600',
+      accentBar: 'bg-green-500',
     },
   ]
 
   const testimonials = [
     {
       name: 'Maya Thompson',
+      initials: 'MT',
       role: 'Freelance Designer',
       quote:
         'Budgetly helped me see exactly where my money was leaking each month. I finally have a budget I can actually follow.',
+      accentBar: 'bg-emerald-500',
+      avatarBg: 'bg-emerald-100',
+      avatarText: 'text-emerald-700',
     },
     {
       name: 'Daniel Chen',
+      initials: 'DC',
       role: 'Software Engineer',
       quote:
         'The dashboard is simple, fast, and useful. I check it once a day and instantly know if I am on track.',
+      accentBar: 'bg-teal-500',
+      avatarBg: 'bg-teal-100',
+      avatarText: 'text-teal-700',
     },
     {
       name: 'Sofia Martinez',
+      initials: 'SM',
       role: 'Small Business Owner',
       quote:
         'I needed a finance tool that was clear and not overwhelming. Budgetly gives me confidence in every spending decision.',
+      accentBar: 'bg-cyan-500',
+      avatarBg: 'bg-cyan-100',
+      avatarText: 'text-cyan-700',
     },
   ]
 
@@ -69,8 +93,11 @@ export default function Home() {
 
       <section className="relative overflow-hidden bg-gradient-to-b from-[#06120f] via-[#0a1d17] to-[#0d241c]">
         <div className="pointer-events-none absolute inset-0" aria-hidden>
+          <div className="hero-dot-grid" />
           <div className="hero-aurora hero-aurora-one" />
           <div className="hero-aurora hero-aurora-two" />
+          <div className="hero-aurora hero-aurora-three" />
+          <div className="hero-light-sweep" />
           <div className="hero-horizon" />
         </div>
 
@@ -132,8 +159,9 @@ export default function Home() {
                 animate="visible"
                 variants={riseIn}
                 transition={{ duration: 0.6, delay: 0.28, ease: 'easeOut' }}
-                className="hero-card-float hidden rounded-lg border border-emerald-100/15 bg-white/92 p-4 text-left shadow-[0_10px_30px_rgba(0,0,0,0.22)] lg:block"
+                className="hero-card-float relative hidden overflow-hidden rounded-2xl border border-emerald-100/15 bg-white/92 p-4 text-left shadow-[0_10px_30px_rgba(0,0,0,0.22)] lg:block"
               >
+                <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-emerald-400 to-teal-400" />
                 <p className="text-xs text-slate-500">Monthly Savings</p>
                 <p className="mt-1 text-2xl font-semibold text-slate-900">$860</p>
                 <p className="mt-2 text-sm text-emerald-700">+18% vs last month</p>
@@ -177,8 +205,9 @@ export default function Home() {
                 animate="visible"
                 variants={riseIn}
                 transition={{ duration: 0.62, delay: 0.4, ease: 'easeOut' }}
-                className="hero-card-float hidden rounded-lg border border-emerald-100/15 bg-white/92 p-4 text-left shadow-[0_10px_30px_rgba(0,0,0,0.22)] [animation-delay:1.2s] lg:block"
+                className="hero-card-float relative hidden overflow-hidden rounded-2xl border border-emerald-100/15 bg-white/92 p-4 text-left shadow-[0_10px_30px_rgba(0,0,0,0.22)] [animation-delay:1.2s] lg:block"
               >
+                <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-cyan-400 to-teal-400" />
                 <p className="text-xs text-slate-500">Largest Category</p>
                 <p className="mt-1 text-2xl font-semibold text-slate-900">Groceries</p>
                 <p className="mt-2 text-sm text-slate-600">$420 this month</p>
@@ -191,20 +220,24 @@ export default function Home() {
       <section className="border-y border-slate-200 bg-white">
         <div className="mx-auto grid w-full max-w-6xl gap-8 px-6 py-12 md:grid-cols-2 lg:grid-cols-4">
           <div>
-            <p className="text-2xl font-semibold text-slate-900">50k+</p>
+            <p className="bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-3xl font-bold text-transparent">50k+</p>
             <p className="mt-1 text-sm text-slate-600">Monthly active users</p>
+            <div className="mt-3 h-0.5 w-8 rounded-full bg-emerald-400" />
           </div>
           <div>
-            <p className="text-2xl font-semibold text-slate-900">$120M+</p>
+            <p className="bg-gradient-to-r from-teal-600 to-cyan-500 bg-clip-text text-3xl font-bold text-transparent">$120M+</p>
             <p className="mt-1 text-sm text-slate-600">Tracked each month</p>
+            <div className="mt-3 h-0.5 w-8 rounded-full bg-teal-400" />
           </div>
           <div>
-            <p className="text-2xl font-semibold text-slate-900">4.9/5</p>
+            <p className="bg-gradient-to-r from-cyan-600 to-emerald-500 bg-clip-text text-3xl font-bold text-transparent">4.9/5</p>
             <p className="mt-1 text-sm text-slate-600">Average product rating</p>
+            <div className="mt-3 h-0.5 w-8 rounded-full bg-cyan-400" />
           </div>
           <div>
-            <p className="text-2xl font-semibold text-slate-900">99.9%</p>
+            <p className="bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-3xl font-bold text-transparent">99.9%</p>
             <p className="mt-1 text-sm text-slate-600">Platform availability</p>
+            <div className="mt-3 h-0.5 w-8 rounded-full bg-green-400" />
           </div>
         </div>
       </section>
@@ -230,9 +263,10 @@ export default function Home() {
                 viewport={{ once: true, amount: 0.25 }}
                 transition={{ duration: 0.52, delay: 0.06 * features.indexOf(feature), ease: 'easeOut' }}
                 whileHover={cardHover}
-                className="rounded-xl border border-slate-200 bg-white p-6 shadow-[0_4px_12px_rgba(15,23,42,0.06)] transition-shadow duration-200 hover:shadow-[0_12px_24px_rgba(15,23,42,0.1)]"
+                className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_4px_12px_rgba(15,23,42,0.06)] transition-shadow duration-200 hover:shadow-[0_12px_24px_rgba(15,23,42,0.1)]"
               >
-                <div className="mb-4 inline-flex rounded-md bg-emerald-50 p-2 text-emerald-700">
+                <div className={`absolute top-0 left-0 right-0 h-[3px] ${feature.accentBar}`} />
+                <div className={`mb-4 inline-flex rounded-xl ${feature.iconBg} p-2.5 ${feature.iconColor}`}>
                   <feature.icon className="size-5" aria-hidden />
                 </div>
                 <h3 className="text-base font-semibold text-slate-900">{feature.title}</h3>
@@ -336,12 +370,21 @@ export default function Home() {
                   delay: 0.08 * testimonials.indexOf(item),
                   ease: 'easeOut',
                 }}
-                className="rounded-xl border border-slate-200 bg-white p-7 shadow-[0_6px_18px_rgba(15,23,42,0.07)]"
+                className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-7 shadow-[0_6px_18px_rgba(15,23,42,0.07)]"
               >
+                <div className={`absolute top-0 left-0 right-0 h-[3px] ${item.accentBar}`} />
+                <span className="mb-3 block text-4xl leading-none font-bold text-slate-200 select-none" aria-hidden>
+                  &ldquo;
+                </span>
                 <p className="text-sm leading-7 text-slate-700">{item.quote}</p>
-                <div className="mt-7 border-t border-slate-200 pt-5">
-                  <p className="text-sm font-semibold text-slate-900">{item.name}</p>
-                  <p className="text-xs text-slate-500">{item.role}</p>
+                <div className="mt-6 flex items-center gap-3 border-t border-slate-100 pt-5">
+                  <div className={`flex size-9 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold ${item.avatarBg} ${item.avatarText}`}>
+                    {item.initials}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">{item.name}</p>
+                    <p className="text-xs text-slate-500">{item.role}</p>
+                  </div>
                 </div>
               </motion.article>
             ))}
