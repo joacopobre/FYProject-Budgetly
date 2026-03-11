@@ -1,9 +1,19 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
-import { Menu, X, Wallet, ArrowRight } from 'lucide-react'
+import { Menu, X, ArrowRight } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import { Plus_Jakarta_Sans } from 'next/font/google'
+
+const jakarta = Plus_Jakarta_Sans({ subsets: ['latin'], weight: ['800'], display: 'swap' })
+
+const navLinks = [
+  { href: '#features', label: 'Features' },
+  { href: '#demo', label: 'Demo' },
+  { href: '#about', label: 'About' },
+  { href: '#contact', label: 'Contact' },
+]
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -13,37 +23,25 @@ export default function Header() {
   const router = useRouter()
   const handleClick = () => setIsOpen(prev => !prev)
 
-  // useEffect to change isOpen when window expanded
   useEffect(() => {
     const mq = window.matchMedia('(min-width:768px)')
-
     if (mq.matches) setIsOpen(false)
-
     const onChange = (e: MediaQueryListEvent) => {
       if (e.matches) setIsOpen(false)
     }
-
     mq.addEventListener('change', onChange)
     return () => mq.removeEventListener('change', onChange)
   }, [])
 
-  // useEffect to clsoe mobile menue with esc
   useEffect(() => {
     if (!isOpen) return
-
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setIsOpen(false)
-      }
+      if (e.key === 'Escape') setIsOpen(false)
     }
     window.addEventListener('keydown', onKeyDown)
-
-    return () => {
-      window.removeEventListener('keydown', onKeyDown)
-    }
+    return () => window.removeEventListener('keydown', onKeyDown)
   }, [isOpen])
 
-  // Prevent background scroll while nav bar menu open
   useEffect(() => {
     if (!isOpen) return
     const prev = document.body.style.overflow
@@ -53,7 +51,6 @@ export default function Header() {
     }
   }, [isOpen])
 
-  // Increase nav surface opacity after scroll for readability
   useEffect(() => {
     const onScroll = () => setHasScrolled(window.scrollY > 14)
     onScroll()
@@ -65,181 +62,142 @@ export default function Header() {
     <header>
       <motion.nav
         className="fixed top-0 left-0 z-50 w-full px-4 pt-3 sm:px-6"
-        initial={reduceMotion ? undefined : { opacity: 0, y: -10 }}
+        initial={reduceMotion ? undefined : { opacity: 0, y: -12 }}
         animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
         transition={{ duration: 0.55, ease: 'easeOut' }}
       >
-        <motion.div
-          className={`relative mx-auto max-w-7xl rounded-full px-4 py-1.5 transition-[background-color,border-color,box-shadow,color] duration-200 sm:px-6 ${
+        <div
+          className={`relative mx-auto max-w-7xl rounded-full transition-[background-color,border-color,box-shadow] duration-300 ${
             hasScrolled
-              ? 'border border-slate-200/80 bg-white/78 text-slate-900 shadow-[0_10px_26px_rgba(15,23,42,0.12)] backdrop-blur-xl'
-              : 'border border-white/20 bg-slate-950/45 text-white shadow-[0_12px_28px_rgba(0,0,0,0.35)] backdrop-blur-xl'
+              ? 'border border-emerald-200/50 bg-white/90 shadow-[0_8px_24px_rgba(15,23,42,0.09),inset_0_1px_0_rgba(255,255,255,0.7)] backdrop-blur-xl'
+              : 'border border-white/12 bg-[#061310]/58 shadow-[0_12px_32px_rgba(0,0,0,0.45)] backdrop-blur-xl'
           }`}
-          animate={{
-            opacity: hasScrolled ? 1 : 0.96,
-          }}
-          transition={{ duration: 0.25, ease: 'easeOut' }}
         >
-          <div
-            className={`pointer-events-none absolute inset-px rounded-full border ${
-              hasScrolled ? 'border-white/55' : 'border-white/18'
-            }`}
-            aria-hidden
-          />
-          <div
-            className={`pointer-events-none absolute inset-x-6 top-0 h-px ${
-              hasScrolled ? 'bg-white/70' : 'bg-white/30'
-            }`}
-            aria-hidden
-          />
-          <div className="relative flex items-center justify-between gap-6">
-            {/* logo and name */}
-            <div className="flex w-full items-center justify-between md:w-auto">
-              <a href="/" className="flex flex-1 items-center px-2 py-5">
-                <Wallet color={hasScrolled ? '#0f172a' : '#f8fafc'} />
-              </a>
-            </div>
+          <div className="relative flex items-center justify-between px-5 sm:px-6">
+            {/* Logo */}
+            <a href="/" className="flex flex-shrink-0 items-center py-3.5">
+              <span
+                className={`${jakarta.className} text-xl tracking-tight`}
+                style={
+                  hasScrolled
+                    ? {
+                        background: 'linear-gradient(135deg, #059669 0%, #0d9488 100%)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text',
+                      }
+                    : { color: '#fff' }
+                }
+              >
+                Budgetly
+              </span>
+            </a>
 
-            {/* nav links */}
-            <div
-              id="navigation-menu"
-              className={`hidden items-center justify-center font-medium md:flex md:flex-row md:space-x-8 ${
-                hasScrolled ? 'text-slate-700' : 'text-slate-100/90'
-              }`}
-            >
-              <a
-                href="#features"
-                className={`transition-colors duration-150 ${
-                  hasScrolled ? 'hover:text-slate-900' : 'hover:text-white'
-                }`}
-              >
-                Features
-              </a>
-              <a
-                href="#demo"
-                className={`transition-colors duration-150 ${
-                  hasScrolled ? 'hover:text-slate-900' : 'hover:text-white'
-                }`}
-              >
-                Demo
-              </a>
-              <a
-                href="#about"
-                className={`transition-colors duration-150 ${
-                  hasScrolled ? 'hover:text-slate-900' : 'hover:text-white'
-                }`}
-              >
-                About
-              </a>
-              <a
-                href="#contact"
-                className={`transition-colors duration-150 ${
-                  hasScrolled ? 'hover:text-slate-900' : 'hover:text-white'
-                }`}
-              >
-                Contact
-              </a>
-            </div>
+            {/* Desktop nav links */}
+            <nav className="hidden items-center gap-0.5 md:flex" aria-label="Main navigation">
+              {navLinks.map(link => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors duration-150 ${
+                    hasScrolled
+                      ? 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                      : 'text-slate-200/90 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  {link.label}
+                </a>
+              ))}
+            </nav>
 
-            {/* CTA */}
-            <div className="flex w-1/3 justify-end gap-3 px-2 sm:gap-4 sm:px-4">
+            {/* CTA + hamburger */}
+            <div className="flex flex-shrink-0 items-center gap-1.5 py-2">
               {session?.user ? (
                 <button
                   type="button"
-                  className="inline-flex items-center gap-2 rounded-md bg-black px-5 py-2 text-sm font-medium whitespace-nowrap text-white hover:cursor-pointer"
+                  className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-2 text-sm font-medium whitespace-nowrap text-white shadow-[0_4px_14px_rgba(16,185,129,0.35)] transition-all duration-150 hover:cursor-pointer hover:from-emerald-600 hover:to-teal-600 hover:shadow-[0_4px_18px_rgba(16,185,129,0.5)]"
                   onClick={() => router.push('/dashboard')}
                 >
                   Dashboard
-                  <ArrowRight className="size-4" />
+                  <ArrowRight className="size-3.5" />
                 </button>
               ) : (
                 <>
                   <button
                     type="button"
-                    className="rounded-md bg-[#10b981] px-4 py-2 text-sm font-medium whitespace-nowrap text-white transition-colors duration-150 hover:cursor-pointer hover:bg-[#059669]"
-                    onClick={() => router.push('/signup')}
-                  >
-                    Sign up
-                  </button>
-                  <button
-                    type="button"
-                    className={`hidden rounded-md px-2 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-150 hover:cursor-pointer lg:flex ${
+                    className={`hidden rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-150 hover:cursor-pointer lg:flex ${
                       hasScrolled
-                        ? 'text-slate-700 hover:text-slate-900'
-                        : 'text-slate-100/90 hover:text-white'
+                        ? 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                        : 'text-slate-200 hover:bg-white/10 hover:text-white'
                     }`}
                     onClick={() => router.push('/login')}
                   >
                     Login
                   </button>
+                  <button
+                    type="button"
+                    className="rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-2 text-sm font-medium whitespace-nowrap text-white shadow-[0_4px_14px_rgba(16,185,129,0.35)] transition-all duration-150 hover:cursor-pointer hover:from-emerald-600 hover:to-teal-600 hover:shadow-[0_4px_18px_rgba(16,185,129,0.5)]"
+                    onClick={() => router.push('/signup')}
+                  >
+                    Sign up
+                  </button>
                 </>
               )}
-            </div>
 
-            {/* Hamburguer Menu icon */}
-            <button
-              type="button"
-              className={`flex items-center hover:cursor-pointer md:hidden ${
-                hasScrolled ? 'text-slate-700' : 'text-slate-100'
-              }`}
-              onClick={handleClick}
-              aria-expanded={isOpen}
-              aria-controls="mobile-menu"
-              aria-label={isOpen ? 'Close menu' : 'Open menu'}
-            >
-              {isOpen ? <X /> : <Menu />}
-            </button>
+              {/* Hamburger */}
+              <button
+                type="button"
+                className={`flex size-9 items-center justify-center rounded-full transition-colors duration-150 hover:cursor-pointer md:hidden ${
+                  hasScrolled
+                    ? 'text-slate-700 hover:bg-slate-100'
+                    : 'text-slate-100 hover:bg-white/12'
+                }`}
+                onClick={handleClick}
+                aria-expanded={isOpen}
+                aria-controls="mobile-menu"
+                aria-label={isOpen ? 'Close menu' : 'Open menu'}
+              >
+                {isOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+              </button>
+            </div>
           </div>
 
-          {/* Dropdown */}
+          {/* Mobile menu */}
           {isOpen && (
             <motion.div
               id="mobile-menu"
-              className={`relative z-50 border-t px-4 py-4 md:hidden ${
-                hasScrolled ? 'border-slate-200' : 'border-white/20'
+              className={`border-t px-3 pt-3 pb-4 md:hidden ${
+                hasScrolled ? 'border-slate-200/70' : 'border-white/12'
               }`}
               initial={reduceMotion ? undefined : { opacity: 0, y: -6 }}
               animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
             >
-              <div className="flex flex-col gap-4">
-                <a
-                  href="#features"
-                  onClick={() => setIsOpen(false)}
-                  className={`p-2 ${hasScrolled ? 'text-slate-700' : 'text-slate-100'}`}
-                >
-                  Features
-                </a>
-                <a
-                  href="#demo"
-                  onClick={() => setIsOpen(false)}
-                  className={`p-2 ${hasScrolled ? 'text-slate-700' : 'text-slate-100'}`}
-                >
-                  Demo
-                </a>
-                <a
-                  href="#about"
-                  onClick={() => setIsOpen(false)}
-                  className={`p-2 ${hasScrolled ? 'text-slate-700' : 'text-slate-100'}`}
-                >
-                  About
-                </a>
-                <a
-                  href="#contact"
-                  onClick={() => setIsOpen(false)}
-                  className={`p-2 ${hasScrolled ? 'text-slate-700' : 'text-slate-100'}`}
-                >
-                  Contact
-                </a>
+              <div className="flex flex-col gap-0.5">
+                {navLinks.map(link => (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setIsOpen(false)}
+                    className={`rounded-xl px-3 py-2.5 text-sm font-medium transition-colors duration-150 ${
+                      hasScrolled
+                        ? 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
+                        : 'text-slate-200 hover:bg-white/10 hover:text-white'
+                    }`}
+                  >
+                    {link.label}
+                  </a>
+                ))}
+
                 {!session?.user && (
                   <div
-                    className={`mt-1 grid gap-2 border-t pt-3 ${
-                      hasScrolled ? 'border-slate-200' : 'border-white/20'
+                    className={`mt-2 grid gap-2 border-t pt-3 ${
+                      hasScrolled ? 'border-slate-200' : 'border-white/12'
                     }`}
                   >
                     <button
                       type="button"
-                      className="rounded-md bg-[#10b981] px-4 py-2 text-sm font-medium text-white hover:cursor-pointer"
+                      className="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-2.5 text-sm font-medium text-white shadow-[0_4px_12px_rgba(16,185,129,0.3)] hover:cursor-pointer"
                       onClick={() => {
                         setIsOpen(false)
                         router.push('/signup')
@@ -249,7 +207,11 @@ export default function Header() {
                     </button>
                     <button
                       type="button"
-                      className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:cursor-pointer"
+                      className={`rounded-xl border px-4 py-2.5 text-sm font-medium hover:cursor-pointer ${
+                        hasScrolled
+                          ? 'border-slate-200 text-slate-700 hover:bg-slate-50'
+                          : 'border-white/18 text-slate-200 hover:bg-white/8'
+                      }`}
                       onClick={() => {
                         setIsOpen(false)
                         router.push('/login')
@@ -262,7 +224,7 @@ export default function Header() {
               </div>
             </motion.div>
           )}
-        </motion.div>
+        </div>
       </motion.nav>
     </header>
   )
