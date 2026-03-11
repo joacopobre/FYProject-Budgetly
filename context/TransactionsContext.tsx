@@ -32,15 +32,11 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
 
   // Load transactions from user-scoped localStorage key.
   useEffect(() => {
-    if (!storageKey) {
-      setTransactions([])
-      return
-    }
+    if (!storageKey) return
 
     try {
       const localStorageData = localStorage.getItem(storageKey)
       if (localStorageData) setTransactions(JSON.parse(localStorageData))
-      else setTransactions([])
     } catch {}
   }, [storageKey])
 
