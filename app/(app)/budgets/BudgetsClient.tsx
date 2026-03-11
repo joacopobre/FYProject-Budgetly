@@ -208,10 +208,10 @@ export default function BudgetsClient({ initialBudgets }: Props) {
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-8 px-5 py-10 md:px-8 lg:px-12">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <h1 className="text-4xl font-semibold text-gray-800 md:text-5xl">Budgets</h1>
+        <h1 className="text-4xl font-bold text-slate-900 dark:text-white md:text-5xl">Budgets</h1>
         <button
           type="button"
-          className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
+          className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(16,185,129,0.35)] transition-all hover:from-emerald-600 hover:to-teal-600 hover:shadow-[0_4px_18px_rgba(16,185,129,0.5)]"
           onClick={() => {
             setEditingBudgetId(null)
             setName('')
@@ -257,11 +257,12 @@ export default function BudgetsClient({ initialBudgets }: Props) {
           return (
             <div
               key={budget.id}
-              className="flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white px-5 py-4 shadow-sm"
+              className="relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-[0_4px_14px_rgba(15,23,42,0.06)] dark:border-white/8 dark:bg-white/6 dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)] dark:backdrop-blur-md"
             >
+              <div className={`absolute top-0 left-0 right-0 h-[3px] ${isSave ? 'bg-emerald-500' : 'bg-gradient-to-r from-teal-400 to-cyan-500'}`} />
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-800">{budget.name}</h2>
-                <span className="text-sm font-medium text-gray-500">
+                <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">{budget.name}</h2>
+                <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
                   {rightLabel}{' '}
                   <button type="button" onClick={() => toggleExpandBudget(budget.id)}>
                     {expandedBudgetId === budget.id ? <X /> : <ChevronDown />}
@@ -271,16 +272,16 @@ export default function BudgetsClient({ initialBudgets }: Props) {
 
               {expandedBudgetId === budget.id ? (
                 chartData.length === 0 ? (
-                  <div className="mt-2 rounded-xl bg-gray-50 p-4 text-sm text-gray-500">
+                  <div className="mt-2 rounded-xl bg-slate-50 p-4 text-sm text-slate-500 dark:bg-white/5 dark:text-slate-400">
                     No activity yet — add or withdraw funds to see the trend.
                   </div>
                 ) : (
-                  <div className="mt-2 rounded-xl bg-gray-50 p-4">
+                  <div className="mt-2 rounded-xl bg-slate-50 p-4 dark:bg-white/5">
                     <BudgetLineChart data={chartData} />
                   </div>
                 )
               ) : (
-                <div className="h-2 w-full rounded-full bg-gray-100">
+                <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-white/10">
                   <div
                     className={`h-full rounded-full ${fillClass}`}
                     style={{ width: fillWidth }}
@@ -288,7 +289,7 @@ export default function BudgetsClient({ initialBudgets }: Props) {
                 </div>
               )}
 
-              <div className="flex items-center justify-between text-sm text-gray-600">
+              <div className="flex items-center justify-between text-sm text-slate-600 dark:text-slate-400">
                 <span>{statusLabel}</span>
 
                 <div className="flex items-center gap-2">
@@ -360,12 +361,12 @@ export default function BudgetsClient({ initialBudgets }: Props) {
           onClick={() => setIsModalOpen(false)}
         >
           <div
-            className="flex w-full max-w-lg flex-col gap-6 rounded-2xl border border-gray-200 bg-white p-8 shadow-2xl"
+            className="flex w-full max-w-lg flex-col gap-6 rounded-2xl border border-gray-200 bg-white p-8 shadow-2xl dark:border-white/10 dark:bg-[#0e2318]"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">Add budget</h2>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Add budget</h2>
                 <p className="mt-1 text-sm text-gray-500">
                   Create a new budget with a limit.
                 </p>
@@ -392,7 +393,7 @@ export default function BudgetsClient({ initialBudgets }: Props) {
                     setName(e.currentTarget.value)
                   }}
                   type="text"
-                  className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                  className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-white/10 dark:bg-white/8 dark:text-slate-200"
                   placeholder="e.g. Groceries"
                 />
               </label>
@@ -434,7 +435,7 @@ export default function BudgetsClient({ initialBudgets }: Props) {
                     onChange={e => setLimit(e.currentTarget.value)}
                     type="number"
                     min="0"
-                    className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                    className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-white/10 dark:bg-white/8 dark:text-slate-200"
                     placeholder="0.00"
                   />
                 </label>
@@ -452,7 +453,7 @@ export default function BudgetsClient({ initialBudgets }: Props) {
                     onChange={e => setStartingAmount(e.currentTarget.value)}
                     type="number"
                     min="0"
-                    className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                    className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-white/10 dark:bg-white/8 dark:text-slate-200"
                     placeholder="0.00"
                   />
                 </label>
@@ -469,7 +470,7 @@ export default function BudgetsClient({ initialBudgets }: Props) {
               </button>
               <button
                 type="button"
-                className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
+                className="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(16,185,129,0.3)] transition hover:from-emerald-600 hover:to-teal-600"
                 onClick={handleSave}
               >
                 Save
@@ -485,7 +486,7 @@ export default function BudgetsClient({ initialBudgets }: Props) {
           onClick={() => closeFundModal()}
         >
           <div
-            className="flex w-full max-w-lg flex-col gap-6 rounded-2xl border border-gray-200 bg-white p-8 shadow-2xl"
+            className="flex w-full max-w-lg flex-col gap-6 rounded-2xl border border-gray-200 bg-white p-8 shadow-2xl dark:border-white/10 dark:bg-[#0e2318]"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-3">
@@ -529,7 +530,7 @@ export default function BudgetsClient({ initialBudgets }: Props) {
                 <input
                   id="fund"
                   type="number"
-                  className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                  className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-white/10 dark:bg-white/8 dark:text-slate-200"
                   placeholder="e.g. 100"
                   value={fundAmount}
                   onChange={e => {
@@ -568,7 +569,7 @@ export default function BudgetsClient({ initialBudgets }: Props) {
                     <input
                       id="note"
                       type="text"
-                      className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+                      className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-white/10 dark:bg-white/8 dark:text-slate-200"
                       placeholder="e.g. rent"
                       value={fundNote}
                       onChange={e => {
@@ -582,7 +583,7 @@ export default function BudgetsClient({ initialBudgets }: Props) {
               <div className="flex flex-col gap-3 sm:flex-row sm:justify-end sm:gap-2">
                 <button
                   type="button"
-                  className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
+                  className="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(16,185,129,0.3)] transition hover:from-emerald-600 hover:to-teal-600"
                   onClick={() => {
                     handleConfirmFunds(activeBudgetId, fundAmount, fundMode)
                   }}
