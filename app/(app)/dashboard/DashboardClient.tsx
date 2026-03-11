@@ -25,14 +25,15 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
   const txContext = useContext(TransactionsContext)
   if (!txContext) throw new Error('TransactionsContext missing')
 
-  const { transactions, setTransactions } = txContext
+  const { setTransactions } = txContext
 
   const [isOpen, setIsOpen] = useState(false)
   const trendMenuRef = useRef<HTMLDivElement>(null)
   const budgetsContext = useContext(BudgetsContext)
   if (!budgetsContext) throw new Error('BudgetsContext missing')
 
-  const { budgets, setBudgets } = budgetsContext
+  const { setBudgets } = budgetsContext
+
   useEffect(() => {
     setBudgets(initialBudgets)
   }, [initialBudgets, setBudgets])
@@ -41,12 +42,12 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
     setTransactions(initialTransactions)
   }, [initialTransactions, setTransactions])
 
-  const filtered = filterByDateRange(transactions, trendFilter)
+  const filtered = filterByDateRange(initialTransactions, trendFilter)
   const trendSeries = buildTrendSeries(filtered)
   const stats = calculateDashboardStats(filtered)
 
-  const glanceStats = calculateDashboardStats(transactions)
-  const balanceSeries = buildBalanceSeries(transactions)
+  const glanceStats = calculateDashboardStats(initialTransactions)
+  const balanceSeries = buildBalanceSeries(initialTransactions)
 
   const handleClick = () => setIsOpen(prev => !prev)
 
@@ -173,7 +174,7 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
           <div className="rounded-2xl border border-slate-200 bg-white px-5 py-6 shadow-[0_4px_14px_rgba(15,23,42,0.06)] dark:border-white/8 dark:bg-white/6 dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)] dark:backdrop-blur-md md:px-6 md:py-7 lg:px-8 lg:py-8">
             <div className="space-y-6 md:grid md:grid-cols-[1.2fr_0.8fr] md:items-start md:gap-6 md:space-y-0 lg:gap-8">
               <TrendChart data={trendSeries} />
-              <RecentTransactions transactions={transactions} />
+              <RecentTransactions transactions={initialTransactions} />
             </div>
           </div>
         </section>
@@ -190,8 +191,8 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
             </Link>
           </div>
           <div className="grid grid-cols-1 gap-4">
-            {budgets.length > 0 ? (
-              budgets.slice(0, 4).map(budget => {
+            {initialBudgets.length > 0 ? (
+              initialBudgets.slice(0, 4).map(budget => {
                 const isSave = budget.kind === 'SAVE'
                 const current = budget.balance
                 const target = budget.target ?? 0
