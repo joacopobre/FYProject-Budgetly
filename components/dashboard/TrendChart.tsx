@@ -8,10 +8,12 @@ import {
   ChartLegend,
   ChartLegendContent,
 } from '@/components/ui/chart'
+import { useTheme } from '@/context/ThemeContext'
 
 type Props = {
   data: TrendPoint[]
 }
+
 const chartConfig = {
   income: {
     label: 'Income',
@@ -24,23 +26,57 @@ const chartConfig = {
 }
 
 export function TrendChart({ data }: Props) {
-  if (data.length === 0) return <p className="text-sm text-gray-500">No data for this period</p>
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
+
+  const gridStroke = isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0'
+  const tickFill = isDark ? '#64748b' : '#64748b'
+
+  if (data.length === 0)
+    return <p className="text-sm text-gray-500 dark:text-slate-500">No data for this period</p>
+
   return (
     <div className="h-64 w-full">
       <ChartContainer className="h-full w-full" config={chartConfig}>
         <BarChart data={data} barGap={6}>
-          <CartesianGrid vertical={false} stroke="#e2e8f0" strokeDasharray="3 3" />
+          <CartesianGrid vertical={false} stroke={gridStroke} strokeDasharray="3 3" />
           <XAxis
             dataKey="label"
             axisLine={false}
             tickLine={false}
-            tick={{ fill: '#64748b', fontSize: 12 }}
+            tick={{ fill: tickFill, fontSize: 12 }}
           />
           <YAxis hide />
-          <ChartTooltip content={<ChartTooltipContent />} />
-          <ChartLegend content={<ChartLegendContent />} />
-          <Bar dataKey="income" fill="var(--color-income)" radius={[6, 6, 2, 2]} />
-          <Bar dataKey="expenses" fill="var(--color-expenses)" radius={[6, 6, 2, 2]} />
+          <ChartTooltip
+            content={
+              <ChartTooltipContent
+                className={
+                  isDark
+                    ? '!bg-[#0e2318] !border-white/10 !text-slate-200 [&_.text-muted-foreground]:!text-slate-400 [&_.text-foreground]:!text-white'
+                    : ''
+                }
+              />
+            }
+          />
+          <ChartLegend
+            content={
+              <ChartLegendContent
+                className={isDark ? 'text-slate-300 [&>*]:text-slate-300' : ''}
+              />
+            }
+          />
+          <Bar
+            dataKey="income"
+            fill="var(--color-income)"
+            radius={[6, 6, 2, 2]}
+            activeBar={{ fill: isDark ? '#34d399' : '#059669' }}
+          />
+          <Bar
+            dataKey="expenses"
+            fill="var(--color-expenses)"
+            radius={[6, 6, 2, 2]}
+            activeBar={{ fill: isDark ? '#fca5a5' : '#dc2626' }}
+          />
         </BarChart>
       </ChartContainer>
     </div>

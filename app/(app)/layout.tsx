@@ -1,16 +1,16 @@
-import AppNav from '@/components/AppNav'
+import AppShell from '@/components/AppShell'
 import { BudgetsProvider } from '@/context/BudgetsContext'
 import { TransactionsProvider } from '@/context/TransactionsContext'
+import { ThemeProvider } from '@/context/ThemeContext'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <TransactionsProvider>
-      <BudgetsProvider>
-        <div id="wrapper" className="bg-gray-200 text-black">
-          <AppNav />
-          <main className="bg-gray-200 pt-24">{children}</main>
-        </div>
-      </BudgetsProvider>
-    </TransactionsProvider>
+    <ThemeProvider>
+      <TransactionsProvider>
+        <BudgetsProvider>
+          <AppShell>{children}</AppShell>
+        </BudgetsProvider>
+      </TransactionsProvider>
+    </ThemeProvider>
   )
 }
