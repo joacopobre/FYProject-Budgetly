@@ -1,5 +1,5 @@
 'use client'
-import { XAxis, CartesianGrid, LineChart, Line, AreaChart, Area } from 'recharts'
+import { XAxis, CartesianGrid, AreaChart, Area } from 'recharts'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 
 import type { BalancePoint } from '@/lib/transactions/buildBalanceSeries'
@@ -18,16 +18,21 @@ export function BalanceSparkline({ data }: Props) {
     <div className="h-24 w-full">
       <ChartContainer config={chartConfig} className="h-full w-full">
         <AreaChart data={data}>
-          <CartesianGrid vertical={false} strokeOpacity={0.2} />
+          <defs>
+            <linearGradient id="balanceFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="var(--color-balance)" stopOpacity={0.22} />
+              <stop offset="95%" stopColor="var(--color-balance)" stopOpacity={0.03} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid vertical={false} stroke="#e2e8f0" strokeDasharray="3 3" />
           <XAxis dataKey="label" hide />
           <ChartTooltip content={<ChartTooltipContent />} />
           <Area
             type="monotone"
             dataKey="balance"
             stroke="var(--color-balance)"
-            fill="var(--color-balance)"
-            fillOpacity={0.15}
-            strokeWidth={2.5}
+            fill="url(#balanceFill)"
+            strokeWidth={2.25}
             dot={false}
           />
         </AreaChart>
