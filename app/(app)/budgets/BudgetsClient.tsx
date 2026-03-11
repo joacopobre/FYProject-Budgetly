@@ -50,12 +50,19 @@ export default function BudgetsClient({ initialBudgets }: Props) {
     setExpandedBudgetId(prev => (prev === budgetId ? null : budgetId))
   }
 
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+
   const handleDelete = async (id: string) => {
+    setDeleteError(null)
     const res = await fetch(`/api/budgets/${id}`, {
       method: 'DELETE',
     })
 
-    if (!res.ok) return
+    if (!res.ok) {
+      const data = await res.json()
+      setDeleteError(data.error ?? 'Failed to delete budget.')
+      return
+    }
 
     setBudgets(prev => prev.filter(budget => budget.id !== id))
   }
@@ -198,6 +205,12 @@ export default function BudgetsClient({ initialBudgets }: Props) {
           Add budget
         </button>
       </div>
+
+      {deleteError && (
+        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-400">
+          {deleteError}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2 lg:grid-cols-3">
         {budgets.map(budget => {
