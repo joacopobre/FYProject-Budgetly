@@ -14,13 +14,15 @@ export default async function TransactionsPage() {
 
   const initialTransactions: Transaction[] = rows.map(tx => ({
     id: tx.id,
-    date: tx.date.toISOString(), // prisma Date -> string
+    date: tx.date.toISOString(),
     description: tx.description,
     category: tx.category,
-    type: tx.type, // should match your union ('Income'|'Expense'|'Transfer')
+    type: tx.type,
     amount: tx.amount,
-    source: tx.source, // 'ACCOUNT'|'BUDGET'
+    source: tx.source,
     budgetId: tx.budgetId ?? null,
+    recurrence: tx.recurrence,
+    nextDue: tx.nextDue ? tx.nextDue.toISOString() : null,
   }))
 
   return <TransactionsClient initialTransactions={initialTransactions}/>

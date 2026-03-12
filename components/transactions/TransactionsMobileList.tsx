@@ -35,7 +35,14 @@ export function TransactionsMobileList({
                 {tx.type}
               </span>
             </div>
-            <div className="text-base font-semibold text-slate-800 dark:text-slate-100">{tx.description}</div>
+            <div className="flex items-center gap-2">
+              <span className="text-base font-semibold text-slate-800 dark:text-slate-100">{tx.description}</span>
+              {tx.recurrence !== 'NONE' && (
+                <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400">
+                  ↻ {tx.recurrence.charAt(0) + tx.recurrence.slice(1).toLowerCase()}
+                </span>
+              )}
+            </div>
             <div className="flex items-center justify-between text-sm text-slate-600 dark:text-slate-400">
               <span>{tx.category}</span>
               <span className={`font-semibold ${amountColor}`}>{formatMoney(tx.amount)}</span>
