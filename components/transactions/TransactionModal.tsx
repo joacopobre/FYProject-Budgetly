@@ -3,6 +3,7 @@
 import { useContext, useEffect, useRef, useState } from 'react'
 import type { TxSource, TxType } from '@/types/transactions'
 import { BudgetsContext } from '@/context/BudgetsContext'
+import { DatePicker } from '@/components/ui/DatePicker'
 
 type Props = {
   isOpen: boolean
@@ -120,19 +121,10 @@ export function TransactionModal({
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <label
-            className="flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-gray-300"
-            htmlFor="date"
-          >
+          <div className="flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
             Date
-            <input
-              id="date"
-              type="date"
-              value={date}
-              onChange={e => setDate(e.target.value)}
-              className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-white/10 dark:bg-white/8 dark:text-slate-200"
-            />
-          </label>
+            <DatePicker value={date} onChange={setDate} />
+          </div>
           <div
             className="relative flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-gray-300"
             ref={typeMenuRef}
