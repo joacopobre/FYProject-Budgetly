@@ -11,6 +11,8 @@ import { TrendChart } from '@/components/dashboard/TrendChart'
 import { RecentTransactions } from '@/components/dashboard/RecentTransactions'
 import { buildBalanceSeries } from '@/lib/transactions/buildBalanceSeries'
 import { BalanceSparkline } from '@/components/dashboard/BalanceSparkline'
+import { buildNetWorthSeries } from '@/lib/transactions/buildNetWorthSeries'
+import { NetWorthChart } from '@/components/dashboard/NetWorthChart'
 import { Transaction } from '@/types/transactions'
 import { TransactionsContext } from '@/context/TransactionsContext'
 import { Budget } from '@/types/budgets'
@@ -48,6 +50,7 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
 
   const glanceStats = calculateDashboardStats(initialTransactions)
   const balanceSeries = buildBalanceSeries(initialTransactions)
+  const netWorthSeries = buildNetWorthSeries(initialTransactions, trendFilter)
 
   const handleClick = () => setIsOpen(prev => !prev)
 
@@ -244,6 +247,18 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
           </div>
         </section>
       </div>
+
+      <section className="flex flex-col gap-3">
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100 md:text-3xl">
+            Net Worth
+          </h2>
+          <span className="text-sm text-slate-400 dark:text-slate-500">{trendFilter}</span>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white px-5 py-6 shadow-[0_4px_14px_rgba(15,23,42,0.06)] dark:border-white/8 dark:bg-white/6 dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)] dark:backdrop-blur-md md:px-6 md:py-7 lg:px-8 lg:py-8">
+          <NetWorthChart data={netWorthSeries} />
+        </div>
+      </section>
     </div>
   )
 }
