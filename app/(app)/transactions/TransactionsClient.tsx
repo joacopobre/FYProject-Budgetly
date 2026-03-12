@@ -52,6 +52,14 @@ export default function TransactionsClient({ initialTransactions }: Props) {
     setTransactions(initialTransactions)
   }, [initialTransactions, setTransactions])
 
+  const usedCategories = useMemo(
+    () =>
+      Array.from(new Set(transactions.map(tx => tx.category).filter(Boolean))).sort(
+        (a, b) => a.localeCompare(b),
+      ),
+    [transactions],
+  )
+
   const filteredTransactions = useMemo(
     () =>
       filterTransactions({
@@ -247,6 +255,7 @@ export default function TransactionsClient({ initialTransactions }: Props) {
         setDescription={setDescription}
         category={category}
         setCategory={setCategory}
+        categories={usedCategories}
         type={type}
         setType={setType}
         amount={amount}
