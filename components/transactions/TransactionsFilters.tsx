@@ -69,7 +69,7 @@ export function TransactionsFilters({
           className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-white dark:border-white/10 dark:bg-white/8 dark:text-slate-300 dark:hover:bg-white/12"
         >
           {filterMonth}
-          <span className="text-slate-400">▾</span>
+          <span className="text-slate-400 dark:text-slate-500">▾</span>
         </button>
         {isMonthMenuOpen && (
           <div className="absolute top-full right-0 left-0 z-20 mt-1 w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.1)] dark:border-white/10 dark:bg-[#0d2418]">
@@ -96,7 +96,7 @@ export function TransactionsFilters({
           className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-white dark:border-white/10 dark:bg-white/8 dark:text-slate-300 dark:hover:bg-white/12"
         >
           {filterType}
-          <span className="text-slate-400">▾</span>
+          <span className="text-slate-400 dark:text-slate-500">▾</span>
         </button>
         {isFilterTypeMenuOpen && (
           <div className="absolute top-full right-0 left-0 z-20 mt-1 w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.1)] dark:border-white/10 dark:bg-[#0d2418]">
@@ -104,8 +104,8 @@ export function TransactionsFilters({
               <button
                 key={option}
                 type="button"
-                className={`flex w-full items-center justify-between px-3 py-2.5 text-left text-sm transition hover:bg-slate-50 ${
-                  option === filterType ? 'font-semibold text-emerald-600' : 'text-slate-700'
+                className={`flex w-full items-center justify-between px-3 py-2.5 text-left text-sm transition hover:bg-slate-50 dark:hover:bg-white/8 ${
+                  option === filterType ? 'font-semibold text-emerald-600 dark:text-emerald-400' : 'text-slate-700 dark:text-slate-300'
                 }`}
                 onClick={() => { setFilterType(option); setIsFilterTypeMenuOpen(false) }}
               >
