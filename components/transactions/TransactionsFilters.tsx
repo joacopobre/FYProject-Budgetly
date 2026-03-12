@@ -17,6 +17,8 @@ type Props = {
   isFilterTypeMenuOpen: boolean
   monthOptions: readonly MonthFilter[]
   typeOptions: readonly TypeFilter[]
+  filterRecurring: boolean
+  setFilterRecurring: (value: boolean) => void
 }
 
 export function TransactionsFilters({
@@ -32,6 +34,8 @@ export function TransactionsFilters({
   setIsFilterTypeMenuOpen,
   monthOptions,
   typeOptions,
+  filterRecurring,
+  setFilterRecurring,
 }: Props) {
   const monthMenuRef = useRef<HTMLDivElement>(null)
   const filterTypeMenuRef = useRef<HTMLDivElement>(null)
@@ -116,6 +120,18 @@ export function TransactionsFilters({
           </div>
         )}
       </div>
+      <button
+        type="button"
+        onClick={() => setFilterRecurring(!filterRecurring)}
+        className={`flex w-full shrink-0 items-center gap-2 rounded-xl border px-3 py-2 text-sm font-medium transition md:w-auto ${
+          filterRecurring
+            ? 'border-emerald-400 bg-emerald-50 text-emerald-700 dark:border-emerald-500/50 dark:bg-emerald-500/15 dark:text-emerald-400'
+            : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-white dark:border-white/10 dark:bg-white/8 dark:text-slate-300 dark:hover:bg-white/12'
+        }`}
+      >
+        <span>↻</span>
+        Recurring
+      </button>
     </div>
   )
 }
