@@ -281,7 +281,7 @@ export default function BudgetsClient({ initialBudgets }: Props) {
                   {/* Add funds */}
                   <button
                     type="button"
-                    className="rounded-lg border border-emerald-200 px-3 py-1 text-xs font-medium text-emerald-600 transition hover:bg-emerald-50"
+                    className="rounded-lg border border-emerald-200 px-3 py-1 text-xs font-medium text-emerald-600 transition hover:bg-emerald-50 dark:border-emerald-500/30 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
                     onClick={() => {
                       setFundMode('ADD')
                       setActiveBudgetId(budget.id)
@@ -297,7 +297,7 @@ export default function BudgetsClient({ initialBudgets }: Props) {
                   {/* Withdraw funds */}
                   <button
                     type="button"
-                    className="rounded-lg border border-amber-200 px-3 py-1 text-xs font-medium text-amber-600 transition hover:bg-amber-50"
+                    className="rounded-lg border border-amber-200 px-3 py-1 text-xs font-medium text-amber-600 transition hover:bg-amber-50 dark:border-amber-500/30 dark:text-amber-400 dark:hover:bg-amber-500/10"
                     onClick={() => {
                       setFundMode('WITHDRAW')
                       setActiveBudgetId(budget.id)
@@ -313,7 +313,7 @@ export default function BudgetsClient({ initialBudgets }: Props) {
                   {/* Edit */}
                   <button
                     type="button"
-                    className="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 transition hover:bg-gray-100"
+                    className="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 transition hover:bg-gray-100 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/10"
                     onClick={() => {
                       setEditingBudgetId(budget.id)
                       setName(budget.name)
@@ -328,7 +328,7 @@ export default function BudgetsClient({ initialBudgets }: Props) {
                   {/* Delete */}
                   <button
                     type="button"
-                    className="rounded-lg border border-rose-200 px-3 py-1 text-xs font-medium text-rose-600 transition hover:bg-rose-50"
+                    className="rounded-lg border border-rose-200 px-3 py-1 text-xs font-medium text-rose-600 transition hover:bg-rose-50 dark:border-rose-500/30 dark:text-rose-400 dark:hover:bg-rose-500/10"
                     onClick={() => handleDelete(budget.id)}
                   >
                     Delete
