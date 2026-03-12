@@ -14,7 +14,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { name, kind, target } = await req.json()
+  const { name, kind, target, rollover } = await req.json()
 
   if (!name || typeof name !== 'string' || name.trim() === '') {
     return NextResponse.json({ error: 'Name is required' }, { status: 400 })
@@ -35,6 +35,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
         name: name.trim(),
         kind,
         target: target ?? null,
+        ...(kind === 'SPEND' && typeof rollover === 'boolean' ? { rollover } : {}),
       },
       include: { events: true },
     })
