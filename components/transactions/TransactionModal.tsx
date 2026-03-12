@@ -225,7 +225,9 @@ export function TransactionModal({
               className="flex items-center justify-between rounded-xl border border-gray-200 px-3 py-2 text-left text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-white/10 dark:bg-white/8 dark:text-slate-200"
             >
               <span className={category ? '' : 'text-gray-400 dark:text-gray-500'}>
-                {category || 'e.g. Food'}
+                {category
+                  ? category.charAt(0).toUpperCase() + category.slice(1).toLowerCase()
+                  : 'e.g. Food'}
               </span>
               <span className="text-xs text-gray-500 dark:text-gray-400">▼</span>
             </button>
@@ -260,7 +262,7 @@ export function TransactionModal({
                           setCategorySearch('')
                         }}
                       >
-                        {c}
+                        {c.charAt(0).toUpperCase() + c.slice(1).toLowerCase()}
                         {c === category && (
                           <span className="text-emerald-600 dark:text-emerald-400">✓</span>
                         )}

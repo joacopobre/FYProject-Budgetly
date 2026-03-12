@@ -93,6 +93,18 @@ model Transaction {
   @@index([userId])
 }
 
+model CategoryLimit {
+  id           String   @id @default(cuid())
+  category     String
+  monthlyLimit Float
+
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, category])
+  @@index([userId])
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -101,11 +113,12 @@ model User {
   emailVerified DateTime?
   image         String?
 
-  accounts      Account[]
-  sessions      Session[]
+  accounts        Account[]
+  sessions        Session[]
 
-  budgets       Budget[]
-  transactions  Transaction[]
+  budgets         Budget[]
+  transactions    Transaction[]
+  categoryLimits  CategoryLimit[]
 }
 
 model Account {
