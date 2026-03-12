@@ -9,6 +9,7 @@ export function mapBudgetsToUi(budgets: any[]): UiBudget[] {
     kind: b.kind,
     balance: b.balance,
     target: b.target ?? undefined,
+    rollover: b.rollover ?? false,
     createdAt:
       b.createdAt instanceof Date ? b.createdAt.toISOString() : String(b.createdAt),
     events: (b.events ?? []).map((e: any) => ({

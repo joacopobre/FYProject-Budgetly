@@ -17,6 +17,8 @@ type Props = {
   setStartingAmount: (v: string) => void
   budgetKind: BudgetKind
   setBudgetKind: (v: BudgetKind) => void
+  rollover: boolean
+  setRollover: (v: boolean) => void
 }
 
 export function BudgetModal({
@@ -32,6 +34,8 @@ export function BudgetModal({
   setStartingAmount,
   budgetKind,
   setBudgetKind,
+  rollover,
+  setRollover,
 }: Props) {
   useEffect(() => {
     if (!isOpen) return
@@ -113,6 +117,30 @@ export function BudgetModal({
               Save
             </button>
           </div>
+
+          {budgetKind === 'SPEND' && (
+            <div className="flex items-center justify-between rounded-xl border border-gray-200 px-4 py-3 dark:border-white/10">
+              <div>
+                <p className="text-sm font-medium text-gray-700 dark:text-slate-300">Roll over unused balance</p>
+                <p className="mt-0.5 text-xs text-gray-500 dark:text-slate-500">If off, balance resets to zero each month</p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={rollover}
+                onClick={() => setRollover(!rollover)}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                  rollover ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-white/20'
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    rollover ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+          )}
 
           {budgetKind === 'SAVE' && (
             <label className="flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-slate-300" htmlFor="limit">
