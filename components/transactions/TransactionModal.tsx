@@ -111,7 +111,7 @@ export function TransactionModal({
           </div>
           <button
             type="button"
-            className="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/10 dark:hover:text-gray-300"
+            className="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 dark:text-slate-500 dark:hover:bg-white/10 dark:hover:text-slate-300"
             onClick={onClose}
             aria-label="Close modal"
           >
@@ -154,7 +154,7 @@ export function TransactionModal({
                     key={option}
                     type="button"
                     className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition hover:bg-gray-100 dark:hover:bg-white/10 ${
-                      option === type ? 'font-semibold text-emerald-600' : 'text-gray-700 dark:text-gray-300'
+                      option === type ? 'font-semibold text-emerald-600 dark:text-emerald-400' : 'text-gray-700 dark:text-gray-300'
                     }`}
                     onClick={() => {
                       setType(option)
@@ -162,7 +162,7 @@ export function TransactionModal({
                     }}
                   >
                     {option}
-                    {option === type && <span className="text-emerald-600">✓</span>}
+                    {option === type && <span className="text-emerald-600 dark:text-emerald-400">✓</span>}
                   </button>
                 ))}
               </div>
@@ -240,7 +240,7 @@ export function TransactionModal({
               <button
                 type="button"
                 className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition hover:bg-gray-100 dark:hover:bg-white/10 ${
-                  source === 'ACCOUNT' ? 'font-semibold text-emerald-600' : 'text-gray-700 dark:text-gray-300'
+                  source === 'ACCOUNT' ? 'font-semibold text-emerald-600 dark:text-emerald-400' : 'text-gray-700 dark:text-gray-300'
                 }`}
                 onClick={() => {
                   setSource('ACCOUNT')
@@ -249,7 +249,7 @@ export function TransactionModal({
                 }}
               >
                 Account
-                {source === 'ACCOUNT' && <span className="text-emerald-600">✓</span>}
+                {source === 'ACCOUNT' && <span className="text-emerald-600 dark:text-emerald-400">✓</span>}
               </button>
               {budgets.map(budget => (
                 <button
@@ -257,7 +257,7 @@ export function TransactionModal({
                   type="button"
                   className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition hover:bg-gray-100 dark:hover:bg-white/10 ${
                     source === 'BUDGET' && budgetId === budget.id
-                      ? 'font-semibold text-emerald-600'
+                      ? 'font-semibold text-emerald-600 dark:text-emerald-400'
                       : 'text-gray-700 dark:text-gray-300'
                   }`}
                   onClick={() => {
@@ -268,7 +268,7 @@ export function TransactionModal({
                 >
                   {budget.name}
                   {source === 'BUDGET' && budgetId === budget.id && (
-                    <span className="text-emerald-600">✓</span>
+                    <span className="text-emerald-600 dark:text-emerald-400">✓</span>
                   )}
                 </button>
               ))}
