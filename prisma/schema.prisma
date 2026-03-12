@@ -28,6 +28,14 @@ enum TxSource {
   BUDGET
 }
 
+enum Recurrence {
+  NONE
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
 model Budget {
   id        String      @id @default(cuid())
   name      String
@@ -66,7 +74,9 @@ model Transaction {
   category    String
   type        TxType
   amount      Float
-  source      TxSource @default(ACCOUNT)
+  source      TxSource   @default(ACCOUNT)
+  recurrence  Recurrence @default(NONE)
+  nextDue     DateTime?
 
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)

@@ -1,7 +1,7 @@
 'use client'
 
 import { useContext, useEffect, useRef, useState } from 'react'
-import type { TxSource, TxType } from '@/types/transactions'
+import type { RecurrenceFrequency, TxSource, TxType } from '@/types/transactions'
 import { BudgetsContext } from '@/context/BudgetsContext'
 import { DatePicker } from '@/components/ui/DatePicker'
 
@@ -25,9 +25,18 @@ type Props = {
   setSource: (v: TxSource) => void
   budgetId: string | null
   setBudgetId: (v: string | null) => void
+  recurrence: RecurrenceFrequency
+  setRecurrence: (v: RecurrenceFrequency) => void
 }
 
 const typeOptions: TxType[] = ['Expense', 'Income']
+
+const recurrenceOptions: { value: RecurrenceFrequency; label: string }[] = [
+  { value: 'DAILY', label: 'Daily' },
+  { value: 'WEEKLY', label: 'Weekly' },
+  { value: 'MONTHLY', label: 'Monthly' },
+  { value: 'YEARLY', label: 'Yearly' },
+]
 
 export function TransactionModal({
   isOpen,
@@ -49,6 +58,8 @@ export function TransactionModal({
   setSource,
   budgetId,
   setBudgetId,
+  recurrence,
+  setRecurrence,
 }: Props) {
   const [isTypeMenuOpen, setIsTypeMenuOpen] = useState(false)
   const typeMenuRef = useRef<HTMLDivElement>(null)
@@ -61,10 +72,17 @@ export function TransactionModal({
   const categoryMenuRef = useRef<HTMLDivElement>(null)
   const categoryInputRef = useRef<HTMLInputElement>(null)
 
+  const [isRecurrenceMenuOpen, setIsRecurrenceMenuOpen] = useState(false)
+  const recurrenceMenuRef = useRef<HTMLDivElement>(null)
+
   // get budgets via context
   const context = useContext(BudgetsContext)
   if (!context) throw new Error('BudgetsContext missing')
   const { budgets } = context
+
+  const spendBudgets = budgets.filter(b => b.kind === 'SPEND')
+
+  const isRecurring = recurrence !== 'NONE'
 
   useEffect(() => {
     if (!isOpen) return
@@ -81,15 +99,17 @@ export function TransactionModal({
   }, [isOpen, onClose])
 
   useEffect(() => {
-    if (!isTypeMenuOpen && !isFromMenuOpen && !isCategoryMenuOpen) return
+    if (!isTypeMenuOpen && !isFromMenuOpen && !isCategoryMenuOpen && !isRecurrenceMenuOpen) return
     const onClickAway = (e: MouseEvent | TouchEvent) => {
       const target = e.target as Node
       if (typeMenuRef.current && typeMenuRef.current.contains(target)) return
       if (fromMenuRef.current && fromMenuRef.current.contains(target)) return
       if (categoryMenuRef.current && categoryMenuRef.current.contains(target)) return
+      if (recurrenceMenuRef.current && recurrenceMenuRef.current.contains(target)) return
       setIsTypeMenuOpen(false)
       setIsFromMenuOpen(false)
       setIsCategoryMenuOpen(false)
+      setIsRecurrenceMenuOpen(false)
     }
     document.addEventListener('mousedown', onClickAway)
     document.addEventListener('touchstart', onClickAway)
@@ -97,7 +117,7 @@ export function TransactionModal({
       document.removeEventListener('mousedown', onClickAway)
       document.removeEventListener('touchstart', onClickAway)
     }
-  }, [isTypeMenuOpen, isFromMenuOpen, isCategoryMenuOpen])
+  }, [isTypeMenuOpen, isFromMenuOpen, isCategoryMenuOpen, isRecurrenceMenuOpen])
 
   if (!isOpen) return null
 
@@ -160,6 +180,10 @@ export function TransactionModal({
                     onClick={() => {
                       setType(option)
                       setIsTypeMenuOpen(false)
+                      if (option === 'Income') {
+                        setSource('ACCOUNT')
+                        setBudgetId(null)
+                      }
                     }}
                   >
                     {option}
@@ -286,6 +310,7 @@ export function TransactionModal({
           />
         </label>
 
+        {type !== 'Income' && (
         <div
           className="relative flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-gray-300"
           ref={fromMenuRef}
@@ -300,7 +325,7 @@ export function TransactionModal({
           >
             {source === 'ACCOUNT'
               ? 'Account'
-              : budgets.find(b => b.id === budgetId)?.name ?? 'Budget'}
+              : spendBudgets.find(b => b.id === budgetId)?.name ?? 'Budget'}
             <span className="text-xs text-gray-500 dark:text-gray-400">▼</span>
           </button>
 
@@ -320,7 +345,7 @@ export function TransactionModal({
                 Account
                 {source === 'ACCOUNT' && <span className="text-emerald-600 dark:text-emerald-400">✓</span>}
               </button>
-              {budgets.map(budget => (
+              {spendBudgets.map(budget => (
                 <button
                   key={budget.id}
                   type="button"
@@ -341,6 +366,71 @@ export function TransactionModal({
                   )}
                 </button>
               ))}
+            </div>
+          )}
+        </div>
+        )}
+
+        {/* Recurrence section */}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Recurring</span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={isRecurring}
+              onClick={() => setRecurrence(isRecurring ? 'NONE' : 'MONTHLY')}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                isRecurring ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-white/20'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                  isRecurring ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+
+          {isRecurring && (
+            <div
+              className="relative flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+              ref={recurrenceMenuRef}
+            >
+              <span>Frequency</span>
+              <button
+                type="button"
+                onClick={() => setIsRecurrenceMenuOpen(prev => !prev)}
+                className="flex items-center justify-between rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-white/10 dark:bg-white/8 dark:text-slate-200"
+              >
+                {recurrenceOptions.find(o => o.value === recurrence)?.label ?? 'Monthly'}
+                <span className="text-xs text-gray-500 dark:text-gray-400">▼</span>
+              </button>
+
+              {isRecurrenceMenuOpen && (
+                <div className="absolute top-full right-0 left-0 z-50 mt-1 w-full rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 dark:border-white/10 dark:bg-[#0e2318] dark:ring-white/5">
+                  {recurrenceOptions.map(option => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition hover:bg-gray-100 dark:hover:bg-white/10 ${
+                        option.value === recurrence
+                          ? 'font-semibold text-emerald-600 dark:text-emerald-400'
+                          : 'text-gray-700 dark:text-gray-300'
+                      }`}
+                      onClick={() => {
+                        setRecurrence(option.value)
+                        setIsRecurrenceMenuOpen(false)
+                      }}
+                    >
+                      {option.label}
+                      {option.value === recurrence && (
+                        <span className="text-emerald-600 dark:text-emerald-400">✓</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>

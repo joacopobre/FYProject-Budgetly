@@ -50,7 +50,16 @@ export function TransactionsTable({
               return (
                 <tr key={tx.id} className="border-t border-slate-100 transition hover:bg-slate-50/60 dark:border-white/6 dark:hover:bg-white/4">
                   <td className="px-4 py-3 text-slate-500 dark:text-slate-400">{new Date(tx.date).toISOString().slice(0, 10)}</td>
-                  <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-100">{tx.description}</td>
+                  <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-100">
+                    <span className="flex items-center gap-2">
+                      {tx.description}
+                      {tx.recurrence !== 'NONE' && (
+                        <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400">
+                          ↻ {tx.recurrence.charAt(0) + tx.recurrence.slice(1).toLowerCase()}
+                        </span>
+                      )}
+                    </span>
+                  </td>
                   <td className="px-4 py-3">
                     <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 dark:bg-white/10 dark:text-slate-300">
                       <span className={`h-2 w-2 rounded-full ${categoryDot}`} />
