@@ -185,7 +185,7 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
             <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100 md:text-3xl">Budgets</h2>
             <Link
               href="/budgets"
-              className="text-sm font-semibold text-emerald-600 transition hover:text-emerald-700"
+              className="text-sm font-semibold text-emerald-600 transition hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
             >
               View all
             </Link>

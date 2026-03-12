@@ -45,13 +45,13 @@ export function FundModal({
       >
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
               {fundMode === 'ADD' ? 'Add Funds' : 'Withdraw Funds'}
             </h2>
             {activeBudget && (
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
                 Current balance:{' '}
-                <span className="font-medium text-gray-700">
+                <span className="font-medium text-gray-700 dark:text-slate-300">
                   {formatMoney(activeBudget.balance)}
                 </span>
               </p>
@@ -59,7 +59,7 @@ export function FundModal({
           </div>
           <button
             type="button"
-            className="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
+            className="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 dark:text-slate-500 dark:hover:bg-white/10 dark:hover:text-slate-300"
             onClick={onClose}
           >
             <X className="size-4" />
@@ -67,10 +67,10 @@ export function FundModal({
         </div>
 
         <div className="flex flex-col gap-4">
-          <label className="flex flex-col text-sm font-medium text-gray-700" htmlFor="fund">
+          <label className="flex flex-col text-sm font-medium text-gray-700 dark:text-slate-300" htmlFor="fund">
             {fundMode === 'ADD' ? 'Amount to add:' : 'Amount to withdraw:'}
             {fundMode === 'WITHDRAW' && activeBudget && (
-              <span className="mb-2 text-xs text-gray-400">
+              <span className="mb-2 text-xs text-gray-400 dark:text-slate-500">
                 Max available: {formatMoney(activeBudget.balance)}
               </span>
             )}
@@ -88,7 +88,7 @@ export function FundModal({
             {isFundNoteOpen ? (
               <button
                 type="button"
-                className="cursor-pointer rounded-xl px-4 py-2 text-sm text-gray-400 transition hover:bg-gray-200 hover:text-gray-500"
+                className="cursor-pointer rounded-xl px-4 py-2 text-sm text-gray-400 transition hover:bg-gray-200 hover:text-gray-500 dark:text-slate-500 dark:hover:bg-white/10 dark:hover:text-slate-400"
                 onClick={() => {
                   setIsFundNoteOpen(false)
                   setFundNote('')
@@ -99,14 +99,14 @@ export function FundModal({
             ) : (
               <button
                 type="button"
-                className="cursor-pointer rounded-xl px-4 py-2 text-sm text-gray-400 transition hover:bg-gray-200 hover:text-gray-500"
+                className="cursor-pointer rounded-xl px-4 py-2 text-sm text-gray-400 transition hover:bg-gray-200 hover:text-gray-500 dark:text-slate-500 dark:hover:bg-white/10 dark:hover:text-slate-400"
                 onClick={() => setIsFundNoteOpen(true)}
               >
                 + add note
               </button>
             )}
             {isFundNoteOpen && (
-              <label className="flex flex-col gap-2 text-sm font-medium text-gray-700" htmlFor="note">
+              <label className="flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-slate-300" htmlFor="note">
                 <input
                   id="note"
                   type="text"
@@ -129,7 +129,7 @@ export function FundModal({
             </button>
             <button
               type="button"
-              className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
+              className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/10"
               onClick={onClose}
             >
               Cancel

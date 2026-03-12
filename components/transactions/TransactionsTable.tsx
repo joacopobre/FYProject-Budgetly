@@ -20,7 +20,7 @@ export function TransactionsTable({
   return (
     <div className="hidden overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_4px_14px_rgba(15,23,42,0.06)] dark:border-white/8 dark:bg-white/6 dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)] dark:backdrop-blur-md md:block">
       <div className="max-h-[50vh] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:none">
-        <table className="min-w-full text-sm text-slate-700">
+        <table className="min-w-full text-sm text-slate-700 dark:text-slate-300">
           <thead className="border-b border-slate-100 bg-slate-50 text-xs tracking-wider text-slate-500 uppercase dark:border-white/8 dark:bg-white/5 dark:text-slate-400">
             <tr>
               <th className="px-4 py-3 text-left">Date</th>
@@ -35,7 +35,7 @@ export function TransactionsTable({
           <tbody>
             {transactions.map(tx => {
               const isIncome = tx.amount > 0
-              const amountColor = isIncome ? 'text-emerald-600' : 'text-rose-600'
+              const amountColor = isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
               const categoryColors: Record<string, string> = {
                 Food: 'bg-emerald-500',
                 Groceries: 'bg-lime-500',
@@ -66,14 +66,14 @@ export function TransactionsTable({
                     <div className="flex justify-end gap-2">
                       <button
                         type="button"
-                        className="rounded-lg border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100"
+                        className="rounded-lg border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/10"
                         onClick={() => onEdit(tx)}
                       >
                         Edit
                       </button>
                       <button
                         type="button"
-                        className="rounded-lg border border-rose-200 px-3 py-1 text-xs font-medium text-rose-600 transition hover:bg-rose-50"
+                        className="rounded-lg border border-rose-200 px-3 py-1 text-xs font-medium text-rose-600 transition hover:bg-rose-50 dark:border-rose-500/30 dark:text-rose-400 dark:hover:bg-rose-500/10"
                         onClick={() => onDelete(tx.id)}
                       >
                         Delete

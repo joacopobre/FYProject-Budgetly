@@ -65,11 +65,11 @@ export function BudgetModal({
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Add budget</h2>
-            <p className="mt-1 text-sm text-gray-500">Create a new budget with a limit.</p>
+            <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">Create a new budget with a limit.</p>
           </div>
           <button
             type="button"
-            className="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
+            className="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 dark:text-slate-500 dark:hover:bg-white/10 dark:hover:text-slate-300"
             onClick={onClose}
           >
             <X className="size-4" />
@@ -77,7 +77,7 @@ export function BudgetModal({
         </div>
 
         <div className="flex flex-col gap-4">
-          <label className="flex flex-col gap-2 text-sm font-medium text-gray-700" htmlFor="name">
+          <label className="flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-slate-300" htmlFor="name">
             Budget name
             <input
               id="name"
@@ -96,7 +96,7 @@ export function BudgetModal({
               className={`flex-1 rounded-xl px-4 py-2 text-sm font-semibold transition ${
                 budgetKind === 'SPEND'
                   ? 'bg-blue-600 text-white'
-                  : 'border border-gray-200 text-gray-700 hover:bg-gray-100'
+                  : 'border border-gray-200 text-gray-700 hover:bg-gray-100 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/10'
               }`}
             >
               Spend
@@ -107,7 +107,7 @@ export function BudgetModal({
               className={`flex-1 rounded-xl px-4 py-2 text-sm font-semibold transition ${
                 budgetKind === 'SAVE'
                   ? 'bg-green-600 text-white'
-                  : 'border border-gray-200 text-gray-700 hover:bg-gray-100'
+                  : 'border border-gray-200 text-gray-700 hover:bg-gray-100 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/10'
               }`}
             >
               Save
@@ -115,7 +115,7 @@ export function BudgetModal({
           </div>
 
           {budgetKind === 'SAVE' && (
-            <label className="flex flex-col gap-2 text-sm font-medium text-gray-700" htmlFor="limit">
+            <label className="flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-slate-300" htmlFor="limit">
               Goal amount
               <input
                 id="limit"
@@ -131,7 +131,7 @@ export function BudgetModal({
 
           {editingBudgetId === null && (
             <label
-              className="flex flex-col gap-2 text-sm font-medium text-gray-700"
+              className="flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-slate-300"
               htmlFor="startingAmount"
             >
               {budgetKind === 'SAVE' ? 'Initial deposit' : 'Starting amount'}
@@ -151,7 +151,7 @@ export function BudgetModal({
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-end sm:gap-2">
           <button
             type="button"
-            className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
+            className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/10"
             onClick={onClose}
           >
             Cancel
