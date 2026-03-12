@@ -1,7 +1,9 @@
 'use client'
 
 import { useCallback, useMemo, useState, useContext, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { TransactionModal } from '@/components/transactions/TransactionModal'
+import { CsvImportModal } from '@/components/transactions/CsvImportModal'
 import { TransactionsFilters } from '@/components/transactions/TransactionsFilters'
 import { TransactionsHeader } from '@/components/transactions/TransactionsHeader'
 import { TransactionsMobileList } from '@/components/transactions/TransactionsMobileList'
@@ -48,6 +50,7 @@ type Props = {
   initialTransactions: Transaction[]
 }
 export default function TransactionsClient({ initialTransactions }: Props) {
+  const router = useRouter()
   const context = useContext(TransactionsContext)
   if (!context) throw new Error('TransactionsContext missing')
   const { transactions, setTransactions } = context
@@ -56,6 +59,7 @@ export default function TransactionsClient({ initialTransactions }: Props) {
   const { budgets } = budgetsContext
 
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [date, setDate] = useState('')
   const [description, setDescription] = useState('')
@@ -249,7 +253,7 @@ export default function TransactionsClient({ initialTransactions }: Props) {
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-screen-xl flex-col gap-8 px-5 py-10 md:px-8 lg:px-12">
-      <TransactionsHeader onAdd={() => openModal()} />
+      <TransactionsHeader onAdd={() => openModal()} onImport={() => setIsImportModalOpen(true)} />
 
       <TransactionsFilters
         searchTerm={searchTerm}
@@ -282,6 +286,15 @@ export default function TransactionsClient({ initialTransactions }: Props) {
         onDelete={handleDeleteTransaction}
         formatMoney={formatMoney}
         getSourceLabel={getSourceLabel}
+      />
+
+      <CsvImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onImported={() => {
+          setIsImportModalOpen(false)
+          router.refresh()
+        }}
       />
 
       <TransactionModal
