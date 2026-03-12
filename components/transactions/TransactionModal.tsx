@@ -16,6 +16,7 @@ type Props = {
   setDescription: (v: string) => void
   category: string
   setCategory: (v: string) => void
+  categories: string[]
   type: TxType
   setType: (v: TxType) => void
   amount: string
@@ -39,6 +40,7 @@ export function TransactionModal({
   setDescription,
   category,
   setCategory,
+  categories,
   type,
   setType,
   amount,
@@ -53,6 +55,11 @@ export function TransactionModal({
 
   const [isFromMenuOpen, setIsFromMenuOpen] = useState(false)
   const fromMenuRef = useRef<HTMLDivElement>(null)
+
+  const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false)
+  const [categorySearch, setCategorySearch] = useState('')
+  const categoryMenuRef = useRef<HTMLDivElement>(null)
+  const categoryInputRef = useRef<HTMLInputElement>(null)
 
   // get budgets via context
   const context = useContext(BudgetsContext)
@@ -74,13 +81,15 @@ export function TransactionModal({
   }, [isOpen, onClose])
 
   useEffect(() => {
-    if (!isTypeMenuOpen && !isFromMenuOpen) return
+    if (!isTypeMenuOpen && !isFromMenuOpen && !isCategoryMenuOpen) return
     const onClickAway = (e: MouseEvent | TouchEvent) => {
       const target = e.target as Node
       if (typeMenuRef.current && typeMenuRef.current.contains(target)) return
       if (fromMenuRef.current && fromMenuRef.current.contains(target)) return
+      if (categoryMenuRef.current && categoryMenuRef.current.contains(target)) return
       setIsTypeMenuOpen(false)
       setIsFromMenuOpen(false)
+      setIsCategoryMenuOpen(false)
     }
     document.addEventListener('mousedown', onClickAway)
     document.addEventListener('touchstart', onClickAway)
@@ -88,7 +97,7 @@ export function TransactionModal({
       document.removeEventListener('mousedown', onClickAway)
       document.removeEventListener('touchstart', onClickAway)
     }
-  }, [isTypeMenuOpen, isFromMenuOpen])
+  }, [isTypeMenuOpen, isFromMenuOpen, isCategoryMenuOpen])
 
   if (!isOpen) return null
 
@@ -177,20 +186,88 @@ export function TransactionModal({
               placeholder="e.g. Coffee"
             />
           </label>
-          <label
-            className="flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-gray-300"
-            htmlFor="category"
+          <div
+            className="relative flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+            ref={categoryMenuRef}
           >
-            Category
-            <input
-              id="category"
-              type="text"
-              value={category}
-              onChange={e => setCategory(e.target.value)}
-              className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-white/10 dark:bg-white/8 dark:text-slate-200"
-              placeholder="e.g. Food"
-            />
-          </label>
+            <span>Category</span>
+            <button
+              type="button"
+              onClick={() => {
+                setIsCategoryMenuOpen(prev => !prev)
+                setCategorySearch('')
+                setTimeout(() => categoryInputRef.current?.focus(), 0)
+              }}
+              className="flex items-center justify-between rounded-xl border border-gray-200 px-3 py-2 text-left text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-white/10 dark:bg-white/8 dark:text-slate-200"
+            >
+              <span className={category ? '' : 'text-gray-400 dark:text-gray-500'}>
+                {category || 'e.g. Food'}
+              </span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">▼</span>
+            </button>
+
+            {isCategoryMenuOpen && (
+              <div className="absolute top-full right-0 left-0 z-50 mt-1 w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 dark:border-white/10 dark:bg-[#0e2318] dark:ring-white/5">
+                <div className="border-b border-gray-100 p-2 dark:border-white/10">
+                  <input
+                    ref={categoryInputRef}
+                    type="text"
+                    value={categorySearch}
+                    onChange={e => setCategorySearch(e.target.value)}
+                    placeholder="Search or create..."
+                    className="w-full rounded-lg px-2 py-1 text-sm text-gray-800 outline-none placeholder:text-gray-400 dark:bg-white/8 dark:text-slate-200 dark:placeholder:text-gray-500"
+                  />
+                </div>
+                <div className="max-h-48 overflow-y-auto">
+                  {categories
+                    .filter(c => c.toLowerCase().includes(categorySearch.toLowerCase()))
+                    .map(c => (
+                      <button
+                        key={c}
+                        type="button"
+                        className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition hover:bg-gray-100 dark:hover:bg-white/10 ${
+                          c === category
+                            ? 'font-semibold text-emerald-600 dark:text-emerald-400'
+                            : 'text-gray-700 dark:text-gray-300'
+                        }`}
+                        onClick={() => {
+                          setCategory(c)
+                          setIsCategoryMenuOpen(false)
+                          setCategorySearch('')
+                        }}
+                      >
+                        {c}
+                        {c === category && (
+                          <span className="text-emerald-600 dark:text-emerald-400">✓</span>
+                        )}
+                      </button>
+                    ))}
+                  {categorySearch.trim() &&
+                    !categories.some(
+                      c => c.toLowerCase() === categorySearch.trim().toLowerCase(),
+                    ) && (
+                      <button
+                        type="button"
+                        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-emerald-600 transition hover:bg-gray-100 dark:text-emerald-400 dark:hover:bg-white/10"
+                        onClick={() => {
+                          setCategory(categorySearch.trim())
+                          setIsCategoryMenuOpen(false)
+                          setCategorySearch('')
+                        }}
+                      >
+                        <span className="font-semibold">+</span> Create new category:{' '}
+                        <span className="font-medium">"{categorySearch.trim()}"</span>
+                      </button>
+                    )}
+                  {categories.length === 0 && !categorySearch.trim() && (
+                    <p className="px-3 py-2 text-sm text-gray-400 dark:text-gray-500">
+                      Start typing to create a category
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         <label
