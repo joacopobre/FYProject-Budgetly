@@ -7,15 +7,18 @@ import type { Budget, BudgetKind } from '@/types/budgets'
 import { BudgetLineChart } from '@/components/budgets/BudgetLineChart'
 import { BudgetModal } from '@/components/budgets/BudgetModal'
 import { FundModal } from '@/components/budgets/FundModal'
+import { SpendingLimits } from '@/components/budgets/SpendingLimits'
 import { buildBudgetBalanceSeries } from '@/lib/budgets/buildBudgetBalanceSeries'
 import { Transaction } from '@/types/transactions'
 import { TransactionsContext } from '@/context/TransactionsContext'
+import type { CategoryLimit } from '@/types/categoryLimits'
 
 type Props = {
   initialBudgets: Budget[]
+  initialLimits: CategoryLimit[]
 }
 
-export default function BudgetsClient({ initialBudgets }: Props) {
+export default function BudgetsClient({ initialBudgets, initialLimits }: Props) {
   console.log('initialBudgets', initialBudgets)
 
   const [isFundModalOpen, setIsFundModalOpen] = useState(false)
@@ -344,6 +347,7 @@ export default function BudgetsClient({ initialBudgets }: Props) {
           )
         })}
       </div>
+      <SpendingLimits initialLimits={initialLimits} />
       <BudgetModal
         isOpen={isModalOpen}
         onClose={closeModal}
