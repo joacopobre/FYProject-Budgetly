@@ -9,6 +9,7 @@ export const transactionsData: Transaction[] = [
     type: 'Expense',
     amount: -82.35,
     source: 'ACCOUNT',
+    recurrence: 'NONE',
   },
   {
     id: 2,
@@ -18,6 +19,7 @@ export const transactionsData: Transaction[] = [
     type: 'Income',
     amount: 2200,
     source: 'ACCOUNT',
+    recurrence: 'NONE',
   },
   {
     id: 3,
@@ -27,6 +29,7 @@ export const transactionsData: Transaction[] = [
     type: 'Expense',
     amount: -45.5,
     source: 'ACCOUNT',
+    recurrence: 'NONE',
   },
   {
     id: 4,
@@ -36,6 +39,7 @@ export const transactionsData: Transaction[] = [
     type: 'Expense',
     amount: -6.25,
     source: 'ACCOUNT',
+    recurrence: 'NONE',
   },
   {
     id: 5,
@@ -45,6 +49,7 @@ export const transactionsData: Transaction[] = [
     type: 'Income',
     amount: 120,
     source: 'ACCOUNT',
+    recurrence: 'NONE',
   },
   {
     id: 6,
@@ -54,6 +59,7 @@ export const transactionsData: Transaction[] = [
     type: 'Expense',
     amount: -55,
     source: 'ACCOUNT',
+    recurrence: 'NONE',
   },
   {
     id: 7,
@@ -63,6 +69,7 @@ export const transactionsData: Transaction[] = [
     type: 'Expense',
     amount: -62.9,
     source: 'ACCOUNT',
+    recurrence: 'NONE',
   },
   {
     id: 8,
@@ -72,6 +79,7 @@ export const transactionsData: Transaction[] = [
     type: 'Income',
     amount: 480,
     source: 'ACCOUNT',
+    recurrence: 'NONE',
   },
   {
     id: 9,
@@ -81,6 +89,7 @@ export const transactionsData: Transaction[] = [
     type: 'Expense',
     amount: -38.4,
     source: 'ACCOUNT',
+    recurrence: 'NONE',
   },
   {
     id: 10,
@@ -90,6 +99,7 @@ export const transactionsData: Transaction[] = [
     type: 'Expense',
     amount: -74.15,
     source: 'ACCOUNT',
+    recurrence: 'NONE',
   },
   {
     id: 11,
@@ -99,6 +109,7 @@ export const transactionsData: Transaction[] = [
     type: 'Income',
     amount: 950,
     source: 'ACCOUNT',
+    recurrence: 'NONE',
   },
   {
     id: 12,
@@ -108,6 +119,7 @@ export const transactionsData: Transaction[] = [
     type: 'Expense',
     amount: -210.75,
     source: 'ACCOUNT',
+    recurrence: 'NONE',
   },
   {
     id: 13,
@@ -117,6 +129,7 @@ export const transactionsData: Transaction[] = [
     type: 'Expense',
     amount: -24.2,
     source: 'ACCOUNT',
+    recurrence: 'NONE',
   },
   {
     id: 14,
@@ -126,6 +139,7 @@ export const transactionsData: Transaction[] = [
     type: 'Income',
     amount: 2200,
     source: 'ACCOUNT',
+    recurrence: 'NONE',
   },
   {
     id: 15,
@@ -135,6 +149,7 @@ export const transactionsData: Transaction[] = [
     type: 'Expense',
     amount: -1200,
     source: 'ACCOUNT',
+    recurrence: 'NONE',
   },
   {
     id: 16,
@@ -144,6 +159,7 @@ export const transactionsData: Transaction[] = [
     type: 'Expense',
     amount: -52,
     source: 'ACCOUNT',
+    recurrence: 'NONE',
   },
   {
     id: 17,
@@ -153,6 +169,7 @@ export const transactionsData: Transaction[] = [
     type: 'Expense',
     amount: -95,
     source: 'ACCOUNT',
+    recurrence: 'NONE',
   },
   {
     id: 18,
@@ -162,6 +179,7 @@ export const transactionsData: Transaction[] = [
     type: 'Income',
     amount: 300,
     source: 'ACCOUNT',
+    recurrence: 'NONE',
   },
   {
     id: 19,
@@ -171,6 +189,7 @@ export const transactionsData: Transaction[] = [
     type: 'Expense',
     amount: -129.6,
     source: 'ACCOUNT',
+    recurrence: 'NONE',
   },
   {
     id: 20,
@@ -180,6 +199,7 @@ export const transactionsData: Transaction[] = [
     type: 'Expense',
     amount: -310,
     source: 'ACCOUNT',
+    recurrence: 'NONE',
   },
   {
     id: 21,
@@ -189,6 +209,7 @@ export const transactionsData: Transaction[] = [
     type: 'Income',
     amount: 640,
     source: 'ACCOUNT',
+    recurrence: 'NONE',
   },
   {
     id: 22,
@@ -198,6 +219,7 @@ export const transactionsData: Transaction[] = [
     type: 'Expense',
     amount: -186.45,
     source: 'ACCOUNT',
+    recurrence: 'NONE',
   },
   {
     id: 23,
@@ -207,6 +229,7 @@ export const transactionsData: Transaction[] = [
     type: 'Expense',
     amount: -14.99,
     source: 'ACCOUNT',
+    recurrence: 'NONE',
   },
   {
     id: 24,
@@ -216,5 +239,6 @@ export const transactionsData: Transaction[] = [
     type: 'Income',
     amount: 260,
     source: 'ACCOUNT',
+    recurrence: 'NONE',
   },
 ]
