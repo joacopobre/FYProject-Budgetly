@@ -37,12 +37,14 @@ enum Recurrence {
 }
 
 model Budget {
-  id        String      @id @default(cuid())
-  name      String
-  kind      BudgetKind
-  balance   Float       @default(0)
-  target    Float?
-  createdAt DateTime    @default(now())
+  id          String      @id @default(cuid())
+  name        String
+  kind        BudgetKind
+  balance     Float       @default(0)
+  target      Float?
+  rollover    Boolean     @default(false)
+  lastResetAt DateTime?
+  createdAt   DateTime    @default(now())
 
   userId    String
   user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)

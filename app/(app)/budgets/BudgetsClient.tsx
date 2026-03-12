@@ -31,6 +31,7 @@ export default function BudgetsClient({ initialBudgets }: Props) {
   const [name, setName] = useState<string>('')
   const [limit, setLimit] = useState<string>('')
   const [startingAmount, setStartingAmount] = useState<string>('')
+  const [rollover, setRollover] = useState<boolean>(false)
   const [editingBudgetId, setEditingBudgetId] = useState<null | string>(null)
   const context = useContext(BudgetsContext)
   if (!context) throw new Error('BudgetsContext missing')
@@ -127,6 +128,7 @@ export default function BudgetsClient({ initialBudgets }: Props) {
           name: validatedName,
           kind: budgetKind,
           target,
+          rollover: budgetKind === 'SPEND' ? rollover : undefined,
         }),
       })
 
@@ -161,6 +163,7 @@ export default function BudgetsClient({ initialBudgets }: Props) {
           kind: budgetKind,
           target: isSave ? validatedTarget : undefined,
           startingAmount: hasStartingAmount ? validatedStartingAmount : undefined,
+          rollover: budgetKind === 'SPEND' ? rollover : undefined,
         }),
       })
 
@@ -178,6 +181,7 @@ export default function BudgetsClient({ initialBudgets }: Props) {
     setLimit('')
     setStartingAmount('')
     setName('')
+    setRollover(false)
     setIsModalOpen(false)
     setEditingBudgetId(null)
   }
@@ -319,6 +323,7 @@ export default function BudgetsClient({ initialBudgets }: Props) {
                       setName(budget.name)
                       setLimit(String(budget.target ?? ''))
                       setBudgetKind(budget.kind)
+                      setRollover(budget.rollover)
                       setIsModalOpen(true)
                     }}
                   >
@@ -352,6 +357,8 @@ export default function BudgetsClient({ initialBudgets }: Props) {
         setStartingAmount={setStartingAmount}
         budgetKind={budgetKind}
         setBudgetKind={setBudgetKind}
+        rollover={rollover}
+        setRollover={setRollover}
       />
       <FundModal
         isOpen={isFundModalOpen}

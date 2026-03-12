@@ -18,6 +18,9 @@ export type Budget = {
   // optional goal (useful mainly for SAVE pots)
   target?: number
 
+  // SPEND budgets only: if false, balance resets to zero each month
+  rollover: boolean
+
   createdAt: string
 
   events: BudgetEvent[]
