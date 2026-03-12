@@ -9,6 +9,7 @@ type CreateBudgetBody = {
   kind: 'SPEND' | 'SAVE'
   target?: number
   startingAmount?: number // only for SPEND if you want initial balance
+  rollover?: boolean
 }
 export async function GET() {
   const session = await getAuthSession()
@@ -55,6 +56,8 @@ export async function POST(req: Request) {
       ? body.startingAmount
       : 0
 
+  const rollover = kind === 'SPEND' && typeof body.rollover === 'boolean' ? body.rollover : false
+
   // If you want to record an initial event when startingAmount > 0
   type TxClient = Parameters<Parameters<typeof prisma.$transaction>[0]>[0]
   const created = await prisma.$transaction(async (tx: TxClient) => {
@@ -64,6 +67,7 @@ export async function POST(req: Request) {
         kind,
         target: target ?? null,
         balance: startingAmount ?? 0,
+        rollover,
         userId: session.user.id,
         events: startingAmount
           ? {

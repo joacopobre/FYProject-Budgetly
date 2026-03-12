@@ -8,6 +8,7 @@ import type { Transaction } from '@/types/transactions'
 import { getBudgetsForUser } from '@/lib/db/budgets'
 import type { Budget } from '@/types/budgets'
 import { processRecurringTransactions } from '@/lib/db/processRecurringTransactions'
+import { processBudgetRollovers } from '@/lib/db/processBudgetRollovers'
 
 export default async function DashboardPage() {
   const session = await getAuthSession()
@@ -18,6 +19,9 @@ export default async function DashboardPage() {
 
   // Auto-create instances for any recurring transactions that are due
   await processRecurringTransactions(session.user.id)
+
+  // Reset SPEND budgets with rollover=false at the start of each month
+  await processBudgetRollovers(session.user.id)
 
   const rows = await getTransactionsForUser(session.user.id)
 
@@ -41,6 +45,7 @@ export default async function DashboardPage() {
     kind: budget.kind,
     balance: budget.balance,
     target: budget.target ?? undefined,
+    rollover: budget.rollover,
     createdAt: budget.createdAt.toISOString(),
     events: budget.events.map(event => ({
       id: event.id,
