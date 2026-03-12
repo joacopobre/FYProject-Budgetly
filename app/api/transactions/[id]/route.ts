@@ -10,6 +10,8 @@ type Body = {
   amount: number
   source: 'ACCOUNT' | 'BUDGET'
   budgetId?: string | null
+  recurrence?: 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY'
+  nextDue?: string | null
 }
 
 type Ctx = {
@@ -32,6 +34,7 @@ export async function PATCH(req: Request, { params }: Ctx) {
 
   const body = (await req.json()) as Body
 
+  const recurrence = body.recurrence ?? 'NONE'
   const updated = await prisma.transaction.updateMany({
     where: {
       id: txId,
@@ -45,6 +48,8 @@ export async function PATCH(req: Request, { params }: Ctx) {
       amount: body.amount,
       source: body.source,
       budgetId: body.source === 'BUDGET' ? (body.budgetId ?? null) : null,
+      recurrence,
+      nextDue: recurrence !== 'NONE' && body.nextDue ? new Date(body.nextDue) : null,
     },
   })
 

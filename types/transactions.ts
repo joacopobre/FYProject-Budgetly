@@ -6,6 +6,8 @@ export type TypeFilter = 'All types' | 'Income' | 'Expense' | 'Transfer'
 
 export type TxSource = 'ACCOUNT' | 'BUDGET'
 
+export type RecurrenceFrequency = 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY'
+
 export type Transaction = {
   id: number
   date: string
@@ -15,4 +17,6 @@ export type Transaction = {
   amount: number
   budgetId?: string | null
   source: TxSource
+  recurrence: RecurrenceFrequency
+  nextDue?: string | null
 }

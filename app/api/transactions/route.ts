@@ -10,6 +10,8 @@ type Body = {
   amount: number
   source: 'ACCOUNT' | 'BUDGET'
   budgetId?: string | null
+  recurrence?: 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY'
+  nextDue?: string | null
 }
 
 export async function POST(req: Request) {
@@ -21,6 +23,7 @@ export async function POST(req: Request) {
 
   const body = (await req.json()) as Body
 
+  const recurrence = body.recurrence ?? 'NONE'
   const created = await prisma.transaction.create({
     data: {
       userId: session.user.id,
@@ -31,6 +34,8 @@ export async function POST(req: Request) {
       amount: body.amount,
       source: body.source,
       budgetId: body.source === 'BUDGET' ? (body.budgetId ?? null) : null,
+      recurrence,
+      nextDue: recurrence !== 'NONE' && body.nextDue ? new Date(body.nextDue) : null,
     },
   })
 
