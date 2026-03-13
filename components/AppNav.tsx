@@ -1,20 +1,21 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { signOut } from 'next-auth/react'
-import { AlertTriangle, Bell, CheckCircle, Info, Moon, Sun, X } from 'lucide-react'
+import { AlertTriangle, Bell, CheckCircle, Info, Map, Moon, Sun, X } from 'lucide-react'
 import { Plus_Jakarta_Sans } from 'next/font/google'
 import { useTheme } from '@/context/ThemeContext'
+import { useOnboarding, TOUR_DONE_KEY } from '@/context/OnboardingContext'
 import type { Notification } from '@/types/notifications'
 
 const jakarta = Plus_Jakarta_Sans({ subsets: ['latin'], weight: ['800'], display: 'swap' })
 
 const links = [
-  { href: '/dashboard', label: 'Dashboard' },
-  { href: '/transactions', label: 'Transactions' },
-  { href: '/budgets', label: 'Budgets' },
+  { href: '/dashboard', label: 'Dashboard', tourTarget: 'nav-dashboard' },
+  { href: '/transactions', label: 'Transactions', tourTarget: 'nav-transactions' },
+  { href: '/budgets', label: 'Budgets', tourTarget: 'nav-budgets' },
 ]
 
 function timeAgo(dateStr: string): string {
@@ -38,9 +39,21 @@ function TypeIcon({ type }: { type: Notification['type'] }) {
 
 export default function AppNav() {
   const pathname = usePathname()
+  const router = useRouter()
   const [open, setOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const { theme, toggleTheme } = useTheme()
+  const { startTour } = useOnboarding()
+
+  const handleStartTour = () => {
+    try {
+      localStorage.removeItem(TOUR_DONE_KEY)
+    } catch {}
+    startTour()
+    if (pathname !== '/dashboard') {
+      router.push('/dashboard')
+    }
+  }
 
   const [notifOpen, setNotifOpen] = useState(false)
   const notifRef = useRef<HTMLDivElement>(null)
@@ -137,6 +150,7 @@ export default function AppNav() {
               <Link
                 key={link.href}
                 href={link.href}
+                data-tour={link.tourTarget}
                 className={`rounded-full px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/80 ${
                   isActive
                     ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200 dark:bg-white/15 dark:text-white dark:ring-white/20'
@@ -249,6 +263,16 @@ export default function AppNav() {
             className="flex size-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
           >
             {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleStartTour}
+            title="Take the tour"
+            aria-label="Take the tour"
+            className="flex size-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
+          >
+            <Map className="size-4" />
           </button>
 
           <button
@@ -402,6 +426,14 @@ export default function AppNav() {
               </Link>
             )
           })}
+          <button
+            type="button"
+            onClick={() => { close(); handleStartTour() }}
+            className="mt-1 flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-white/70 dark:text-slate-300 dark:hover:bg-white/10"
+          >
+            <Map className="size-4" />
+            Take the tour
+          </button>
           <button
             type="button"
             onClick={() => signOut({ callbackUrl: '/login' })}
