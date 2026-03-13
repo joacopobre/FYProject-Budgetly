@@ -9,6 +9,7 @@ import { getBudgetsForUser } from '@/lib/db/budgets'
 import type { Budget } from '@/types/budgets'
 import { processRecurringTransactions } from '@/lib/db/processRecurringTransactions'
 import { processBudgetRollovers } from '@/lib/db/processBudgetRollovers'
+import { processNotifications } from '@/lib/db/processNotifications'
 
 export default async function DashboardPage() {
   const session = await getAuthSession()
@@ -22,6 +23,9 @@ export default async function DashboardPage() {
 
   // Reset SPEND budgets with rollover=false at the start of each month
   await processBudgetRollovers(session.user.id)
+
+  // Generate threshold notifications
+  await processNotifications(session.user.id)
 
   const rows = await getTransactionsForUser(session.user.id)
 
