@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState, useContext } from 'react'
 import { ChevronDown, Plus, X } from 'lucide-react'
+import { useOnboarding, TOUR_DONE_KEY } from '@/context/OnboardingContext'
 import { filterByDateRange, type TrendRange } from '@/lib/transactions/filterByDateRange'
 import { calculateDashboardStats } from '@/lib/transactions/calculateDashboardStats'
 import { formatMoney } from '@/lib/transactions/formatMoney'
@@ -36,6 +37,8 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
 
   const { setBudgets } = budgetsContext
 
+  const { startTour } = useOnboarding()
+
   useEffect(() => {
     setBudgets(initialBudgets)
   }, [initialBudgets, setBudgets])
@@ -43,6 +46,18 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
   useEffect(() => {
     setTransactions(initialTransactions)
   }, [initialTransactions, setTransactions])
+
+  // Auto-start tour for new users with no data
+  useEffect(() => {
+    if (initialTransactions.length === 0 && initialBudgets.length === 0) {
+      try {
+        if (!localStorage.getItem(TOUR_DONE_KEY)) {
+          startTour()
+        }
+      } catch {}
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const filtered = filterByDateRange(initialTransactions, trendFilter)
   const trendSeries = buildTrendSeries(filtered)
@@ -77,10 +92,20 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
 
   return (
     <div className="mx-auto flex w-full max-w-screen-xl flex-col gap-7 px-5 pt-6 pb-12 md:px-8 lg:px-12">
-      <h1 className="text-4xl font-bold text-slate-900 dark:text-white md:text-5xl lg:text-6xl">
-        Dashboard
-      </h1>
-      <section className="flex flex-col gap-5">
+      <div className="flex items-center justify-between">
+        <h1 className="text-4xl font-bold text-slate-900 dark:text-white md:text-5xl lg:text-6xl">
+          Dashboard
+        </h1>
+        <Link
+          href="/transactions"
+          data-tour="add-transaction"
+          className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(16,185,129,0.35)] transition hover:from-emerald-600 hover:to-teal-600 hover:shadow-[0_4px_18px_rgba(16,185,129,0.5)]"
+        >
+          <Plus className="size-4" />
+          <span className="hidden sm:inline">Add transaction</span>
+        </Link>
+      </div>
+      <section data-tour="dashboard-stats" className="flex flex-col gap-5">
         <div className="flex items-baseline justify-between">
           <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100 md:text-3xl">Glance</h2>
           <span className="text-sm text-slate-400 dark:text-slate-500">Overview</span>
@@ -138,7 +163,7 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
       </section>
 
       <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-        <section className="flex flex-col gap-3">
+        <section data-tour="dashboard-trend" className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100 md:text-3xl">Trend</h2>
             <div className="relative" ref={trendMenuRef}>
