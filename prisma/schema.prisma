@@ -36,6 +36,12 @@ enum Recurrence {
   YEARLY
 }
 
+enum NotificationType {
+  WARNING
+  INFO
+  SUCCESS
+}
+
 model Budget {
   id          String      @id @default(cuid())
   name        String
@@ -105,6 +111,20 @@ model CategoryLimit {
   @@index([userId])
 }
 
+model Notification {
+  id        String           @id @default(cuid())
+  message   String
+  type      NotificationType
+  read      Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([read])
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -119,6 +139,7 @@ model User {
   budgets         Budget[]
   transactions    Transaction[]
   categoryLimits  CategoryLimit[]
+  notifications   Notification[]
 }
 
 model Account {

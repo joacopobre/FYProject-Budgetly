@@ -2,11 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { signOut } from 'next-auth/react'
-import { Moon, Sun } from 'lucide-react'
+import { AlertTriangle, Bell, CheckCircle, Info, Moon, Sun, X } from 'lucide-react'
 import { Plus_Jakarta_Sans } from 'next/font/google'
 import { useTheme } from '@/context/ThemeContext'
+import type { Notification } from '@/types/notifications'
 
 const jakarta = Plus_Jakarta_Sans({ subsets: ['latin'], weight: ['800'], display: 'swap' })
 
@@ -16,15 +17,63 @@ const links = [
   { href: '/budgets', label: 'Budgets' },
 ]
 
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return 'just now'
+  if (mins < 60) return `${mins}m ago`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `${hrs}h ago`
+  const days = Math.floor(hrs / 24)
+  return `${days}d ago`
+}
+
+function TypeIcon({ type }: { type: Notification['type'] }) {
+  if (type === 'WARNING')
+    return <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-500" />
+  if (type === 'SUCCESS')
+    return <CheckCircle className="mt-0.5 size-4 shrink-0 text-emerald-500" />
+  return <Info className="mt-0.5 size-4 shrink-0 text-sky-500" />
+}
+
 export default function AppNav() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const { theme, toggleTheme } = useTheme()
 
+  const [notifOpen, setNotifOpen] = useState(false)
+  const notifRef = useRef<HTMLDivElement>(null)
+  const notifRefMobile = useRef<HTMLDivElement>(null)
+  const [notifications, setNotifications] = useState<Notification[]>([])
+
   const toggle = () => setOpen(prev => !prev)
   const close = () => setOpen(false)
 
+  const unreadCount = notifications.filter(n => !n.read).length
+
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const res = await fetch('/api/notifications')
+      if (res.ok) setNotifications(await res.json())
+    } catch {}
+  }, [])
+
+  useEffect(() => {
+    fetchNotifications()
+  }, [fetchNotifications])
+
+  const markRead = async (id: string) => {
+    await fetch(`/api/notifications/${id}`, { method: 'PATCH' })
+    setNotifications(prev => prev.map(n => (n.id === id ? { ...n, read: true } : n)))
+  }
+
+  const markAllRead = async () => {
+    await fetch('/api/notifications/mark-all-read', { method: 'PATCH' })
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+  }
+
+  // Close mobile menu on click-away
   useEffect(() => {
     if (!open) return
     const onClickAway = (e: MouseEvent | TouchEvent) => {
@@ -42,6 +91,28 @@ export default function AppNav() {
       document.removeEventListener('keydown', onKeyDown)
     }
   }, [open])
+
+  // Close notification panel on click-away
+  useEffect(() => {
+    if (!notifOpen) return
+    const onClickAway = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node
+      const insideDesktop = notifRef.current?.contains(target)
+      const insideMobile = notifRefMobile.current?.contains(target)
+      if (!insideDesktop && !insideMobile) setNotifOpen(false)
+    }
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setNotifOpen(false)
+    }
+    document.addEventListener('mousedown', onClickAway)
+    document.addEventListener('touchstart', onClickAway)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', onClickAway)
+      document.removeEventListener('touchstart', onClickAway)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [notifOpen])
 
   return (
     <header className="fixed inset-x-0 top-0 z-30 px-4 pt-3 md:px-6">
@@ -78,12 +149,104 @@ export default function AppNav() {
             )
           })}
 
+          {/* Notification bell */}
+          <div className="relative ml-1" ref={notifRef}>
+            <button
+              type="button"
+              aria-label="Notifications"
+              onClick={() => setNotifOpen(prev => !prev)}
+              className="relative flex size-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
+            >
+              <Bell className="size-4" />
+              {unreadCount > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 flex size-4 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-white">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </button>
+
+            {notifOpen && (
+              <div className="absolute right-0 top-14 z-50 w-80 overflow-hidden rounded-2xl border border-white/60 bg-white/95 shadow-[0_16px_48px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:border-white/12 dark:bg-[#0a1d17]/95 dark:shadow-[0_16px_48px_rgba(0,0,0,0.5)]">
+                {/* Header */}
+                <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-white/8">
+                  <span className="text-sm font-semibold text-slate-800 dark:text-white">
+                    Notifications
+                  </span>
+                  <div className="flex items-center gap-2">
+                    {unreadCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={markAllRead}
+                        className="text-xs font-medium text-emerald-600 transition hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+                      >
+                        Mark all as read
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setNotifOpen(false)}
+                      className="flex size-6 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-white/10 dark:hover:text-white"
+                    >
+                      <X className="size-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* List */}
+                <div className="max-h-80 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                  {notifications.length === 0 ? (
+                    <p className="px-4 py-8 text-center text-sm text-slate-400 dark:text-slate-500">
+                      No notifications yet
+                    </p>
+                  ) : (
+                    notifications.map(n => (
+                      <div
+                        key={n.id}
+                        className={`flex items-start gap-3 px-4 py-3 transition ${
+                          !n.read
+                            ? 'bg-emerald-50/60 dark:bg-emerald-900/20'
+                            : 'hover:bg-slate-50 dark:hover:bg-white/5'
+                        }`}
+                      >
+                        <TypeIcon type={n.type} />
+                        <div className="min-w-0 flex-1">
+                          <p
+                            className={`text-sm leading-snug ${
+                              n.read
+                                ? 'text-slate-500 dark:text-slate-400'
+                                : 'text-slate-800 dark:text-slate-100'
+                            }`}
+                          >
+                            {n.message}
+                          </p>
+                          <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">
+                            {timeAgo(n.createdAt)}
+                          </p>
+                        </div>
+                        {!n.read && (
+                          <button
+                            type="button"
+                            onClick={() => markRead(n.id)}
+                            className="shrink-0 text-xs font-medium text-slate-400 transition hover:text-emerald-600 dark:hover:text-emerald-400"
+                            aria-label="Mark as read"
+                          >
+                            ✓
+                          </button>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Theme toggle */}
           <button
             type="button"
             onClick={toggleTheme}
             aria-label="Toggle theme"
-            className="ml-1 flex size-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
+            className="flex size-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white"
           >
             {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
           </button>
@@ -98,6 +261,95 @@ export default function AppNav() {
         </div>
 
         <div className="flex items-center gap-2 md:hidden">
+          {/* Notification bell mobile */}
+          <div className="relative" ref={notifRefMobile}>
+            <button
+              type="button"
+              aria-label="Notifications"
+              onClick={() => setNotifOpen(prev => !prev)}
+              className="relative flex size-9 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/10"
+            >
+              <Bell className="size-4" />
+              {unreadCount > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 flex size-4 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-white">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </button>
+
+            {notifOpen && (
+              <div className="absolute right-0 top-14 z-50 w-72 overflow-hidden rounded-2xl border border-white/60 bg-white/95 shadow-[0_16px_48px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:border-white/12 dark:bg-[#0a1d17]/95 dark:shadow-[0_16px_48px_rgba(0,0,0,0.5)]">
+                <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-white/8">
+                  <span className="text-sm font-semibold text-slate-800 dark:text-white">
+                    Notifications
+                  </span>
+                  <div className="flex items-center gap-2">
+                    {unreadCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={markAllRead}
+                        className="text-xs font-medium text-emerald-600 transition hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+                      >
+                        Mark all as read
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setNotifOpen(false)}
+                      className="flex size-6 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 dark:hover:bg-white/10"
+                    >
+                      <X className="size-3.5" />
+                    </button>
+                  </div>
+                </div>
+                <div className="max-h-72 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                  {notifications.length === 0 ? (
+                    <p className="px-4 py-8 text-center text-sm text-slate-400 dark:text-slate-500">
+                      No notifications yet
+                    </p>
+                  ) : (
+                    notifications.map(n => (
+                      <div
+                        key={n.id}
+                        className={`flex items-start gap-3 px-4 py-3 transition ${
+                          !n.read
+                            ? 'bg-emerald-50/60 dark:bg-emerald-900/20'
+                            : 'hover:bg-slate-50 dark:hover:bg-white/5'
+                        }`}
+                      >
+                        <TypeIcon type={n.type} />
+                        <div className="min-w-0 flex-1">
+                          <p
+                            className={`text-sm leading-snug ${
+                              n.read
+                                ? 'text-slate-500 dark:text-slate-400'
+                                : 'text-slate-800 dark:text-slate-100'
+                            }`}
+                          >
+                            {n.message}
+                          </p>
+                          <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">
+                            {timeAgo(n.createdAt)}
+                          </p>
+                        </div>
+                        {!n.read && (
+                          <button
+                            type="button"
+                            onClick={() => markRead(n.id)}
+                            className="shrink-0 text-xs font-medium text-slate-400 transition hover:text-emerald-600 dark:hover:text-emerald-400"
+                            aria-label="Mark as read"
+                          >
+                            ✓
+                          </button>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Theme toggle mobile */}
           <button
             type="button"
