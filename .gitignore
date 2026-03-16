@@ -41,3 +41,18 @@ yarn-error.log*
 next-env.d.ts
 
 /lib/generated/prisma
+
+# database files
+*.db
+*.db-journal
+
+# editor / AI tool local config
+.cursor/
+.agents/
+.claude/
+
+# static test data
+/staticData/
+
+# claude code skills lock
+skills-lock.json
