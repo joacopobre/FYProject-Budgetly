@@ -63,11 +63,7 @@ export function NetWorthChart({ data }: Props) {
             content={
               <ChartTooltipContent
                 formatter={(value) => [`$${Number(value).toFixed(2)}`, 'Net Worth']}
-                className={
-                  isDark
-                    ? '!bg-[#0e2318] !border-white/10 !text-slate-200 [&_.text-muted-foreground]:!text-slate-400 [&_.text-foreground]:!text-white'
-                    : ''
-                }
+                className={`!bg-[#0e2318] !border-white/10 !text-slate-200${isDark ? ' [&_.text-muted-foreground]:!text-slate-400 [&_.text-foreground]:!text-white' : ''}`}
               />
             }
           />
