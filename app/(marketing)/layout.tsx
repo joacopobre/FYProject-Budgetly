@@ -1,7 +1,20 @@
-export default function RootLayout({
+import { Playfair_Display, Inter } from 'next/font/google'
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  weight: ['400', '700', '900'],
+  variable: '--font-playfair',
+})
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
+
+export default function MarketingLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
-  return <div className="bg-gray-200 text-black">{children}</div>
+}) {
+  return (
+    <div id="font-root" className={`${playfair.variable} ${inter.variable}`}>
+      {children}
+    </div>
+  )
 }
