@@ -8,7 +8,7 @@ type CreateBudgetBody = {
   name: string
   kind: 'SPEND' | 'SAVE'
   target?: number
-  startingAmount?: number // only for SPEND if you want initial balance
+  startingAmount?: number // optional initial balance for either kind
   rollover?: boolean
 }
 export async function GET() {
@@ -50,9 +50,7 @@ export async function POST(req: Request) {
       : null
 
   const startingAmount =
-    kind === 'SPEND' &&
-    typeof body.startingAmount === 'number' &&
-    body.startingAmount >= 0
+    typeof body.startingAmount === 'number' && body.startingAmount >= 0
       ? body.startingAmount
       : 0
 
@@ -68,6 +66,7 @@ export async function POST(req: Request) {
         target: target ?? null,
         balance: startingAmount ?? 0,
         rollover,
+        lastResetAt: kind === 'SPEND' ? new Date() : null,
         userId: session.user.id,
         events: startingAmount
           ? {
