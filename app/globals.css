@@ -84,6 +84,21 @@
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
 }
+/* ── Typography ─────────────────────────────────────────────────────────────── */
+
+#font-root {
+  font-family: var(--font-inter, sans-serif);
+}
+
+#font-root h1,
+#font-root h2,
+#font-root h3,
+#font-root h4,
+#font-root h5,
+#font-root h6 {
+  font-family: var(--font-playfair, serif);
+}
+
 @keyframes marquee {
   0% { transform: translateX(0); }
   100% { transform: translateX(calc(-1 * var(--marquee-distance))); }
