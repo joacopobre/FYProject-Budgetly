@@ -1,7 +1,7 @@
 'use client'
 
 import { X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { CategoryLimit } from '@/types/categoryLimits'
 
 type Props = {
@@ -24,6 +24,8 @@ export function SpendingLimitModal({
   const [category, setCategory] = useState('')
   const [amount, setAmount] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+  const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false)
+  const categoryMenuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (editingLimit) {
@@ -53,6 +55,20 @@ export function SpendingLimitModal({
     }
   }, [isOpen])
 
+  useEffect(() => {
+    if (!isCategoryMenuOpen) return
+    const onClickAway = (e: MouseEvent | TouchEvent) => {
+      if (categoryMenuRef.current && categoryMenuRef.current.contains(e.target as Node)) return
+      setIsCategoryMenuOpen(false)
+    }
+    document.addEventListener('mousedown', onClickAway)
+    document.addEventListener('touchstart', onClickAway)
+    return () => {
+      document.removeEventListener('mousedown', onClickAway)
+      document.removeEventListener('touchstart', onClickAway)
+    }
+  }, [isCategoryMenuOpen])
+
   if (!isOpen) return null
 
   const handleSave = async () => {
@@ -77,7 +93,7 @@ export function SpendingLimitModal({
       onClick={onClose}
     >
       <div
-        className="flex w-full max-w-md flex-col gap-6 rounded-2xl border border-gray-200 bg-white p-8 shadow-2xl dark:border-white/10 dark:bg-[#0e2318]"
+        className="flex w-full max-w-md flex-col gap-6 overflow-visible rounded-2xl border border-gray-200 bg-white p-8 shadow-2xl dark:border-white/10 dark:bg-[#0e2318]"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3">
@@ -99,10 +115,7 @@ export function SpendingLimitModal({
         </div>
 
         <div className="flex flex-col gap-4">
-          <label
-            className="flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-slate-300"
-            htmlFor="category"
-          >
+          <div className="flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-slate-300">
             Category
             {editingLimit ? (
               <input
@@ -112,21 +125,46 @@ export function SpendingLimitModal({
                 className="rounded-xl border border-gray-200 px-3 py-2 text-gray-400 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-500"
               />
             ) : (
-              <select
-                id="category"
-                value={category}
-                onChange={e => setCategory(e.currentTarget.value)}
-                className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-white/10 dark:bg-white/8 dark:text-slate-200"
-              >
-                <option value="">Select a category…</option>
-                {categories.map(cat => (
-                  <option key={cat} value={cat}>
-                    {cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase()}
-                  </option>
-                ))}
-              </select>
+              <div className="relative" ref={categoryMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsCategoryMenuOpen(prev => !prev)}
+                  className="flex w-full items-center justify-between rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-white/10 dark:bg-white/8 dark:text-slate-200"
+                >
+                  <span className={category ? '' : 'text-gray-400 dark:text-slate-500'}>
+                    {category ? category.charAt(0).toUpperCase() + category.slice(1).toLowerCase() : 'Select a category…'}
+                  </span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">▼</span>
+                </button>
+                {isCategoryMenuOpen && (
+                  <div className="absolute top-full right-0 left-0 z-[9999] mt-1 max-h-48 overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden dark:border-white/10 dark:bg-[#0e2318] dark:ring-white/5">
+                    {categories.length === 0 ? (
+                      <p className="px-3 py-2 text-sm text-gray-400 dark:text-slate-500">
+                        No categories available
+                      </p>
+                    ) : (
+                      categories.map(cat => (
+                        <button
+                          key={cat}
+                          type="button"
+                          className={`flex w-full items-center justify-between px-3 py-2 text-left text-sm transition hover:bg-gray-100 dark:hover:bg-white/10 ${
+                            cat === category ? 'font-semibold text-emerald-600 dark:text-emerald-400' : 'text-gray-700 dark:text-gray-300'
+                          }`}
+                          onClick={() => {
+                            setCategory(cat)
+                            setIsCategoryMenuOpen(false)
+                          }}
+                        >
+                          {cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase()}
+                          {cat === category && <span className="text-emerald-600 dark:text-emerald-400">✓</span>}
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
             )}
-          </label>
+          </div>
 
           <label
             className="flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-slate-300"
