@@ -1,41 +1,71 @@
 'use client'
 
+import { Pencil } from 'lucide-react'
 import type { Transaction } from '@/types/transactions'
+
+const PAGE_SIZE = 10
+
+function formatDate(dateStr: string): string {
+  const d = new Date(dateStr)
+  const now = new Date()
+  const opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' }
+  if (d.getFullYear() !== now.getFullYear()) opts.year = 'numeric'
+  return d.toLocaleDateString('en-GB', opts)
+}
 
 type Props = {
   transactions: Transaction[]
   onEdit: (tx: Transaction) => void
-  onDelete: (id: number) => void
   formatMoney: (value: number) => string
   getSourceLabel: (tx: Transaction) => string
+  totalCount: number
+  currentPage: number
+  onPageChange: (page: number) => void
 }
 
 export function TransactionsTable({
   transactions,
   onEdit,
-  onDelete,
   formatMoney,
   getSourceLabel,
+  totalCount,
+  currentPage,
+  onPageChange,
 }: Props) {
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE)
+  const startIndex = totalCount === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1
+  const endIndex = Math.min(currentPage * PAGE_SIZE, totalCount)
+
   return (
     <div className="hidden overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_4px_14px_rgba(15,23,42,0.06)] dark:border-white/8 dark:bg-white/6 dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)] dark:backdrop-blur-md md:block">
-      <div className="max-h-[50vh] overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:none">
-        <table className="min-w-full text-sm text-slate-700 dark:text-slate-300">
-          <thead className="border-b border-slate-100 bg-slate-50 text-xs tracking-wider text-slate-500 uppercase dark:border-white/8 dark:bg-white/5 dark:text-slate-400">
+      <table className="min-w-full text-sm text-slate-700 dark:text-slate-300">
+        <thead className="border-b border-slate-100 bg-slate-50 text-xs tracking-wider text-slate-500 uppercase dark:border-white/8 dark:bg-white/5 dark:text-slate-400">
+          <tr>
+            <th className="px-4 py-3 text-left">Date</th>
+            <th className="px-4 py-3 text-left">Description</th>
+            <th className="px-4 py-3 text-left">Category</th>
+            <th className="px-4 py-3 text-left">Type</th>
+            <th className="px-4 py-3 text-left">From</th>
+            <th className="px-4 py-3 text-right">Amount</th>
+            <th className="w-10 px-4 py-3" />
+          </tr>
+        </thead>
+        <tbody>
+          {transactions.length === 0 ? (
             <tr>
-              <th className="px-4 py-3 text-left">Date</th>
-              <th className="px-4 py-3 text-left">Description</th>
-              <th className="px-4 py-3 text-left">Category</th>
-              <th className="px-4 py-3 text-left">Type</th>
-              <th className="px-4 py-3 text-left">From</th>
-              <th className="px-4 py-3 text-right">Amount</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+              <td
+                colSpan={7}
+                className="px-4 py-10 text-center text-sm text-slate-400 dark:text-slate-500"
+              >
+                No transactions found.
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {transactions.map(tx => {
+          ) : (
+            transactions.map(tx => {
               const isIncome = tx.amount > 0
-              const amountColor = isIncome ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
+              const amountColor = isIncome
+                ? 'text-emerald-600 dark:text-emerald-400'
+                : 'text-rose-600 dark:text-rose-400'
               const categoryColors: Record<string, string> = {
                 Food: 'bg-emerald-500',
                 Groceries: 'bg-lime-500',
@@ -48,8 +78,13 @@ export function TransactionsTable({
               }
               const categoryDot = categoryColors[tx.category] ?? 'bg-slate-400'
               return (
-                <tr key={tx.id} className="border-t border-slate-100 transition hover:bg-slate-50/60 dark:border-white/6 dark:hover:bg-white/4">
-                  <td className="px-4 py-3 text-slate-500 dark:text-slate-400">{new Date(tx.date).toISOString().slice(0, 10)}</td>
+                <tr
+                  key={tx.id}
+                  className="group border-t border-slate-100 transition hover:bg-slate-50/60 dark:border-white/6 dark:hover:bg-white/4"
+                >
+                  <td className="px-4 py-3 text-slate-500 dark:text-slate-400">
+                    {formatDate(tx.date)}
+                  </td>
                   <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-100">
                     <span className="flex items-center gap-2">
                       {tx.description}
@@ -67,34 +102,58 @@ export function TransactionsTable({
                     </span>
                   </td>
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{tx.type}</td>
-                  <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{getSourceLabel(tx)}</td>
+                  <td className="px-4 py-3 text-slate-600 dark:text-slate-400">
+                    {getSourceLabel(tx)}
+                  </td>
                   <td className={`px-4 py-3 text-right font-semibold ${amountColor}`}>
                     {formatMoney(tx.amount)}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <div className="flex justify-end gap-2">
-                      <button
-                        type="button"
-                        className="rounded-lg border border-slate-200 px-3 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-100 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/10"
-                        onClick={() => onEdit(tx)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        className="rounded-lg border border-rose-200 px-3 py-1 text-xs font-medium text-rose-600 transition hover:bg-rose-50 dark:border-rose-500/30 dark:text-rose-400 dark:hover:bg-rose-500/10"
-                        onClick={() => onDelete(tx.id)}
-                      >
-                        Delete
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      title="Edit transaction"
+                      className="inline-flex size-7 items-center justify-center rounded-lg text-slate-400 opacity-0 transition hover:bg-slate-100 hover:text-slate-700 group-hover:opacity-100 dark:text-slate-500 dark:hover:bg-white/10 dark:hover:text-slate-300"
+                      onClick={() => onEdit(tx)}
+                    >
+                      <Pencil className="size-3.5" />
+                    </button>
                   </td>
                 </tr>
               )
-            })}
-          </tbody>
-        </table>
-      </div>
+            })
+          )}
+        </tbody>
+      </table>
+
+      {/* Pagination footer */}
+      {totalCount > 0 && (
+        <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3 dark:border-white/8">
+          <span className="text-xs text-slate-500 dark:text-slate-400">
+            Showing {startIndex}–{endIndex} of {totalCount} transactions
+          </span>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              disabled={currentPage === 1}
+              onClick={() => onPageChange(currentPage - 1)}
+              className="flex size-7 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/8"
+            >
+              ←
+            </button>
+            <span className="min-w-[2.5rem] text-center text-xs text-slate-500 dark:text-slate-400">
+              {currentPage} / {totalPages || 1}
+            </span>
+            <button
+              type="button"
+              disabled={currentPage >= totalPages}
+              onClick={() => onPageChange(currentPage + 1)}
+              className="flex size-7 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:text-slate-400 dark:hover:bg-white/8"
+            >
+              →
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
