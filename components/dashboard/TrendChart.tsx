@@ -21,7 +21,7 @@ const chartConfig = {
   },
   expenses: {
     label: 'Expenses',
-    color: '#ef4444',
+    color: '#dc2626',
   },
 }
 
@@ -75,7 +75,7 @@ export function TrendChart({ data }: Props) {
             dataKey="expenses"
             fill="var(--color-expenses)"
             radius={[6, 6, 2, 2]}
-            activeBar={{ fill: isDark ? '#fca5a5' : '#dc2626' }}
+            activeBar={{ fill: isDark ? '#f87171' : '#b91c1c' }}
           />
         </BarChart>
       </ChartContainer>

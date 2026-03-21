@@ -9,6 +9,7 @@ type Props = {
   isOpen: boolean
   onClose: () => void
   onSave: () => void
+  onDelete?: () => void
   editingId: number | null
   date: string
   setDate: (v: string) => void
@@ -42,6 +43,7 @@ export function TransactionModal({
   isOpen,
   onClose,
   onSave,
+  onDelete,
   editingId,
   date,
   setDate,
@@ -437,21 +439,32 @@ export function TransactionModal({
           )}
         </div>
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:justify-end sm:gap-2">
-          <button
-            type="button"
-            className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/10"
-            onClick={onClose}
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
-            onClick={onSave}
-          >
-            Save
-          </button>
+        <div className="flex items-center justify-between gap-3">
+          {editingId !== null && onDelete && (
+            <button
+              type="button"
+              className="rounded-xl border border-rose-200 px-4 py-2 text-sm font-medium text-rose-600 transition hover:bg-rose-50 dark:border-rose-500/30 dark:text-rose-400 dark:hover:bg-rose-500/10"
+              onClick={onDelete}
+            >
+              Delete
+            </button>
+          )}
+          <div className="ml-auto flex gap-2">
+            <button
+              type="button"
+              className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100 dark:border-white/10 dark:text-gray-300 dark:hover:bg-white/10"
+              onClick={onClose}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
+              onClick={onSave}
+            >
+              Save
+            </button>
+          </div>
         </div>
       </div>
     </div>

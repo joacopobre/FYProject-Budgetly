@@ -75,10 +75,16 @@ export default function TransactionsClient({ initialTransactions }: Props) {
   const [isFilterTypeMenuOpen, setIsFilterTypeMenuOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterRecurring, setFilterRecurring] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
 
   useEffect(() => {
     setTransactions(initialTransactions)
   }, [initialTransactions, setTransactions])
+
+  // Reset to page 1 whenever filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, filterType, filterMonth, filterRecurring])
 
   const usedCategories = useMemo(
     () =>
@@ -107,6 +113,12 @@ export default function TransactionsClient({ initialTransactions }: Props) {
       return b.id - a.id
     })
   }, [transactions, searchTerm, filterType, filterMonth, filterRecurring])
+
+  const PAGE_SIZE = 10
+  const paginatedTransactions = useMemo(
+    () => filteredTransactions.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    [filteredTransactions, currentPage],
+  )
 
   const closeModal = useCallback(() => {
     setIsModalOpen(false)
@@ -252,7 +264,7 @@ export default function TransactionsClient({ initialTransactions }: Props) {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-screen-xl flex-col gap-8 px-5 py-10 md:px-8 lg:px-12">
+    <main className="mx-auto flex min-h-screen w-full max-w-screen-xl flex-col gap-8 px-5 py-10 pb-14 md:px-8 lg:px-12">
       <TransactionsHeader onAdd={() => openModal()} onImport={() => setIsImportModalOpen(true)} />
 
       <TransactionsFilters
@@ -273,15 +285,17 @@ export default function TransactionsClient({ initialTransactions }: Props) {
       />
 
       <TransactionsTable
-        transactions={filteredTransactions}
+        transactions={paginatedTransactions}
         onEdit={openModal}
-        onDelete={handleDeleteTransaction}
         formatMoney={formatMoney}
         getSourceLabel={getSourceLabel}
+        totalCount={filteredTransactions.length}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
       />
 
       <TransactionsMobileList
-        transactions={filteredTransactions}
+        transactions={paginatedTransactions}
         onEdit={openModal}
         onDelete={handleDeleteTransaction}
         formatMoney={formatMoney}
@@ -301,6 +315,7 @@ export default function TransactionsClient({ initialTransactions }: Props) {
         isOpen={isModalOpen}
         onClose={closeModal}
         onSave={handleSave}
+        onDelete={editingId !== null ? () => { handleDeleteTransaction(editingId); closeModal() } : undefined}
         editingId={editingId}
         date={date}
         setDate={setDate}

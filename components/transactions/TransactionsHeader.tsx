@@ -8,7 +8,7 @@ type Props = {
 export function TransactionsHeader({ onAdd, onImport }: Props) {
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-      <h1 className="text-4xl font-bold text-slate-900 dark:text-white md:text-5xl">Transactions</h1>
+      <h1 className="text-4xl font-bold text-slate-900 dark:text-white md:text-5xl lg:text-6xl">Transactions</h1>
       <div className="flex items-center gap-3">
         <button
           type="button"
