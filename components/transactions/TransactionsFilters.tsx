@@ -58,14 +58,29 @@ export function TransactionsFilters({
   }, [isMonthMenuOpen, isFilterTypeMenuOpen, setIsFilterTypeMenuOpen, setIsMonthMenuOpen])
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-[0_2px_8px_rgba(15,23,42,0.05)] dark:border-white/8 dark:bg-white/6 dark:backdrop-blur-md md:flex-row md:items-center md:gap-3">
-      <input
-        type="text"
-        value={searchTerm}
-        onChange={e => setSearchTerm(e.currentTarget.value)}
-        placeholder="Search transactions..."
-        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800 transition outline-none focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-100 dark:border-white/10 dark:bg-white/8 dark:text-slate-200 dark:placeholder-slate-500 dark:focus:bg-white/12"
-      />
+    <div className="relative z-20 flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-[0_2px_8px_rgba(15,23,42,0.05)] dark:border-white/8 dark:bg-white/6 dark:backdrop-blur-md md:flex-row md:items-center md:gap-3">
+      <div className="relative flex-1">
+        <svg
+          className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400 dark:text-slate-500"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"
+          />
+        </svg>
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.currentTarget.value)}
+          placeholder="Search transactions..."
+          className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-3 pl-9 text-sm text-slate-800 transition outline-none focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-100 dark:border-white/10 dark:bg-white/8 dark:text-slate-200 dark:placeholder-slate-500 dark:focus:bg-white/12"
+        />
+      </div>
       <div className="relative w-full md:w-44" ref={monthMenuRef}>
         <button
           type="button"
