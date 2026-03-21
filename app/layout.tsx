@@ -6,6 +6,10 @@ import Providers from './providers'
 export const metadata: Metadata = {
   title: 'Budgetly',
   description: 'Personal budgeting app',
+  icons: {
+    icon: '/favicon.png',
+    apple: '/icon.png',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
