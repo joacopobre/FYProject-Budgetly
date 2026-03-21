@@ -1,15 +1,26 @@
 'use client'
 
 import { useContext, useMemo, useState } from 'react'
+import { Plus } from 'lucide-react'
 import { TransactionsContext } from '@/context/TransactionsContext'
 import { SpendingLimitModal } from './SpendingLimitModal'
 import type { CategoryLimit } from '@/types/categoryLimits'
 
 type Props = {
   initialLimits: CategoryLimit[]
+  compact?: boolean
 }
 
-export function SpendingLimits({ initialLimits }: Props) {
+function formatAmount(value: number): string {
+  if (value === 0) return '£0'
+  const abs = Math.abs(value)
+  const hasDecimals = Math.round(abs * 100) % 100 !== 0
+  const fixed = abs.toFixed(hasDecimals ? 2 : 0)
+  const withCommas = fixed.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  return `${value < 0 ? '-' : ''}£${withCommas}`
+}
+
+export function SpendingLimits({ initialLimits, compact = false }: Props) {
   const [limits, setLimits] = useState<CategoryLimit[]>(initialLimits)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingLimit, setEditingLimit] = useState<CategoryLimit | null>(null)
@@ -23,7 +34,6 @@ export function SpendingLimits({ initialLimits }: Props) {
     const now = new Date()
     const year = now.getFullYear()
     const month = now.getMonth()
-
     const map: Record<string, number> = {}
     for (const tx of transactions) {
       if (tx.type !== 'Expense') continue
@@ -34,7 +44,6 @@ export function SpendingLimits({ initialLimits }: Props) {
     return map
   }, [transactions])
 
-  // All unique categories from transactions (for the modal dropdown)
   const usedCategories = useMemo(
     () =>
       Array.from(new Set(transactions.map(tx => tx.category).filter(Boolean))).sort((a, b) =>
@@ -43,7 +52,6 @@ export function SpendingLimits({ initialLimits }: Props) {
     [transactions],
   )
 
-  // Categories that don't already have a limit (for the add modal)
   const availableCategories = useMemo(
     () => usedCategories.filter(cat => !limits.some(l => l.category === cat)),
     [usedCategories, limits],
@@ -90,6 +98,97 @@ export function SpendingLimits({ initialLimits }: Props) {
     setEditingLimit(null)
   }
 
+  if (compact) {
+    return (
+      <section className="flex flex-col gap-3 rounded-2xl border border-[#0d2118]/8 bg-white px-4 py-4 shadow-sm dark:border-white/8 dark:bg-white/8 dark:backdrop-blur-md">
+        <div className="flex items-center justify-between">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+            Spending Limits
+          </p>
+          <button
+            type="button"
+            title="Add spending limit"
+            className="inline-flex size-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 transition hover:bg-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-400 dark:hover:bg-emerald-500/25"
+            onClick={() => {
+              setEditingLimit(null)
+              setIsModalOpen(true)
+            }}
+          >
+            <Plus className="size-3.5" />
+          </button>
+        </div>
+
+        {limits.length === 0 ? (
+          <p className="text-xs text-slate-400 dark:text-slate-500">
+            No limits set. Add one to track category spend.
+          </p>
+        ) : (
+          <div className="flex flex-col divide-y divide-slate-100 dark:divide-white/8">
+            {limits.map(limit => {
+              const spent = spentByCategory[limit.category] ?? 0
+              const pct = limit.monthlyLimit > 0 ? (spent / limit.monthlyLimit) * 100 : 0
+              const clampedPct = Math.min(pct, 100)
+              const isOver = pct >= 100
+              const isWarning = !isOver && pct >= 80
+
+              const barClass = isOver
+                ? 'bg-gradient-to-r from-rose-400 to-rose-600'
+                : isWarning
+                  ? 'bg-gradient-to-r from-amber-400 to-amber-500'
+                  : 'bg-gradient-to-r from-emerald-300 via-emerald-400 to-emerald-600'
+
+              const statusClass = isOver
+                ? 'text-rose-600 dark:text-rose-400'
+                : isWarning
+                  ? 'text-amber-600 dark:text-amber-400'
+                  : 'text-slate-500 dark:text-slate-400'
+
+              return (
+                <button
+                  key={limit.id}
+                  type="button"
+                  className="flex flex-col gap-1.5 py-3 text-left transition first:pt-0 last:pb-0 hover:opacity-80"
+                  onClick={() => openEdit(limit)}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-medium text-slate-800 dark:text-slate-100">
+                      {limit.category}
+                    </span>
+                    <span className={`text-xs ${statusClass}`}>
+                      {isOver && (
+                        <span className="mr-1 text-rose-500 dark:text-rose-400">Over</span>
+                      )}
+                      {isWarning && !isOver && (
+                        <span className="mr-1 text-amber-500 dark:text-amber-400">Near</span>
+                      )}
+                      {formatAmount(spent)} / {formatAmount(limit.monthlyLimit)}
+                    </span>
+                  </div>
+                  <div className="h-1 w-full rounded-full bg-slate-100 dark:bg-white/10">
+                    <div
+                      className={`h-full rounded-full transition-all ${barClass}`}
+                      style={{ width: `${clampedPct}%` }}
+                    />
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        )}
+
+        <SpendingLimitModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          onSave={handleAdd}
+          onUpdate={handleUpdate}
+          categories={availableCategories}
+          editingLimit={editingLimit}
+        />
+      </section>
+    )
+  }
+
+  // Full layout
   return (
     <section className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
@@ -101,7 +200,7 @@ export function SpendingLimits({ initialLimits }: Props) {
         </div>
         <button
           type="button"
-          className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(16,185,129,0.35)] transition-all hover:from-emerald-600 hover:to-teal-600 hover:shadow-[0_4px_18px_rgba(16,185,129,0.5)]"
+          className="inline-flex cursor-pointer items-center justify-center rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(16,185,129,0.35)] transition-all hover:from-emerald-600 hover:to-teal-600 hover:shadow-[0_4px_18px_rgba(16,185,129,0.5)]"
           onClick={() => {
             setEditingLimit(null)
             setIsModalOpen(true)
@@ -144,7 +243,6 @@ export function SpendingLimits({ initialLimits }: Props) {
                 <div
                   className={`absolute top-0 right-0 left-0 h-[3px] ${isOver ? 'bg-rose-500' : isWarning ? 'bg-amber-400' : 'bg-gradient-to-r from-teal-400 to-cyan-500'}`}
                 />
-
                 <div className="flex items-center justify-between">
                   <h3 className="text-base font-semibold text-slate-800 dark:text-slate-100">
                     {limit.category}
@@ -160,30 +258,27 @@ export function SpendingLimits({ initialLimits }: Props) {
                     </span>
                   )}
                 </div>
-
                 <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-white/10">
                   <div
                     className={`h-full rounded-full transition-all ${barClass}`}
                     style={{ width: `${clampedPct}%` }}
                   />
                 </div>
-
                 <div className="flex items-center justify-between text-sm">
                   <span className={statusClass}>
-                    £{spent.toFixed(2)} of £{limit.monthlyLimit.toFixed(2)}
+                    {formatAmount(spent)} of {formatAmount(limit.monthlyLimit)}
                   </span>
-
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      className="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 transition hover:bg-gray-100 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/10"
+                      className="cursor-pointer rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-700 transition hover:bg-gray-100 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/10"
                       onClick={() => openEdit(limit)}
                     >
                       Edit
                     </button>
                     <button
                       type="button"
-                      className="rounded-lg border border-rose-200 px-3 py-1 text-xs font-medium text-rose-600 transition hover:bg-rose-50 dark:border-rose-500/30 dark:text-rose-400 dark:hover:bg-rose-500/10"
+                      className="cursor-pointer rounded-lg border border-rose-200 px-3 py-1 text-xs font-medium text-rose-600 transition hover:bg-rose-50 dark:border-rose-500/30 dark:text-rose-400 dark:hover:bg-rose-500/10"
                       onClick={() => handleDelete(limit.id)}
                     >
                       Delete

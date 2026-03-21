@@ -10,8 +10,6 @@ import { formatMoney } from '@/lib/transactions/formatMoney'
 import { buildTrendSeries } from '@/lib/transactions/buildTrendSeries'
 import { TrendChart } from '@/components/dashboard/TrendChart'
 import { RecentTransactions } from '@/components/dashboard/RecentTransactions'
-import { buildBalanceSeries } from '@/lib/transactions/buildBalanceSeries'
-import { BalanceSparkline } from '@/components/dashboard/BalanceSparkline'
 import { buildNetWorthSeries } from '@/lib/transactions/buildNetWorthSeries'
 import { NetWorthChart } from '@/components/dashboard/NetWorthChart'
 import { Transaction } from '@/types/transactions'
@@ -23,18 +21,17 @@ type Props = {
   initialTransactions: Transaction[]
   initialBudgets: Budget[]
 }
+
 export default function DashboardClient({ initialTransactions, initialBudgets }: Props) {
   const [trendFilter, setTrendFilter] = useState<TrendRange>('This Month')
   const txContext = useContext(TransactionsContext)
   if (!txContext) throw new Error('TransactionsContext missing')
-
   const { setTransactions } = txContext
 
   const [isOpen, setIsOpen] = useState(false)
   const trendMenuRef = useRef<HTMLDivElement>(null)
   const budgetsContext = useContext(BudgetsContext)
   if (!budgetsContext) throw new Error('BudgetsContext missing')
-
   const { setBudgets } = budgetsContext
 
   const { startTour } = useOnboarding()
@@ -47,29 +44,55 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
     setTransactions(initialTransactions)
   }, [initialTransactions, setTransactions])
 
-  // Auto-start tour for new users with no data
   useEffect(() => {
     if (initialTransactions.length === 0 && initialBudgets.length === 0) {
       try {
-        if (!localStorage.getItem(TOUR_DONE_KEY)) {
-          startTour()
-        }
+        if (!localStorage.getItem(TOUR_DONE_KEY)) startTour()
       } catch {}
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // This-month stats (always fixed, independent of trendFilter)
+  const thisMonthTx = filterByDateRange(initialTransactions, 'This Month')
+  const thisMonthStats = calculateDashboardStats(thisMonthTx)
+
+  // Last-month for comparison
+  const lastMonthTx = initialTransactions.filter(tx => {
+    const d = new Date(tx.date)
+    const now = new Date()
+    const lm = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+    return d.getFullYear() === lm.getFullYear() && d.getMonth() === lm.getMonth()
+  })
+  const lastMonthStats = calculateDashboardStats(lastMonthTx)
+
+  // All-time balance
+  const allTimeBalance = initialTransactions.reduce((sum, tx) => sum + tx.amount, 0)
+
+  // Trend chart & net-worth data (follow trendFilter)
   const filtered = filterByDateRange(initialTransactions, trendFilter)
   const trendSeries = buildTrendSeries(filtered)
-  const stats = calculateDashboardStats(filtered)
-
-  const glanceStats = calculateDashboardStats(initialTransactions)
-  const balanceSeries = buildBalanceSeries(initialTransactions)
   const netWorthSeries = buildNetWorthSeries(initialTransactions, trendFilter)
 
-  const handleClick = () => setIsOpen(prev => !prev)
+  // Secondary-line helpers
+  const savingsRate =
+    thisMonthStats.totalIncome > 0
+      ? Math.round(
+          ((thisMonthStats.totalIncome - thisMonthStats.totalExpenses) /
+            thisMonthStats.totalIncome) *
+            100,
+        )
+      : null
 
-  const applyFilter = (filter: TrendRange): void => {
+  const spentDelta =
+    lastMonthStats.totalExpenses > 0
+      ? ((thisMonthStats.totalExpenses - lastMonthStats.totalExpenses) /
+          lastMonthStats.totalExpenses) *
+        100
+      : null
+
+  const handleClick = () => setIsOpen(prev => !prev)
+  const applyFilter = (filter: TrendRange) => {
     setTrendFilter(filter)
     handleClick()
   }
@@ -78,9 +101,7 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
     if (!isOpen) return
     const handleOutside = (e: MouseEvent | TouchEvent) => {
       if (!trendMenuRef.current) return
-      if (!trendMenuRef.current.contains(e.target as Node)) {
-        setIsOpen(false)
-      }
+      if (!trendMenuRef.current.contains(e.target as Node)) setIsOpen(false)
     }
     document.addEventListener('mousedown', handleOutside)
     document.addEventListener('touchstart', handleOutside)
@@ -91,7 +112,8 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
   }, [isOpen])
 
   return (
-    <div className="mx-auto flex w-full max-w-screen-xl flex-col gap-7 px-5 pt-6 pb-12 md:px-8 lg:px-12">
+    <div className="mx-auto flex w-full max-w-screen-xl flex-col gap-8 px-5 pt-8 pb-14 md:px-8 lg:px-12">
+      {/* Page header */}
       <div className="flex items-center justify-between">
         <h1 className="text-4xl font-bold text-slate-900 dark:text-white md:text-5xl lg:text-6xl">
           Dashboard
@@ -105,182 +127,211 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
           <span className="hidden sm:inline">Add transaction</span>
         </Link>
       </div>
-      <section data-tour="dashboard-stats" className="flex flex-col gap-5">
-        <div className="flex items-baseline justify-between">
-          <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100 md:text-3xl">Glance</h2>
-          <span className="text-sm text-slate-400 dark:text-slate-500">Overview</span>
+
+      {/* 4 Stat Cards */}
+      <section data-tour="dashboard-stats" className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {/* Total Balance */}
+        <div className="flex flex-col gap-1 rounded-2xl border border-[#0d2118]/8 bg-white px-5 py-5 shadow-sm dark:border-white/8 dark:bg-white/8 dark:backdrop-blur-md">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+            Total Balance
+          </p>
+          <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-white lg:text-3xl">
+            {formatMoney(allTimeBalance)}
+          </p>
+          <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">All-time net</p>
         </div>
 
-        {/* Balance */}
-        <div className="flex flex-col gap-4 md:grid md:grid-cols-2 md:gap-5">
-          <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white px-4 py-6 shadow-[0_4px_14px_rgba(15,23,42,0.06)] dark:border-white/8 dark:bg-white/6 dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)] dark:backdrop-blur-md md:h-full md:px-6 md:py-8">
-            <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-emerald-400 to-teal-400" />
-            <div className="flex justify-between">
-              <p className="my-auto text-lg font-medium text-slate-600 dark:text-slate-300 md:text-xl">
-                Balance
-              </p>
-              <span className="text-3xl font-semibold text-slate-900 dark:text-white md:text-4xl">
-                {formatMoney(glanceStats.balance)}
-              </span>
-            </div>
-            <div className="mt-4">
-              <BalanceSparkline data={balanceSeries} />
-            </div>
-          </div>
+        {/* Monthly Income */}
+        <div className="flex flex-col gap-1 rounded-2xl border border-emerald-100 bg-emerald-50/50 px-5 py-5 shadow-sm dark:border-emerald-500/20 dark:bg-emerald-500/8 dark:backdrop-blur-md">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+            Monthly Income
+          </p>
+          <p className="mt-1 text-2xl font-bold text-emerald-600 dark:text-emerald-400 lg:text-3xl">
+            {formatMoney(thisMonthStats.totalIncome)}
+          </p>
+          <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+            {savingsRate !== null
+              ? savingsRate >= 0
+                ? `Saving ${savingsRate}% of income`
+                : `Overspending by ${Math.abs(savingsRate)}%`
+              : 'No income this month'}
+          </p>
+        </div>
 
-          <div className="flex flex-col gap-3">
-            <div className="relative overflow-hidden rounded-2xl border border-emerald-100 bg-emerald-50/50 px-4 py-4 dark:border-emerald-500/20 dark:bg-emerald-500/8 dark:backdrop-blur-md">
-              <div className="absolute top-0 left-0 right-0 h-[3px] bg-emerald-400" />
-              <div className="flex items-center justify-between">
-                <p className="text-base font-medium text-slate-700 dark:text-slate-300">Income</p>
-                <span className="text-xl font-semibold text-emerald-600 dark:text-emerald-400">
-                  {formatMoney(stats.totalIncome)}
-                </span>
-              </div>
-            </div>
+        {/* Monthly Spent */}
+        <div className="flex flex-col gap-1 rounded-2xl border border-[#dc2626]/15 bg-[#dc2626]/5 px-5 py-5 shadow-sm dark:border-[#dc2626]/20 dark:bg-[#dc2626]/8 dark:backdrop-blur-md">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+            Monthly Spent
+          </p>
+          <p className="mt-1 text-2xl font-bold text-[#dc2626] dark:text-[#f87171] lg:text-3xl">
+            {formatMoney(thisMonthStats.totalExpenses)}
+          </p>
+          <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+            {spentDelta !== null
+              ? `${spentDelta > 0 ? '+' : ''}${spentDelta.toFixed(1)}% vs last month`
+              : 'No data last month'}
+          </p>
+        </div>
 
-            <div className="relative overflow-hidden rounded-2xl border border-rose-100 bg-rose-50/45 px-4 py-4 dark:border-rose-500/20 dark:bg-rose-500/8 dark:backdrop-blur-md">
-              <div className="absolute top-0 left-0 right-0 h-[3px] bg-rose-400" />
-              <div className="flex items-center justify-between">
-                <p className="text-base font-medium text-slate-700 dark:text-slate-300">Spent</p>
-                <span className="text-xl font-semibold text-rose-600 dark:text-rose-400">
-                  {formatMoney(stats.totalExpenses)}
-                </span>
-              </div>
-            </div>
-
-            <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-[0_2px_10px_rgba(15,23,42,0.04)] dark:border-white/8 dark:bg-white/6 dark:shadow-none dark:backdrop-blur-md">
-              <div className="absolute top-0 left-0 right-0 h-[3px] bg-teal-400" />
-              <div className="flex items-center justify-between">
-                <p className="text-base font-medium text-slate-700 dark:text-slate-300">Net</p>
-                <span className="text-xl font-semibold text-slate-900 dark:text-white">
-                  {formatMoney(stats.balance)}
-                </span>
-              </div>
-            </div>
-          </div>
+        {/* Net Savings */}
+        <div className="flex flex-col gap-1 rounded-2xl border border-[#0d2118]/8 bg-white px-5 py-5 shadow-sm dark:border-white/8 dark:bg-white/8 dark:backdrop-blur-md">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+            Net Savings
+          </p>
+          <p
+            className={`mt-1 text-2xl font-bold lg:text-3xl ${
+              thisMonthStats.balance >= 0
+                ? 'text-slate-900 dark:text-white'
+                : 'text-[#dc2626] dark:text-[#f87171]'
+            }`}
+          >
+            {formatMoney(thisMonthStats.balance)}
+          </p>
+          <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+            {thisMonthStats.balance >= 0 ? 'Positive this month' : 'Negative this month'}
+          </p>
         </div>
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-        <section data-tour="dashboard-trend" className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100 md:text-3xl">Trend</h2>
-            <div className="relative" ref={trendMenuRef}>
-              <button
-                type="button"
-                onClick={handleClick}
-                className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:border-slate-300 dark:border-white/15 dark:bg-white/8 dark:text-slate-300 dark:hover:bg-white/12"
-                aria-expanded={isOpen}
-                aria-controls="trend-filter-menu"
-              >
-                {trendFilter}
-                {isOpen ? <X className="size-4" /> : <ChevronDown className="size-4" />}
-              </button>
-              {isOpen && (
-                <div
-                  id="trend-filter-menu"
-                  className="absolute right-0 z-10 mt-2 w-48 rounded-2xl border border-slate-200 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.1)] overflow-hidden dark:border-white/10 dark:bg-[#0d2418]"
-                >
-                  <ul className="flex flex-col text-sm font-medium text-slate-700">
-                    {(['This Month', 'Last 3 Months', 'This Year'] as const).map(opt => (
-                      <li key={opt} className="border-b border-slate-100 last:border-b-0 dark:border-white/8">
-                        <button
-                          type="button"
-                          className={`w-full px-4 py-2.5 text-left transition hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-white/8 ${trendFilter === opt ? 'text-emerald-600 font-semibold dark:text-emerald-400' : ''}`}
-                          onClick={() => applyFilter(opt)}
-                        >
-                          {opt}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
+      {/* Two-column layout */}
+      <div data-tour="dashboard-trend" className="grid gap-6 lg:grid-cols-[1.7fr_1fr]">
+        {/* Left: trend filter + chart + recent transactions */}
+        <div className="flex flex-col gap-4">
+          <div className="relative" ref={trendMenuRef}>
+            <button
+              type="button"
+              onClick={handleClick}
+              className="flex items-center gap-2 rounded-full border border-[#0d2118]/10 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:border-[#0d2118]/20 hover:bg-slate-50 dark:border-white/15 dark:bg-white/8 dark:text-slate-300 dark:hover:bg-white/12"
+              aria-expanded={isOpen}
+            >
+              {trendFilter}
+              {isOpen ? <X className="size-4" /> : <ChevronDown className="size-4" />}
+            </button>
+            {isOpen && (
+              <div className="absolute left-0 z-10 mt-2 w-48 overflow-hidden rounded-2xl border border-[#0d2118]/8 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-[#0d2418]">
+                <ul className="flex flex-col text-sm font-medium text-slate-700">
+                  {(['This Month', 'Last 3 Months', 'This Year'] as const).map(opt => (
+                    <li key={opt} className="border-b border-slate-100 last:border-b-0 dark:border-white/8">
+                      <button
+                        type="button"
+                        className={`w-full px-4 py-2.5 text-left transition hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-white/8 ${trendFilter === opt ? 'font-semibold text-emerald-600 dark:text-emerald-400' : ''}`}
+                        onClick={() => applyFilter(opt)}
+                      >
+                        {opt}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-white px-5 py-6 shadow-[0_4px_14px_rgba(15,23,42,0.06)] dark:border-white/8 dark:bg-white/6 dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)] dark:backdrop-blur-md md:px-6 md:py-7 lg:px-8 lg:py-8">
-            <div className="space-y-6 md:grid md:grid-cols-[1.2fr_0.8fr] md:items-start md:gap-6 md:space-y-0 lg:gap-8">
-              <TrendChart data={trendSeries} />
-              <RecentTransactions transactions={initialTransactions} />
-            </div>
-          </div>
-        </section>
 
-        {/* budgets compact */}
+          <div className="rounded-2xl border border-[#0d2118]/8 bg-white px-5 py-6 shadow-sm dark:border-white/8 dark:bg-white/8 dark:backdrop-blur-md">
+            <TrendChart data={trendSeries} />
+          </div>
+
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                Recent Transactions
+              </span>
+              <Link
+                href="/transactions"
+                className="text-xs font-semibold text-emerald-600 transition hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+              >
+                View all →
+              </Link>
+            </div>
+            <RecentTransactions transactions={initialTransactions} />
+          </div>
+        </div>
+
+        {/* Right: active budgets */}
         <section className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100 md:text-3xl">Budgets</h2>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+              Active Budgets
+            </p>
             <Link
               href="/budgets"
-              className="text-sm font-semibold text-emerald-600 transition hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+              className="text-xs font-semibold text-emerald-600 transition hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
             >
-              View all
+              View all →
             </Link>
           </div>
-          <div className="grid grid-cols-1 gap-4">
+
+          <div className="rounded-2xl border border-[#0d2118]/8 bg-white px-4 pb-4 shadow-sm dark:border-white/8 dark:bg-white/8 dark:backdrop-blur-md">
             {initialBudgets.length > 0 ? (
-              initialBudgets.slice(0, 4).map(budget => {
-                const isSave = budget.kind === 'SAVE'
-                const current = budget.balance
-                const target = budget.target ?? 0
-                const progress =
-                  isSave && target > 0
-                    ? Math.min(100, Math.round((current / target) * 100))
-                    : 0
+              <div className="divide-y divide-slate-100 dark:divide-white/8">
+                {initialBudgets.slice(0, 5).map(budget => {
+                  const isSave = budget.kind === 'SAVE'
+                  const current = budget.balance
+                  const target = budget.target ?? 0
+                  const progress =
+                    isSave && target > 0
+                      ? Math.min(100, Math.round((current / target) * 100))
+                      : 0
 
-                return (
-                  <div
-                    key={budget.id}
-                    className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-[0_2px_10px_rgba(15,23,42,0.04)] dark:border-white/8 dark:bg-white/6 dark:shadow-none dark:backdrop-blur-md"
-                  >
-                    <div className={`absolute top-0 left-0 right-0 h-[3px] ${isSave ? 'bg-emerald-500' : 'bg-teal-500'}`} />
-                    <div className="mb-3 flex items-center justify-between">
-                      <h3 className="text-base font-semibold text-slate-800 dark:text-slate-100">{budget.name}</h3>
-                      <span className="text-sm text-slate-500 dark:text-slate-400">
-                        {isSave
-                          ? `$${current.toFixed(2)} / $${target.toFixed(2)}`
-                          : `$${current.toFixed(2)}`}
-                      </span>
+                  return (
+                    <div key={budget.id} className="flex flex-col gap-2 py-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex min-w-0 items-center gap-1.5">
+                          <span className="truncate text-sm font-medium text-slate-800 dark:text-slate-100">
+                            {budget.name}
+                          </span>
+                          <span
+                            className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${
+                              isSave
+                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400'
+                                : 'bg-slate-100 text-slate-500 dark:bg-white/8 dark:text-slate-400'
+                            }`}
+                          >
+                            {isSave ? 'Save' : 'Spend'}
+                          </span>
+                        </div>
+                        <span className="shrink-0 text-xs text-slate-500 dark:text-slate-400">
+                          {isSave
+                            ? `${formatMoney(current)} / ${formatMoney(target)}`
+                            : formatMoney(current)}
+                        </span>
+                      </div>
+                      <div className="h-1 w-full rounded-full bg-slate-100 dark:bg-white/10">
+                        <div
+                          className={`h-full rounded-full ${isSave ? 'bg-emerald-500' : 'bg-slate-400 dark:bg-slate-500'}`}
+                          style={{ width: isSave ? `${progress}%` : '100%' }}
+                        />
+                      </div>
                     </div>
-
-                    <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-white/10">
-                      <div
-                        className={`h-full rounded-full ${isSave ? 'bg-emerald-500' : 'bg-teal-500'}`}
-                        style={{ width: isSave ? `${progress}%` : '100%' }}
-                      />
-                    </div>
-                  </div>
-                )
-              })
+                  )
+                })}
+              </div>
             ) : (
               <Link
                 href="/budgets"
-                className="group rounded-xl border border-dashed border-slate-300 bg-white px-6 py-7 text-left shadow-[0_2px_10px_rgba(15,23,42,0.04)] transition hover:border-emerald-300 hover:bg-emerald-50/30 dark:border-white/10 dark:bg-white/5 dark:hover:border-emerald-500/30 dark:hover:bg-emerald-500/8"
+                className="group flex flex-col items-center rounded-xl border border-dashed border-[#0d2118]/15 py-8 text-center transition hover:border-emerald-300 hover:bg-emerald-50/30 dark:border-white/10 dark:hover:border-emerald-500/30 dark:hover:bg-emerald-500/8"
               >
                 <div className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400">
                   <Plus className="size-4" />
                 </div>
-                <p className="mt-3 text-base font-semibold text-gray-800 transition group-hover:text-emerald-700 dark:text-slate-100 dark:group-hover:text-emerald-400">
+                <p className="mt-3 text-sm font-semibold text-gray-800 transition group-hover:text-emerald-700 dark:text-slate-100 dark:group-hover:text-emerald-400">
                   Create your first budget
-                </p>
-                <p className="mt-1 text-sm text-gray-500 dark:text-slate-400">
-                  Set a target and track your progress each month.
                 </p>
               </Link>
             )}
+            <Link
+              href="/budgets"
+              className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-[#0d2118]/12 px-3 py-2 text-xs font-medium text-slate-500 transition hover:border-emerald-300 hover:bg-emerald-50/30 hover:text-emerald-700 dark:border-white/10 dark:text-slate-400 dark:hover:border-emerald-500/30 dark:hover:bg-emerald-500/8 dark:hover:text-emerald-400"
+            >
+              <Plus className="size-3" />
+              Add budget
+            </Link>
           </div>
         </section>
       </div>
 
-      <section className="flex flex-col gap-3">
-        <div className="flex items-baseline justify-between">
-          <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100 md:text-3xl">
-            Net Worth
-          </h2>
-          <span className="text-sm text-slate-400 dark:text-slate-500">{trendFilter}</span>
-        </div>
-        <div className="rounded-2xl border border-slate-200 bg-white px-5 py-6 shadow-[0_4px_14px_rgba(15,23,42,0.06)] dark:border-white/8 dark:bg-white/6 dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)] dark:backdrop-blur-md md:px-6 md:py-7 lg:px-8 lg:py-8">
+      {/* Net Worth — full width */}
+      <section>
+        <div className="rounded-2xl border border-[#0d2118]/8 bg-white px-5 py-6 shadow-sm dark:border-white/8 dark:bg-white/8 dark:backdrop-blur-md md:px-6 md:py-7 lg:px-8 lg:py-8">
           <NetWorthChart data={netWorthSeries} />
         </div>
       </section>

@@ -9,14 +9,17 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div
       id="wrapper"
-      className={`min-h-screen ${
-        theme === 'dark'
-          ? 'dark bg-gradient-to-br from-[#06120f] via-[#0a1d17] to-[#0d241c]'
-          : 'bg-[#f3f5f4]'
+      className={`relative min-h-screen ${
+        theme === 'dark' ? 'dark bg-[#0d2118]' : 'bg-[#f1f5f9]'
       }`}
     >
+      {/* Grain texture overlay — matches landing page */}
+      <div
+        className="pointer-events-none fixed inset-0 z-0 opacity-[0.035]"
+        style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/noise.png")' }}
+      />
       <AppNav />
-      <main className="pt-24">{children}</main>
+      <main className="relative z-10 pt-24">{children}</main>
     </div>
   )
 }
