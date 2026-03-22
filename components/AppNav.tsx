@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { signOut } from 'next-auth/react'
-import { AlertTriangle, Bell, CheckCircle, Info, Map, Moon, Sun, X } from 'lucide-react'
+import { AlertTriangle, Bell, CheckCircle, Info, Map, Moon, Settings, Sun, X } from 'lucide-react'
 import { Plus_Jakarta_Sans } from 'next/font/google'
 import { useTheme } from '@/context/ThemeContext'
 import { useOnboarding, TOUR_DONE_KEY } from '@/context/OnboardingContext'
@@ -275,6 +275,19 @@ export default function AppNav() {
             <Map className="size-4" />
           </button>
 
+          <Link
+            href="/settings"
+            aria-label="Account settings"
+            title="Account settings"
+            className={`flex size-9 items-center justify-center rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/80 ${
+              pathname === '/settings'
+                ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200 dark:bg-white/15 dark:text-white dark:ring-white/20'
+                : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white'
+            }`}
+          >
+            <Settings className="size-4" />
+          </Link>
+
           <button
             type="button"
             onClick={() => signOut({ callbackUrl: '/login' })}
@@ -434,6 +447,18 @@ export default function AppNav() {
             <Map className="size-4" />
             Take the tour
           </button>
+          <Link
+            href="/settings"
+            onClick={close}
+            className={`mt-1 flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition ${
+              pathname === '/settings'
+                ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200 dark:bg-white/15 dark:text-white dark:ring-white/20'
+                : 'text-slate-600 hover:bg-white/70 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-white'
+            }`}
+          >
+            <Settings className="size-4" />
+            Account settings
+          </Link>
           <button
             type="button"
             onClick={() => signOut({ callbackUrl: '/login' })}
