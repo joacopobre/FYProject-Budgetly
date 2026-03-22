@@ -13,6 +13,7 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [googleAccount, setGoogleAccount] = useState(false)
   const [error, setError] = useState('')
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -28,9 +29,15 @@ export default function ForgotPasswordPage() {
 
     setIsSubmitting(false)
 
+    const data = (await res.json()) as { error?: string; googleAccount?: boolean }
+
     if (!res.ok) {
-      const data = (await res.json()) as { error?: string }
       setError(data.error ?? 'Something went wrong. Please try again.')
+      return
+    }
+
+    if (data.googleAccount) {
+      setGoogleAccount(true)
       return
     }
 
@@ -57,7 +64,32 @@ export default function ForgotPasswordPage() {
               Budgetly
             </Link>
 
-            {submitted ? (
+            {googleAccount ? (
+              <>
+                <div className="mt-6 flex items-center gap-3">
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-blue-100">
+                    <svg className="h-5 w-5 text-blue-600" viewBox="0 0 24 24">
+                      <path
+                        fill="currentColor"
+                        d="M12.545 10.239v3.821h5.445c-.712 2.315-2.647 3.972-5.445 3.972a6.033 6.033 0 1 1 0-12.064c1.498 0 2.866.549 3.921 1.453l2.814-2.814A9.969 9.969 0 0 0 12.545 2C7.021 2 2.543 6.477 2.543 12s4.478 10 10.002 10c8.396 0 10.249-7.85 9.426-11.748z"
+                      />
+                    </svg>
+                  </div>
+                  <h1 className="text-2xl font-bold text-slate-900">Google account detected</h1>
+                </div>
+                <p className="mt-4 text-sm text-slate-500">
+                  This account uses Google sign-in. Please continue with Google.
+                </p>
+                <p className="mt-8 text-center text-sm text-slate-500">
+                  <Link
+                    href="/login"
+                    className="font-semibold text-emerald-600 hover:text-emerald-700"
+                  >
+                    Back to sign in
+                  </Link>
+                </p>
+              </>
+            ) : submitted ? (
               <>
                 <div className="mt-6 flex items-center gap-3">
                   <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100">
