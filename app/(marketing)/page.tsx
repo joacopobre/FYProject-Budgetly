@@ -230,20 +230,20 @@ function BentoSection() {
   const cardRadius = useTransform(scrollYProgress, [0, 0.4], [20, 0])
 
   return (
-    <div ref={ref} className="relative overflow-x-hidden bg-[#0d2118] py-32">
+    <div ref={ref} className="relative overflow-x-hidden bg-[#0d2118] py-20 sm:py-32">
       <div className="flex items-center justify-center">
         <motion.div
           style={{ width: cardWidth, borderRadius: cardRadius }}
-          className="relative overflow-hidden bg-[#f0ede6]"
+          className="relative min-w-full overflow-hidden bg-[#f0ede6]"
         >
           <Grain />
-          <div className="relative z-10 mx-auto w-full max-w-5xl px-8 py-16">
+          <div className="relative z-10 mx-auto w-full max-w-5xl px-4 py-10 sm:px-8 sm:py-16">
 
-            <div className="mb-16 text-center">
+            <div className="mb-10 text-center sm:mb-16">
               <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">
                 Everything you need
               </p>
-              <h2 className="mt-3 text-4xl font-bold leading-[1.05] text-[#0d2118] sm:text-5xl">
+              <h2 className="mt-3 text-3xl font-bold leading-[1.05] text-[#0d2118] sm:text-5xl">
                 All your finances, one place.
               </h2>
             </div>
@@ -256,7 +256,7 @@ function BentoSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.15 }}
                 transition={{ duration: 0.7, delay: 0 }}
-                className="col-span-2 rounded-2xl border border-[#0d2118]/8 bg-white p-6 shadow-sm"
+                className="rounded-2xl border border-[#0d2118]/8 bg-white p-6 shadow-sm md:col-span-2"
               >
                 <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">Dashboard</p>
                 <p className="mt-1 text-base font-bold text-slate-900">Income vs Spending</p>
@@ -331,9 +331,9 @@ function BentoSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.15 }}
                 transition={{ duration: 0.7, delay: 0.16 }}
-                className="col-span-2 rounded-2xl border border-[#0d2118]/8 bg-white p-6 shadow-sm"
+                className="rounded-2xl border border-[#0d2118]/8 bg-white p-6 shadow-sm md:col-span-2"
               >
-                <div className="mb-4 flex items-center justify-between">
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">Net Worth</p>
                     <p className="mt-1 text-base font-bold text-slate-900">£17,556</p>
@@ -501,12 +501,12 @@ export default function Home() {
 
       {/* ══ Section 1 — Hero ══════════════════════════════════════════════════ */}
       <section className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#06120f] via-[#0b1e17] to-[#0d2118] text-white">
-        <div className="relative z-10 mx-auto w-full max-w-5xl px-8 pt-40 pb-0 text-center sm:pt-44 lg:pt-52">
+        <div className="relative z-10 mx-auto w-full max-w-5xl px-4 pt-36 pb-0 text-center sm:px-8 sm:pt-44 lg:pt-52">
           <motion.h1
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.65, ease: 'easeOut' }}
-            className="mx-auto max-w-4xl text-6xl font-normal leading-[1.0] tracking-tight text-white sm:text-7xl lg:text-8xl"
+            className="mx-auto max-w-4xl text-4xl font-normal leading-[1.1] tracking-tight text-white sm:text-6xl sm:leading-[1.0] lg:text-8xl"
           >
             Budgeting clarity for people who want real financial progress
           </motion.h1>
@@ -571,41 +571,18 @@ export default function Home() {
       <section id="demo">
 
         {/* 2a — Dashboard ─────────────────────────────────────────────────────── */}
-        <div className="relative overflow-hidden bg-[#0d2118] py-32 text-white">
+        <div className="relative overflow-hidden bg-[#0d2118] py-12 sm:py-24 text-white">
           <Grain />
 
-          <div className="relative z-10 mx-auto w-full max-w-5xl px-8">
-            <div className="grid gap-x-16 lg:grid-cols-2">
-              {/* LEFT: chart */}
-              <div className="py-12 lg:py-0">
-                <ThemeProvider>
-                  <motion.div
-                    {...fadeUp}
-                    className="flex w-full min-h-[500px] flex-col justify-center rounded-2xl border border-emerald-400/15 bg-[#112a1c] px-8 py-8 shadow-[0_24px_64px_rgba(0,0,0,0.4)]"
-                  >
-                    <div className="mb-5 flex flex-wrap gap-2">
-                      <span className="rounded-full bg-emerald-900/50 px-4 py-1.5 text-sm font-semibold text-emerald-300">
-                        Income £4,355
-                      </span>
-                      <span className="rounded-full bg-red-900/50 px-4 py-1.5 text-sm font-semibold text-red-300">
-                        Spent £1,304
-                      </span>
-                      <span className="rounded-full bg-white/10 px-4 py-1.5 text-sm font-semibold text-white">
-                        Net £3,051
-                      </span>
-                    </div>
-                    <TrendChart data={trendData} />
-                  </motion.div>
-                </ThemeProvider>
-              </div>
-
-              {/* RIGHT: text */}
-              <div className="py-12 lg:sticky lg:top-24 lg:py-0 lg:self-start">
+          <div className="relative z-10 mx-auto w-full max-w-5xl px-4 sm:px-8">
+            <div className="grid items-start gap-y-8 lg:grid-cols-2 lg:gap-x-16 lg:gap-y-0">
+              {/* text — DOM first so it stacks on top on mobile; pushed to col-2 on desktop */}
+              <div className="order-1 lg:order-2 lg:sticky lg:top-24 lg:self-start">
                 <motion.div {...fadeUp}>
                   <p className="text-xs font-semibold uppercase tracking-widest text-emerald-400">
                     Dashboard
                   </p>
-                  <h2 className="mt-3 text-5xl font-bold leading-[1.05] text-white sm:text-6xl lg:text-7xl">
+                  <h2 className="mt-3 text-3xl font-bold leading-[1.05] text-white sm:text-5xl lg:text-7xl">
                     Everything at a glance
                   </h2>
                   <p className="mt-5 max-w-sm text-lg leading-8 text-emerald-50/60">
@@ -613,23 +590,46 @@ export default function Home() {
                   </p>
                 </motion.div>
               </div>
+
+              {/* chart — DOM second so it stacks below on mobile; pulled to col-1 on desktop */}
+              <div className="order-2 lg:order-1">
+                <ThemeProvider>
+                  <motion.div
+                    {...fadeUp}
+                    className="flex w-full flex-col justify-center overflow-hidden rounded-2xl border border-emerald-400/15 bg-[#112a1c] px-4 py-6 shadow-[0_24px_64px_rgba(0,0,0,0.4)] sm:min-h-[500px] sm:px-8 sm:py-8"
+                  >
+                    <div className="mb-4 flex flex-wrap gap-2">
+                      <span className="rounded-full bg-emerald-900/50 px-3 py-1 text-xs font-semibold text-emerald-300 sm:px-4 sm:py-1.5 sm:text-sm">
+                        Income £4,355
+                      </span>
+                      <span className="rounded-full bg-red-900/50 px-3 py-1 text-xs font-semibold text-red-300 sm:px-4 sm:py-1.5 sm:text-sm">
+                        Spent £1,304
+                      </span>
+                      <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white sm:px-4 sm:py-1.5 sm:text-sm">
+                        Net £3,051
+                      </span>
+                    </div>
+                    <TrendChart data={trendData} />
+                  </motion.div>
+                </ThemeProvider>
+              </div>
             </div>
           </div>
         </div>
 
         {/* 2b — Budgets ───────────────────────────────────────────────────────── */}
-        <div className="relative overflow-hidden bg-[#0d2118] py-32 text-white">
+        <div className="relative overflow-hidden bg-[#0d2118] py-12 sm:py-24 text-white">
           <Grain />
 
-          <div className="relative z-10 mx-auto w-full max-w-5xl px-8">
-            <div className="grid gap-x-16 lg:grid-cols-2">
+          <div className="relative z-10 mx-auto w-full max-w-5xl px-4 sm:px-8">
+            <div className="grid items-start gap-y-8 lg:grid-cols-2 lg:gap-x-16 lg:gap-y-0">
               {/* LEFT: text */}
-              <div className="py-12 lg:sticky lg:top-24 lg:py-0 lg:self-start">
+              <div className="lg:sticky lg:top-24 lg:self-start">
                 <motion.div {...fadeUp}>
                   <p className="text-xs font-semibold uppercase tracking-widest text-emerald-400">
                     Budgets
                   </p>
-                  <h2 className="mt-3 text-5xl font-bold leading-[1.05] text-white sm:text-6xl lg:text-7xl">
+                  <h2 className="mt-3 text-3xl font-bold leading-[1.05] text-white sm:text-5xl lg:text-7xl">
                     Give every pound a job
                   </h2>
                   <p className="mt-5 max-w-sm text-lg leading-8 text-emerald-50/60">
@@ -639,7 +639,7 @@ export default function Home() {
               </div>
 
               {/* RIGHT: budget cards */}
-              <div className="py-12 lg:py-0">
+              <div>
                 <div className="grid w-full gap-4 sm:grid-cols-2">
                   {budgets.map((budget, i) => {
                     const pct = Math.min(100, Math.round((budget.balance / budget.target) * 100))
@@ -694,19 +694,34 @@ export default function Home() {
         </div>
 
         {/* 2c — Net Worth ─────────────────────────────────────────────────────── */}
-        <div className="relative overflow-hidden bg-[#0d2118] py-32 text-white">
+        <div className="relative overflow-hidden bg-[#0d2118] py-12 sm:py-24 text-white">
           <Grain />
 
-          <div className="relative z-10 mx-auto w-full max-w-5xl px-8">
-            <div className="grid gap-x-16 lg:grid-cols-2">
-              {/* LEFT: chart */}
-              <div className="py-12 lg:py-0">
+          <div className="relative z-10 mx-auto w-full max-w-5xl px-4 sm:px-8">
+            <div className="grid items-start gap-y-8 lg:grid-cols-2 lg:gap-x-16 lg:gap-y-0">
+              {/* text — DOM first so it stacks on top on mobile; pushed to col-2 on desktop */}
+              <div className="order-1 lg:order-2 lg:sticky lg:top-24 lg:self-start">
+                <motion.div {...fadeUp}>
+                  <p className="text-xs font-semibold uppercase tracking-widest text-emerald-400">
+                    Net Worth
+                  </p>
+                  <h2 className="mt-3 text-3xl font-bold leading-[1.05] text-white sm:text-5xl lg:text-7xl">
+                    Watch your wealth grow
+                  </h2>
+                  <p className="mt-5 max-w-sm text-lg leading-8 text-emerald-50/60">
+                    Track your net worth over time. See the trend that matters most.
+                  </p>
+                </motion.div>
+              </div>
+
+              {/* chart — DOM second so it stacks below on mobile; pulled to col-1 on desktop */}
+              <div className="order-2 lg:order-1">
                 <ThemeProvider>
                   <motion.div
                     {...fadeUp}
-                    className="flex w-full min-h-[500px] flex-col justify-center rounded-2xl border border-emerald-400/15 bg-[#112a1c] px-8 py-8 shadow-[0_24px_64px_rgba(0,0,0,0.4)]"
+                    className="flex w-full flex-col justify-center overflow-hidden rounded-2xl border border-emerald-400/15 bg-[#112a1c] px-4 py-6 shadow-[0_24px_64px_rgba(0,0,0,0.4)] sm:min-h-[500px] sm:px-8 sm:py-8"
                   >
-                    <div className="mb-5 flex items-center justify-between">
+                    <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-widest text-emerald-400">Current Net Worth</p>
                         <p className="mt-1 text-2xl font-bold text-white">£17,556</p>
@@ -719,21 +734,6 @@ export default function Home() {
                   </motion.div>
                 </ThemeProvider>
               </div>
-
-              {/* RIGHT: text */}
-              <div className="py-12 lg:sticky lg:top-24 lg:py-0 lg:self-start">
-                <motion.div {...fadeUp}>
-                  <p className="text-xs font-semibold uppercase tracking-widest text-emerald-400">
-                    Net Worth
-                  </p>
-                  <h2 className="mt-3 text-5xl font-bold leading-[1.05] text-white sm:text-6xl lg:text-7xl">
-                    Watch your wealth grow
-                  </h2>
-                  <p className="mt-5 max-w-sm text-lg leading-8 text-emerald-50/60">
-                    Track your net worth over time. See the trend that matters most.
-                  </p>
-                </motion.div>
-              </div>
             </div>
           </div>
         </div>
@@ -741,17 +741,17 @@ export default function Home() {
       </section>
 
       {/* ══ Section 3 — Transactions ══════════════════════════════════════════ */}
-      <section className="relative overflow-hidden bg-[#0d2118] py-32 text-white">
+      <section className="relative overflow-hidden bg-[#0d2118] py-12 sm:py-24 text-white">
         <Grain />
 
-        <div className="relative z-10 mx-auto w-full max-w-5xl px-8">
-          <div className="grid gap-x-16 lg:grid-cols-2 lg:items-start">
+        <div className="relative z-10 mx-auto w-full max-w-5xl px-4 sm:px-8">
+          <div className="grid items-start gap-y-8 lg:grid-cols-2 lg:gap-x-16 lg:gap-y-0">
             {/* Left: text */}
-            <motion.div {...fadeUp} className="py-12 lg:sticky lg:top-24 lg:py-0 lg:self-start">
+            <motion.div {...fadeUp} className="lg:sticky lg:top-24 lg:self-start">
               <p className="text-xs font-semibold uppercase tracking-widest text-emerald-400">
                 Transactions
               </p>
-              <h2 className="mt-3 text-5xl font-bold leading-[1.05] text-white sm:text-6xl lg:text-7xl">
+              <h2 className="mt-3 text-3xl font-bold leading-[1.05] text-white sm:text-5xl lg:text-7xl">
                 Every transaction, beautifully organised
               </h2>
               <p className="mt-5 max-w-sm text-lg leading-8 text-emerald-50/60">
@@ -760,7 +760,7 @@ export default function Home() {
             </motion.div>
 
             {/* Right: transaction list */}
-            <div className="flex flex-col gap-3 py-12 lg:py-0">
+            <div className="flex flex-col gap-3">
               {mockTransactions.map((tx, i) => (
                 <motion.div
                   key={i}
@@ -797,7 +797,7 @@ export default function Home() {
       <section className="relative overflow-hidden bg-[#0d2118] py-32 text-white">
         <Grain />
 
-        <div className="relative z-10 mx-auto mb-14 w-full max-w-5xl px-8">
+        <div className="relative z-10 mx-auto mb-14 w-full max-w-5xl px-4 sm:px-8">
           <motion.div {...fadeUp} className="text-center">
             <p className="text-xs font-semibold uppercase tracking-widest text-emerald-400">
               Testimonials
@@ -818,9 +818,9 @@ export default function Home() {
 
         <motion.div
           {...fadeUp}
-          className="relative z-10 mx-auto w-full max-w-5xl px-8 text-center"
+          className="relative z-10 mx-auto w-full max-w-5xl px-4 text-center sm:px-8"
         >
-          <h2 className="text-4xl font-bold text-white sm:text-5xl sm:leading-[1.1] lg:text-6xl">
+          <h2 className="text-3xl font-bold text-white sm:text-4xl sm:leading-[1.1] lg:text-6xl">
             Ready to bring structure to your finances?
           </h2>
           <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-emerald-50/70">
