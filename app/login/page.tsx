@@ -1,12 +1,33 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { signIn, signOut } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Plus_Jakarta_Sans } from 'next/font/google'
 
 const jakarta = Plus_Jakarta_Sans({ subsets: ['latin'], weight: ['800'], display: 'swap' })
+
+function SuccessBanner() {
+  const searchParams = useSearchParams()
+  if (searchParams.get('success') !== 'password-reset') return null
+  return (
+    <div className="mt-6 flex items-start gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+      <svg
+        className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+      </svg>
+      <p className="text-sm text-emerald-700">
+        Password reset successfully. You can now sign in with your new password.
+      </p>
+    </div>
+  )
+}
 
 export default function LoginPage() {
   const router = useRouter()
@@ -70,6 +91,10 @@ export default function LoginPage() {
               Sign in to manage your budgets and spending.
             </p>
 
+            <Suspense>
+              <SuccessBanner />
+            </Suspense>
+
             {/* Google */}
             <button
               type="button"
@@ -108,9 +133,17 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label htmlFor="password" className="block text-sm font-medium text-slate-700">
-                  Password
-                </label>
+                <div className="flex items-center justify-between">
+                  <label htmlFor="password" className="block text-sm font-medium text-slate-700">
+                    Password
+                  </label>
+                  <Link
+                    href="/forgot-password"
+                    className="text-xs font-medium text-emerald-600 hover:text-emerald-700"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
                 <input
                   id="password"
                   type="password"
