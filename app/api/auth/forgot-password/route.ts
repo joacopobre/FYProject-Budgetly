@@ -15,10 +15,14 @@ export async function POST(req: Request) {
 
   const user = await prisma.user.findUnique({ where: { email } })
 
-  // Always return success to avoid email enumeration.
-  // Only send a reset link for accounts that use password auth.
-  if (!user || !user.passwordHash) {
+  // No account — return generic success to avoid email enumeration.
+  if (!user) {
     return NextResponse.json({ success: true })
+  }
+
+  // Google OAuth account (no password hash) — tell the client explicitly.
+  if (!user.passwordHash) {
+    return NextResponse.json({ googleAccount: true })
   }
 
   // Delete any existing reset tokens for this email

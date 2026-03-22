@@ -260,7 +260,7 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
             </Link>
           </div>
 
-          <div className="rounded-2xl border border-[#0d2118]/8 bg-white px-4 pb-4 shadow-sm dark:border-white/8 dark:bg-white/8 dark:backdrop-blur-md">
+          <div className="rounded-2xl border border-[#0d2118]/8 bg-white px-4 pt-4 pb-4 shadow-sm dark:border-white/8 dark:bg-white/8 dark:backdrop-blur-md">
             {initialBudgets.length > 0 ? (
               <div className="divide-y divide-slate-100 dark:divide-white/8">
                 {initialBudgets.slice(0, 5).map(budget => {
@@ -308,7 +308,7 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
             ) : (
               <Link
                 href="/budgets"
-                className="group flex flex-col items-center rounded-xl border border-dashed border-[#0d2118]/15 py-8 text-center transition hover:border-emerald-300 hover:bg-emerald-50/30 dark:border-white/10 dark:hover:border-emerald-500/30 dark:hover:bg-emerald-500/8"
+                className="group flex w-full flex-col items-center rounded-xl border border-dashed border-[#0d2118]/15 py-8 text-center transition hover:border-emerald-300 hover:bg-emerald-50/30 dark:border-white/10 dark:hover:border-emerald-500/30 dark:hover:bg-emerald-500/8"
               >
                 <div className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400">
                   <Plus className="size-4" />
