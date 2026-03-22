@@ -284,7 +284,7 @@ export function TransactionModal({
                         }}
                       >
                         <span className="font-semibold">+</span> Create new category:{' '}
-                        <span className="font-medium">"{categorySearch.trim()}"</span>
+                        <span className="font-medium">&quot;{categorySearch.trim()}&quot;</span>
                       </button>
                     )}
                   {categories.length === 0 && !categorySearch.trim() && (
