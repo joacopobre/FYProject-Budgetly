@@ -61,17 +61,20 @@ export default function Header() {
 
   return (
     <header>
+      {/* Nav pill — always z-50, always above the menu overlay */}
       <motion.nav
-        className="fixed top-0 left-0 z-50 w-full px-4 pt-3 sm:px-6"
+        className="fixed top-0 left-0 z-[60] w-full px-4 pt-3 sm:px-6"
         initial={reduceMotion ? undefined : { opacity: 0, y: -12 }}
         animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
         transition={{ duration: 0.55, ease: 'easeOut' }}
       >
         <div
           className={`relative mx-auto max-w-7xl rounded-full transition-[background-color,border-color,box-shadow] duration-300 ${
-            hasScrolled
-              ? 'border border-emerald-200/50 bg-white/90 shadow-[0_8px_24px_rgba(15,23,42,0.09),inset_0_1px_0_rgba(255,255,255,0.7)] backdrop-blur-xl'
-              : 'border border-white/12 bg-[#061310]/58 shadow-[0_12px_32px_rgba(0,0,0,0.45)] backdrop-blur-xl'
+            isOpen
+              ? 'border-transparent bg-transparent shadow-none'
+              : hasScrolled
+                ? 'border border-emerald-200/50 bg-white/90 shadow-[0_8px_24px_rgba(15,23,42,0.09),inset_0_1px_0_rgba(255,255,255,0.7)] backdrop-blur-xl'
+                : 'border border-white/12 bg-[#061310]/58 shadow-[0_12px_32px_rgba(0,0,0,0.45)] backdrop-blur-xl'
           }`}
         >
           <div className="relative flex items-center justify-between px-5 sm:px-6">
@@ -148,7 +151,7 @@ export default function Header() {
               {/* Hamburger */}
               <button
                 type="button"
-                className={`flex size-9 items-center justify-center rounded-full transition-colors duration-150 hover:cursor-pointer md:hidden ${
+                className={`flex size-9 items-center justify-center rounded-full transition-colors duration-150 hover:cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 md:hidden ${
                   hasScrolled
                     ? 'text-slate-700 hover:bg-slate-100'
                     : 'text-slate-100 hover:bg-white/12'
@@ -162,71 +165,78 @@ export default function Header() {
               </button>
             </div>
           </div>
-
-          {/* Mobile menu */}
-          {isOpen && (
-            <motion.div
-              id="mobile-menu"
-              className={`border-t px-3 pt-3 pb-4 md:hidden ${
-                hasScrolled ? 'border-slate-200/70' : 'border-white/12'
-              }`}
-              initial={reduceMotion ? undefined : { opacity: 0, y: -6 }}
-              animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-              transition={{ duration: 0.18, ease: 'easeOut' }}
-            >
-              <div className="flex flex-col gap-0.5">
-                {navLinks.map(link => (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setIsOpen(false)}
-                    className={`rounded-xl px-3 py-2.5 text-sm font-medium transition-colors duration-150 ${
-                      hasScrolled
-                        ? 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
-                        : 'text-slate-200 hover:bg-white/10 hover:text-white'
-                    }`}
-                  >
-                    {link.label}
-                  </a>
-                ))}
-
-                {!session?.user && (
-                  <div
-                    className={`mt-2 grid gap-2 border-t pt-3 ${
-                      hasScrolled ? 'border-slate-200' : 'border-white/12'
-                    }`}
-                  >
-                    <button
-                      type="button"
-                      className="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-2.5 text-sm font-medium text-white shadow-[0_4px_12px_rgba(16,185,129,0.3)] hover:cursor-pointer"
-                      onClick={() => {
-                        setIsOpen(false)
-                        router.push('/signup')
-                      }}
-                    >
-                      Sign up
-                    </button>
-                    <button
-                      type="button"
-                      className={`rounded-xl border px-4 py-2.5 text-sm font-medium hover:cursor-pointer ${
-                        hasScrolled
-                          ? 'border-slate-200 text-slate-700 hover:bg-slate-50'
-                          : 'border-white/18 text-slate-200 hover:bg-white/8'
-                      }`}
-                      onClick={() => {
-                        setIsOpen(false)
-                        router.push('/login')
-                      }}
-                    >
-                      Login
-                    </button>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
         </div>
       </motion.nav>
+
+      {/* Mobile menu — full-bleed flush dropdown */}
+      {isOpen && (
+        <motion.div
+          id="mobile-menu"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Navigation menu"
+          className={`fixed inset-x-0 top-0 z-[45] pt-[68px] pb-5 md:hidden ${
+            hasScrolled
+              ? 'border-b border-slate-200 bg-white shadow-[0_8px_24px_rgba(0,0,0,0.12)]'
+              : 'border-b border-white/10 bg-[#0d2118] shadow-[0_8px_24px_rgba(0,0,0,0.4)]'
+          }`}
+          initial={reduceMotion ? undefined : { opacity: 0, y: -8 }}
+          animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+          transition={{ duration: 0.18, ease: 'easeOut' }}
+        >
+          <div className="px-4 pt-2">
+            <div className="flex flex-col gap-0">
+              {navLinks.map(link => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setIsOpen(false)}
+                  className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 ${
+                    hasScrolled
+                      ? 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
+                      : 'text-slate-200 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  {link.label}
+                </a>
+              ))}
+
+              {!session?.user && (
+                <div
+                  className={`mt-2 grid gap-2 border-t pt-3 ${
+                    hasScrolled ? 'border-slate-200' : 'border-white/12'
+                  }`}
+                >
+                  <button
+                    type="button"
+                    className="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-2.5 text-sm font-medium text-white shadow-[0_4px_12px_rgba(16,185,129,0.3)] hover:cursor-pointer"
+                    onClick={() => {
+                      setIsOpen(false)
+                      router.push('/signup')
+                    }}
+                  >
+                    Sign up
+                  </button>
+                  <button
+                    type="button"
+                    className={`rounded-xl border px-4 py-2.5 text-sm font-medium hover:cursor-pointer ${
+                      hasScrolled
+                        ? 'border-slate-200 text-slate-700 hover:bg-slate-50'
+                        : 'border-white/18 text-slate-200 hover:bg-white/8'
+                    }`}
+                    onClick={() => {
+                      setIsOpen(false)
+                      router.push('/login')
+                    }}
+                  >
+                    Login
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      )}
     </header>
   )
 }
