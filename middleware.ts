@@ -10,7 +10,7 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  const protectedRoutes = ['/dashboard', '/budgets', '/transactions']
+  const protectedRoutes = ['/dashboard', '/budgets', '/transactions', '/settings']
 
   const isProtected = protectedRoutes.some(route => pathname.startsWith(route))
 
@@ -22,5 +22,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/budgets/:path*', '/transactions/:path*'],
+  matcher: ['/dashboard/:path*', '/budgets/:path*', '/transactions/:path*', '/settings/:path*'],
 }
