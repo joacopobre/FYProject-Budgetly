@@ -6,7 +6,6 @@ import { redirect } from 'next/navigation'
 import { getBudgetsForUser } from '@/lib/db/budgets'
 import { mapBudgetsToUi } from '@/lib/mappers/budgets'
 import { prisma } from '@/lib/prisma'
-import type { CategoryLimit } from '@prisma/client'
 
 export default async function BudgetsPage() {
   const session = await getAuthSession()
@@ -21,7 +20,7 @@ export default async function BudgetsPage() {
   ])
 
   const initialBudgets = mapBudgetsToUi(budgets)
-  const initialLimits = rawLimits.map((l: CategoryLimit) => ({
+  const initialLimits = rawLimits.map((l: typeof rawLimits[number]) => ({
     id: l.id,
     category: l.category,
     monthlyLimit: l.monthlyLimit,
