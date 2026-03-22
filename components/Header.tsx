@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { Menu, X, ArrowRight } from 'lucide-react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { Plus_Jakarta_Sans } from 'next/font/google'
@@ -75,7 +76,7 @@ export default function Header() {
         >
           <div className="relative flex items-center justify-between px-5 sm:px-6">
             {/* Logo */}
-            <a href="/" className="flex flex-shrink-0 items-center py-3.5">
+            <Link href="/" className="flex flex-shrink-0 items-center py-3.5">
               <span
                 className={`${jakarta.className} text-xl tracking-tight`}
                 style={
@@ -91,7 +92,7 @@ export default function Header() {
               >
                 Budgetly
               </span>
-            </a>
+            </Link>
 
             {/* Desktop nav links */}
             <nav className="hidden items-center gap-0.5 md:flex" aria-label="Main navigation">
