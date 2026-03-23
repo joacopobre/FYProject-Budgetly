@@ -71,6 +71,8 @@ export default function BudgetsClient({ initialBudgets, initialLimits }: Props) 
   const { transactions, setTransactions } = txContext
 
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [fundError, setFundError] = useState<string | null>(null)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   // Close three-dot menu on outside click
   useEffect(() => {
@@ -109,7 +111,12 @@ export default function BudgetsClient({ initialBudgets, initialLimits }: Props) 
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ mode, amount, note: fundNote.trim() || undefined }),
     })
-    if (!res.ok) return
+    if (!res.ok) {
+      const data = await res.json()
+      setFundError(data.error ?? 'Something went wrong.')
+      return
+    }
+    setFundError(null)
 
     const data = await res.json()
     const updatedBudget: Budget = data.budget
@@ -125,6 +132,7 @@ export default function BudgetsClient({ initialBudgets, initialLimits }: Props) 
     setFundMode(null)
     setFundAmount('')
     setFundNote('')
+    setFundError(null)
     setIsFundModalOpen(false)
     setIsFundNoteOpen(false)
   }
@@ -174,7 +182,12 @@ export default function BudgetsClient({ initialBudgets, initialLimits }: Props) 
         rollover: budgetKind === 'SPEND' ? rollover : undefined,
       }),
     })
-    if (!res.ok) return
+    if (!res.ok) {
+      const data = await res.json()
+      setSaveError(data.error ?? 'Something went wrong.')
+      return
+    }
+    setSaveError(null)
     const createdBudget: Budget = await res.json()
     setBudgets(prev => [...prev, createdBudget])
     closeModal()
@@ -185,6 +198,7 @@ export default function BudgetsClient({ initialBudgets, initialLimits }: Props) 
     setStartingAmount('')
     setName('')
     setRollover(false)
+    setSaveError(null)
     setIsModalOpen(false)
     setEditingBudgetId(null)
   }
@@ -532,6 +546,7 @@ export default function BudgetsClient({ initialBudgets, initialLimits }: Props) 
         setBudgetKind={setBudgetKind}
         rollover={rollover}
         setRollover={setRollover}
+        error={saveError}
       />
       <FundModal
         isOpen={isFundModalOpen}
@@ -545,6 +560,7 @@ export default function BudgetsClient({ initialBudgets, initialLimits }: Props) 
         setFundNote={setFundNote}
         isFundNoteOpen={isFundNoteOpen}
         setIsFundNoteOpen={setIsFundNoteOpen}
+        error={fundError}
       />
     </main>
   )
