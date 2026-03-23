@@ -19,6 +19,7 @@ type Props = {
   setBudgetKind: (v: BudgetKind) => void
   rollover: boolean
   setRollover: (v: boolean) => void
+  error?: string | null
 }
 
 export function BudgetModal({
@@ -36,6 +37,7 @@ export function BudgetModal({
   setBudgetKind,
   rollover,
   setRollover,
+  error,
 }: Props) {
   useEffect(() => {
     if (!isOpen) return
@@ -175,6 +177,12 @@ export function BudgetModal({
             </label>
           )}
         </div>
+
+        {error && (
+          <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-400">
+            {error}
+          </p>
+        )}
 
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-end sm:gap-2">
           <button
