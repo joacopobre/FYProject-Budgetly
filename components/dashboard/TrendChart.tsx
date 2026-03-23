@@ -36,7 +36,7 @@ export function TrendChart({ data }: Props) {
     return <p className="text-sm text-gray-500 dark:text-slate-500">No data for this period</p>
 
   return (
-    <div className="h-48 w-full sm:h-64">
+    <div className="h-48 w-full overflow-hidden sm:h-64">
       <ChartContainer className="h-full w-full" config={chartConfig}>
         <BarChart data={data} barGap={4} barCategoryGap="20%">
           <CartesianGrid vertical={false} stroke={gridStroke} strokeDasharray="3 3" />
