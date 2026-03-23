@@ -59,7 +59,7 @@ export async function sendEmail({
   to,
   subject,
   html,
-  from = "Budgetly <noreply@budgetly.app>",
+  from = "Budgetly <hello@budgetly.uk>",
 }: SendEmailOptions) {
   const { data, error } = await resend.emails.send({ from, to, subject, html });
 
