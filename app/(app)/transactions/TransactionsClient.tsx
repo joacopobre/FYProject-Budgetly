@@ -75,6 +75,7 @@ export default function TransactionsClient({ initialTransactions }: Props) {
   const [isFilterTypeMenuOpen, setIsFilterTypeMenuOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterRecurring, setFilterRecurring] = useState(false)
+  const [apiError, setApiError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
 
   useEffect(() => {
@@ -131,6 +132,7 @@ export default function TransactionsClient({ initialTransactions }: Props) {
     setBudgetId(null)
     setRecurrence('NONE')
     setEditingId(null)
+    setApiError(null)
   }, [])
 
   const openModal = (tx?: Transaction) => {
@@ -159,6 +161,7 @@ export default function TransactionsClient({ initialTransactions }: Props) {
   }
 
   const handleSave = async () => {
+    setApiError(null)
     const validatedDate = date.trim()
     const validatedDescription = description.trim()
     const validatedCategory = category.trim()
@@ -231,7 +234,11 @@ export default function TransactionsClient({ initialTransactions }: Props) {
         }),
       })
 
-      if (!res.ok) return
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setApiError(data?.error ?? 'Something went wrong.')
+        return
+      }
 
       const created = await res.json()
 
@@ -334,6 +341,7 @@ export default function TransactionsClient({ initialTransactions }: Props) {
         setBudgetId={setBudgetId}
         recurrence={recurrence}
         setRecurrence={setRecurrence}
+        apiError={apiError}
       />
     </main>
   )

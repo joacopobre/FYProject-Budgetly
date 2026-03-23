@@ -23,6 +23,26 @@ export async function POST(req: Request) {
 
   const body = (await req.json()) as Body
 
+  if (body.source === 'ACCOUNT' && body.type === 'Expense') {
+    const [txSum, budgetSum] = await Promise.all([
+      prisma.transaction.aggregate({
+        where: { userId: session.user.id },
+        _sum: { amount: true },
+      }),
+      prisma.budget.aggregate({
+        where: { userId: session.user.id },
+        _sum: { balance: true },
+      }),
+    ])
+    const available = (txSum._sum.amount ?? 0) - (budgetSum._sum.balance ?? 0)
+    if (Math.abs(body.amount) > available) {
+      return NextResponse.json(
+        { error: `Insufficient available balance. You have £${available.toFixed(2)} available.` },
+        { status: 400 },
+      )
+    }
+  }
+
   const recurrence = body.recurrence ?? 'NONE'
   const created = await prisma.transaction.create({
     data: {

@@ -28,6 +28,7 @@ type Props = {
   setBudgetId: (v: string | null) => void
   recurrence: RecurrenceFrequency
   setRecurrence: (v: RecurrenceFrequency) => void
+  apiError?: string | null
 }
 
 const typeOptions: TxType[] = ['Expense', 'Income']
@@ -62,6 +63,7 @@ export function TransactionModal({
   setBudgetId,
   recurrence,
   setRecurrence,
+  apiError,
 }: Props) {
   const [isTypeMenuOpen, setIsTypeMenuOpen] = useState(false)
   const typeMenuRef = useRef<HTMLDivElement>(null)
@@ -438,6 +440,12 @@ export function TransactionModal({
             </div>
           )}
         </div>
+
+        {apiError && (
+          <p className="rounded-xl bg-rose-50 px-4 py-2 text-sm text-rose-600 dark:bg-rose-500/10 dark:text-rose-400">
+            {apiError}
+          </p>
+        )}
 
         <div className="flex items-center justify-between gap-3">
           {editingId !== null && onDelete && (

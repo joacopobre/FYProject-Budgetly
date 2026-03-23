@@ -68,6 +68,8 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
 
   // All-time balance
   const allTimeBalance = initialTransactions.reduce((sum, tx) => sum + tx.amount, 0)
+  const inBudgets = initialBudgets.reduce((sum, b) => sum + b.balance, 0)
+  const availableBalance = allTimeBalance - inBudgets
 
   // Trend chart & net-worth data (follow trendFilter)
   const filtered = filterByDateRange(initialTransactions, trendFilter)
@@ -138,7 +140,9 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
           <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-white lg:text-3xl">
             {formatMoney(allTimeBalance)}
           </p>
-          <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">All-time net</p>
+          <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+            {formatMoney(availableBalance)} available &middot; {formatMoney(inBudgets)} in budgets
+          </p>
         </div>
 
         {/* Monthly Income */}
