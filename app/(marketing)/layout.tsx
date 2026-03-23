@@ -1,4 +1,5 @@
 import { Playfair_Display, Inter } from 'next/font/google'
+import { ThemeProvider } from '@/context/ThemeContext'
 
 const playfair = Playfair_Display({
   subsets: ['latin'],
@@ -13,8 +14,8 @@ export default function MarketingLayout({
   children: React.ReactNode
 }) {
   return (
-    <div id="font-root" className={`${playfair.variable} ${inter.variable}`}>
-      {children}
+    <div id="font-root" className={`${playfair.variable} ${inter.variable} overflow-x-hidden`}>
+      <ThemeProvider>{children}</ThemeProvider>
     </div>
   )
 }
