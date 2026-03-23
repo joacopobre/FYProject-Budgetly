@@ -58,7 +58,24 @@ export async function POST(req: Request) {
 
   // If you want to record an initial event when startingAmount > 0
   type TxClient = Parameters<Parameters<typeof prisma.$transaction>[0]>[0]
+  try {
   const created = await prisma.$transaction(async (tx: TxClient) => {
+    if (startingAmount > 0) {
+      const [txSum, budgetSum] = await Promise.all([
+        tx.transaction.aggregate({
+          where: { userId: session.user.id },
+          _sum: { amount: true },
+        }),
+        tx.budget.aggregate({
+          where: { userId: session.user.id },
+          _sum: { balance: true },
+        }),
+      ])
+      const available = (txSum._sum.amount ?? 0) - (budgetSum._sum.balance ?? 0)
+      if (startingAmount > available) {
+        throw new Error(`INSUFFICIENT_BALANCE:${available}`)
+      }
+    }
     const budget = await tx.budget.create({
       data: {
         name,
@@ -109,4 +126,16 @@ export async function POST(req: Request) {
   })
 
   return NextResponse.json(created)
+  } catch (err: any) {
+    if (err?.message?.startsWith('INSUFFICIENT_BALANCE:')) {
+      const available = Number(err.message.split(':')[1])
+      return NextResponse.json(
+        {
+          error: `Insufficient available balance. You have £${available.toFixed(2)} available.`,
+        },
+        { status: 400 },
+      )
+    }
+    throw err
+  }
 }

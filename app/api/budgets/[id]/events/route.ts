@@ -41,6 +41,21 @@ export async function POST(req: Request, { params }: Ctx) {
       if (mode === 'WITHDRAW' && budget.balance < amount)
         throw new Error('INSUFFICIENT_FUNDS')
 
+      if (mode === 'ADD') {
+        const [txSum, budgetSum] = await Promise.all([
+          tx.transaction.aggregate({
+            where: { userId: session.user.id },
+            _sum: { amount: true },
+          }),
+          tx.budget.aggregate({
+            where: { userId: session.user.id },
+            _sum: { balance: true },
+          }),
+        ])
+        const available = (txSum._sum.amount ?? 0) - (budgetSum._sum.balance ?? 0)
+        if (amount > available) throw new Error(`INSUFFICIENT_BALANCE:${available}`)
+      }
+
       const delta = mode === 'ADD' ? amount : -amount
 
       await tx.budgetEvent.create({
@@ -119,6 +134,15 @@ export async function POST(req: Request, { params }: Ctx) {
     }
     if (err?.message === 'INSUFFICIENT_FUNDS') {
       return NextResponse.json({ error: 'Insufficient funds' }, { status: 400 })
+    }
+    if (err?.message?.startsWith('INSUFFICIENT_BALANCE:')) {
+      const available = Number(err.message.split(':')[1])
+      return NextResponse.json(
+        {
+          error: `Insufficient available balance. You have £${available.toFixed(2)} available.`,
+        },
+        { status: 400 },
+      )
     }
     throw err
   }

@@ -15,6 +15,7 @@ type Props = {
   setFundNote: (v: string) => void
   isFundNoteOpen: boolean
   setIsFundNoteOpen: (v: boolean) => void
+  error?: string | null
 }
 
 const formatMoney = (value: number) => `$${value.toFixed(2)}`
@@ -31,6 +32,7 @@ export function FundModal({
   setFundNote,
   isFundNoteOpen,
   setIsFundNoteOpen,
+  error,
 }: Props) {
   if (!isOpen) return null
 
@@ -118,6 +120,12 @@ export function FundModal({
               </label>
             )}
           </div>
+
+          {error && (
+            <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-400">
+              {error}
+            </p>
+          )}
 
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-end sm:gap-2">
             <button
