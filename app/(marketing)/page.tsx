@@ -7,7 +7,6 @@ import GoogleSignInButton from '@/components/auth/GoogleSignInButton'
 import { BalanceSparkline } from '@/components/dashboard/BalanceSparkline'
 import { TrendChart } from '@/components/dashboard/TrendChart'
 import { NetWorthChart } from '@/components/dashboard/NetWorthChart'
-import { ThemeProvider } from '@/context/ThemeContext'
 import type { BalancePoint } from '@/lib/transactions/buildBalanceSeries'
 import type { TrendPoint } from '@/lib/transactions/buildTrendSeries'
 import type { NetWorthPoint } from '@/lib/transactions/buildNetWorthSeries'
@@ -74,10 +73,10 @@ const testimonials = [
 // ─── Shared animation props ────────────────────────────────────────────────────
 
 const fadeUp = {
-  initial: { opacity: 0, y: 60 },
+  initial: { opacity: 0, y: 24 },
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true, amount: 0.15 },
-  transition: { duration: 0.7 },
+  transition: { duration: 0.5 },
 }
 
 // ─── Waitlist form ─────────────────────────────────────────────────────────────
@@ -131,11 +130,11 @@ function WaitlistForm() {
 function GlobalGlow() {
   return (
     <div
-      className="pointer-events-none fixed inset-0 z-0"
+      className="pointer-events-none fixed inset-0 z-0 hidden sm:block"
       aria-hidden
       style={{
         background: 'radial-gradient(ellipse 80% 55% at 50% 35%, rgba(16,185,129,0.15) 0%, transparent 70%)',
-        filter: 'blur(160px)',
+        filter: 'blur(80px)',
       }}
     />
   )
@@ -147,6 +146,9 @@ function HeroParticles() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
+    // Skip particle animation on mobile — saves a continuous RAF loop
+    if (window.matchMedia('(max-width: 767px)').matches) return
+
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
@@ -220,6 +222,12 @@ function Grain() {
 
 function BentoSection() {
   const ref = useRef<HTMLDivElement>(null)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    setIsMobile(window.matchMedia('(max-width: 767px)').matches)
+  }, [])
+
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ['start end', 'center center'],
@@ -233,7 +241,7 @@ function BentoSection() {
     <div ref={ref} className="relative overflow-x-hidden bg-[#0d2118] py-20 sm:py-32">
       <div className="flex items-center justify-center">
         <motion.div
-          style={{ width: cardWidth, borderRadius: cardRadius }}
+          style={isMobile ? undefined : { width: cardWidth, borderRadius: cardRadius }}
           className="relative min-w-full overflow-hidden bg-[#f0ede6]"
         >
           <Grain />
@@ -248,15 +256,15 @@ function BentoSection() {
               </h2>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-3 [&>*]:min-w-0">
 
               {/* Card 1 — TrendChart (col-span-2) */}
               <motion.div
-                initial={{ opacity: 0, y: 60 }}
+                initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.15 }}
-                transition={{ duration: 0.7, delay: 0 }}
-                className="rounded-2xl border border-[#0d2118]/8 bg-white p-6 shadow-sm md:col-span-2"
+                transition={{ duration: 0.5, delay: 0 }}
+                className="overflow-hidden rounded-2xl border border-[#0d2118]/8 bg-white p-6 shadow-sm md:col-span-2"
               >
                 <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">Dashboard</p>
                 <p className="mt-1 text-base font-bold text-slate-900">Income vs Spending</p>
@@ -265,17 +273,15 @@ function BentoSection() {
                   <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">Spent £1,304</span>
                   <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">Net £3,051</span>
                 </div>
-                <ThemeProvider>
-                  <TrendChart data={trendData} />
-                </ThemeProvider>
+                <TrendChart data={trendData} />
               </motion.div>
 
               {/* Card 2 — Budget progress (col-span-1) */}
               <motion.div
-                initial={{ opacity: 0, y: 60 }}
+                initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.15 }}
-                transition={{ duration: 0.7, delay: 0.08 }}
+                transition={{ duration: 0.5, delay: 0.08 }}
                 className="rounded-2xl border border-[#0d2118]/8 bg-white p-6 shadow-sm"
               >
                 <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">Budgets</p>
@@ -304,10 +310,10 @@ function BentoSection() {
 
               {/* Card 3 — Transactions (col-span-1) */}
               <motion.div
-                initial={{ opacity: 0, y: 60 }}
+                initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.15 }}
-                transition={{ duration: 0.7, delay: 0.12 }}
+                transition={{ duration: 0.5, delay: 0.12 }}
                 className="rounded-2xl border border-[#0d2118]/8 bg-white p-6 shadow-sm"
               >
                 <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">Transactions</p>
@@ -327,11 +333,11 @@ function BentoSection() {
 
               {/* Card 4 — Net Worth (col-span-2) */}
               <motion.div
-                initial={{ opacity: 0, y: 60 }}
+                initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.15 }}
-                transition={{ duration: 0.7, delay: 0.16 }}
-                className="rounded-2xl border border-[#0d2118]/8 bg-white p-6 shadow-sm md:col-span-2"
+                transition={{ duration: 0.5, delay: 0.16 }}
+                className="overflow-hidden rounded-2xl border border-[#0d2118]/8 bg-white p-6 shadow-sm md:col-span-2"
               >
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                   <div>
@@ -340,17 +346,15 @@ function BentoSection() {
                   </div>
                   <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">+£6,356 · 57%</span>
                 </div>
-                <ThemeProvider>
-                  <NetWorthChart data={netWorthData} />
-                </ThemeProvider>
+                <NetWorthChart data={netWorthData} />
               </motion.div>
 
               {/* Card 5 — Balance Trend (col-span-1) */}
               <motion.div
-                initial={{ opacity: 0, y: 60 }}
+                initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.15 }}
-                transition={{ duration: 0.7, delay: 0.2 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
                 className="rounded-2xl border border-[#0d2118]/8 bg-white p-6 shadow-sm"
               >
                 <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">Balance</p>
@@ -363,10 +367,10 @@ function BentoSection() {
 
               {/* Card 6 — Spending limits (col-span-1) */}
               <motion.div
-                initial={{ opacity: 0, y: 60 }}
+                initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.15 }}
-                transition={{ duration: 0.7, delay: 0.24 }}
+                transition={{ duration: 0.5, delay: 0.24 }}
                 className="rounded-2xl border border-[#0d2118]/8 bg-white p-6 shadow-sm"
               >
                 <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">Spending Limits</p>
@@ -404,10 +408,10 @@ function BentoSection() {
 
               {/* Card 7 — CSV Import (col-span-1) */}
               <motion.div
-                initial={{ opacity: 0, y: 60 }}
+                initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.15 }}
-                transition={{ duration: 0.7, delay: 0.28 }}
+                transition={{ duration: 0.5, delay: 0.28 }}
                 className="rounded-2xl border border-[#0d2118]/8 bg-white p-6 shadow-sm"
               >
                 <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">Import</p>
@@ -592,26 +596,24 @@ export default function Home() {
               </div>
 
               {/* chart — DOM second so it stacks below on mobile; pulled to col-1 on desktop */}
-              <div className="order-2 lg:order-1">
-                <ThemeProvider>
-                  <motion.div
-                    {...fadeUp}
-                    className="flex w-full flex-col justify-center overflow-hidden rounded-2xl border border-emerald-400/15 bg-[#112a1c] px-4 py-6 shadow-[0_24px_64px_rgba(0,0,0,0.4)] sm:min-h-[500px] sm:px-8 sm:py-8"
-                  >
-                    <div className="mb-4 flex flex-wrap gap-2">
-                      <span className="rounded-full bg-emerald-900/50 px-3 py-1 text-xs font-semibold text-emerald-300 sm:px-4 sm:py-1.5 sm:text-sm">
-                        Income £4,355
-                      </span>
-                      <span className="rounded-full bg-red-900/50 px-3 py-1 text-xs font-semibold text-red-300 sm:px-4 sm:py-1.5 sm:text-sm">
-                        Spent £1,304
-                      </span>
-                      <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white sm:px-4 sm:py-1.5 sm:text-sm">
-                        Net £3,051
-                      </span>
-                    </div>
-                    <TrendChart data={trendData} />
-                  </motion.div>
-                </ThemeProvider>
+              <div className="order-2 min-w-0 lg:order-1">
+                <motion.div
+                  {...fadeUp}
+                  className="flex w-full flex-col justify-center overflow-hidden rounded-2xl border border-emerald-400/15 bg-[#112a1c] px-4 py-6 shadow-[0_24px_64px_rgba(0,0,0,0.4)] sm:min-h-[500px] sm:px-8 sm:py-8"
+                >
+                  <div className="mb-4 flex flex-wrap gap-2">
+                    <span className="rounded-full bg-emerald-900/50 px-3 py-1 text-xs font-semibold text-emerald-300 sm:px-4 sm:py-1.5 sm:text-sm">
+                      Income £4,355
+                    </span>
+                    <span className="rounded-full bg-red-900/50 px-3 py-1 text-xs font-semibold text-red-300 sm:px-4 sm:py-1.5 sm:text-sm">
+                      Spent £1,304
+                    </span>
+                    <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-white sm:px-4 sm:py-1.5 sm:text-sm">
+                      Net £3,051
+                    </span>
+                  </div>
+                  <TrendChart data={trendData} />
+                </motion.div>
               </div>
             </div>
           </div>
@@ -647,10 +649,10 @@ export default function Home() {
                     return (
                       <motion.div
                         key={budget.name}
-                        initial={{ opacity: 0, y: 60 }}
+                        initial={{ opacity: 0, y: 24 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true, amount: 0.15 }}
-                        transition={{ duration: 0.7, delay: i * 0.09 }}
+                        transition={{ duration: 0.5, delay: i * 0.09 }}
                         className="rounded-xl border border-emerald-400/10 bg-[#112a1c] p-5"
                       >
                         <div className="flex items-start justify-between gap-2">
@@ -715,24 +717,22 @@ export default function Home() {
               </div>
 
               {/* chart — DOM second so it stacks below on mobile; pulled to col-1 on desktop */}
-              <div className="order-2 lg:order-1">
-                <ThemeProvider>
-                  <motion.div
-                    {...fadeUp}
-                    className="flex w-full flex-col justify-center overflow-hidden rounded-2xl border border-emerald-400/15 bg-[#112a1c] px-4 py-6 shadow-[0_24px_64px_rgba(0,0,0,0.4)] sm:min-h-[500px] sm:px-8 sm:py-8"
-                  >
-                    <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-widest text-emerald-400">Current Net Worth</p>
-                        <p className="mt-1 text-2xl font-bold text-white">£17,556</p>
-                      </div>
-                      <span className="rounded-full bg-emerald-900/50 px-3 py-1 text-xs font-semibold text-emerald-300">
-                        +£6,356 · 57%
-                      </span>
+              <div className="order-2 min-w-0 lg:order-1">
+                <motion.div
+                  {...fadeUp}
+                  className="flex w-full flex-col justify-center overflow-hidden rounded-2xl border border-emerald-400/15 bg-[#112a1c] px-4 py-6 shadow-[0_24px_64px_rgba(0,0,0,0.4)] sm:min-h-[500px] sm:px-8 sm:py-8"
+                >
+                  <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-widest text-emerald-400">Current Net Worth</p>
+                      <p className="mt-1 text-2xl font-bold text-white">£17,556</p>
                     </div>
-                    <NetWorthChart data={netWorthData} />
-                  </motion.div>
-                </ThemeProvider>
+                    <span className="rounded-full bg-emerald-900/50 px-3 py-1 text-xs font-semibold text-emerald-300">
+                      +£6,356 · 57%
+                    </span>
+                  </div>
+                  <NetWorthChart data={netWorthData} />
+                </motion.div>
               </div>
             </div>
           </div>
@@ -764,10 +764,10 @@ export default function Home() {
               {mockTransactions.map((tx, i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, y: 60 }}
+                  initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.15 }}
-                  transition={{ duration: 0.7, delay: i * 0.08 }}
+                  transition={{ duration: 0.5, delay: i * 0.08 }}
                   className="flex items-center gap-4 rounded-xl border border-emerald-400/10 bg-[#112a1c] px-5 py-4"
                 >
                   <div className={`h-2.5 w-2.5 shrink-0 rounded-full ${tx.type === 'income' ? 'bg-emerald-400' : 'bg-red-400'}`} />
