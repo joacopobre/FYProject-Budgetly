@@ -78,16 +78,14 @@ export default function ForgotPasswordPage() {
                   <h1 className="text-2xl font-bold text-slate-900">Google account detected</h1>
                 </div>
                 <p className="mt-4 text-sm text-slate-500">
-                  This account uses Google sign-in. Please continue with Google.
+                  This account uses Google sign-in. Please sign in with Google instead.
                 </p>
-                <p className="mt-8 text-center text-sm text-slate-500">
-                  <Link
-                    href="/login"
-                    className="font-semibold text-emerald-600 hover:text-emerald-700"
-                  >
-                    Back to sign in
-                  </Link>
-                </p>
+                <Link
+                  href="/login"
+                  className="mt-6 flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-2.5 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(16,185,129,0.35)] transition-all hover:from-emerald-600 hover:to-teal-600 hover:shadow-[0_4px_18px_rgba(16,185,129,0.5)]"
+                >
+                  Go to sign in
+                </Link>
               </>
             ) : submitted ? (
               <>
