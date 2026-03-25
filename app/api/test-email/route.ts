@@ -3,11 +3,11 @@ export const runtime = "nodejs"
 import { NextResponse } from "next/server"
 import { sendEmail, baseEmailTemplate } from "@/lib/email"
 
-const TEST_EMAIL = "joaquin@example.com" // replace with your address
+const TEST_EMAIL = "joacorodes@gmail.com"
 
 export async function GET() {
   const emailBody = `
-    <p style="margin:0 0 16px;">Hi there,</p>
+    <p style="margin:0 0 16px;">Hi Joaquin,</p>
     <p style="margin:0 0 16px;">Welcome to <strong>Budgetly</strong> — we're glad you're here.</p>
     <p style="margin:0 0 24px;">Budgetly helps you take control of your finances by tracking your spending, setting budgets, and watching your savings grow — all in one place.</p>
     <table cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
