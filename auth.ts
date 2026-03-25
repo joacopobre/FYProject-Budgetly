@@ -64,12 +64,14 @@ export const authOptions: NextAuthOptions = {
       if (account?.provider === "google" && user.email) {
         const dbUser = await prisma.user.findUnique({
           where: { email: user.email },
-          select: { name: true, createdAt: true },
+          select: {
+            name: true,
+            _count: { select: { transactions: true } },
+          },
         })
 
         if (dbUser) {
-          const secondsSinceCreation = (Date.now() - dbUser.createdAt.getTime()) / 1000
-          if (secondsSinceCreation < 30) {
+          if (dbUser._count.transactions === 0) {
             const firstName = dbUser.name ? dbUser.name.split(" ")[0] : "there"
             const emailBody = `
               <p style="margin:0 0 16px;">Hi ${firstName},</p>
