@@ -13,15 +13,24 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Email is required" }, { status: 400 })
   }
 
-  const user = await prisma.user.findUnique({ where: { email } })
+  const user = await prisma.user.findUnique({
+    where: { email },
+    include: { accounts: { select: { provider: true } } },
+  })
+
+  console.log("[forgot-password] email lookup:", email)
+  console.log("[forgot-password] user found:", user ? { id: user.id, email: user.email, hasPasswordHash: !!user.passwordHash, providers: user.accounts.map(a => a.provider) } : null)
 
   // No account — return generic success to avoid email enumeration.
   if (!user) {
     return NextResponse.json({ success: true })
   }
 
-  // Google OAuth account (no password hash) — tell the client explicitly.
-  if (!user.passwordHash) {
+  // Google OAuth account — no password hash set, or only Google linked.
+  const hasGoogleAccount = user.accounts.some(a => a.provider === "google")
+  const isGoogleOnly = hasGoogleAccount && !user.passwordHash
+  console.log("[forgot-password] isGoogleOnly:", isGoogleOnly)
+  if (isGoogleOnly) {
     return NextResponse.json({ googleAccount: true })
   }
 
