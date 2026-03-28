@@ -114,7 +114,7 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
   }, [isOpen])
 
   return (
-    <div className="mx-auto flex w-full max-w-screen-xl flex-col gap-8 px-5 pt-8 pb-14 md:px-8 lg:px-12">
+    <div className="mx-auto flex w-full max-w-screen-xl flex-col gap-8 overflow-x-hidden px-5 pt-8 pb-14 md:px-8 lg:px-12">
       {/* Page header */}
       <div className="flex items-center justify-between">
         <h1 className="text-4xl font-bold text-slate-900 dark:text-white md:text-5xl lg:text-6xl">
@@ -133,7 +133,7 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
       {/* 4 Stat Cards */}
       <section data-tour="dashboard-stats" className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {/* Total Balance */}
-        <div className="flex flex-col gap-1 rounded-2xl border border-[#0d2118]/8 bg-white px-5 py-5 shadow-sm dark:border-white/8 dark:bg-white/8 dark:backdrop-blur-md">
+        <div className="flex flex-col gap-1 overflow-hidden rounded-2xl border border-[#0d2118]/8 bg-white px-5 py-5 shadow-sm dark:border-white/8 dark:bg-white/8 dark:backdrop-blur-md">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
             Total Balance
           </p>
@@ -146,7 +146,7 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
         </div>
 
         {/* Monthly Income */}
-        <div className="flex flex-col gap-1 rounded-2xl border border-emerald-100 bg-emerald-50/50 px-5 py-5 shadow-sm dark:border-emerald-500/20 dark:bg-emerald-500/8 dark:backdrop-blur-md">
+        <div className="flex flex-col gap-1 overflow-hidden rounded-2xl border border-emerald-100 bg-emerald-50/50 px-5 py-5 shadow-sm dark:border-emerald-500/20 dark:bg-emerald-500/8 dark:backdrop-blur-md">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
             Monthly Income
           </p>
@@ -163,7 +163,7 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
         </div>
 
         {/* Monthly Spent */}
-        <div className="flex flex-col gap-1 rounded-2xl border border-[#dc2626]/15 bg-[#dc2626]/5 px-5 py-5 shadow-sm dark:border-[#dc2626]/20 dark:bg-[#dc2626]/8 dark:backdrop-blur-md">
+        <div className="flex flex-col gap-1 overflow-hidden rounded-2xl border border-[#dc2626]/15 bg-[#dc2626]/5 px-5 py-5 shadow-sm dark:border-[#dc2626]/20 dark:bg-[#dc2626]/8 dark:backdrop-blur-md">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
             Monthly Spent
           </p>
@@ -178,7 +178,7 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
         </div>
 
         {/* Net Savings */}
-        <div className="flex flex-col gap-1 rounded-2xl border border-[#0d2118]/8 bg-white px-5 py-5 shadow-sm dark:border-white/8 dark:bg-white/8 dark:backdrop-blur-md">
+        <div className="flex flex-col gap-1 overflow-hidden rounded-2xl border border-[#0d2118]/8 bg-white px-5 py-5 shadow-sm dark:border-white/8 dark:bg-white/8 dark:backdrop-blur-md">
           <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
             Net Savings
           </p>
@@ -200,7 +200,7 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
       {/* Two-column layout */}
       <div data-tour="dashboard-trend" className="grid gap-6 lg:grid-cols-[1.7fr_1fr]">
         {/* Left: trend filter + chart + recent transactions */}
-        <div className="flex flex-col gap-4">
+        <div className="flex min-w-0 flex-col gap-4">
           <div className="relative" ref={trendMenuRef}>
             <button
               type="button"
@@ -230,7 +230,7 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
             )}
           </div>
 
-          <div className="rounded-2xl border border-[#0d2118]/8 bg-white px-5 py-6 shadow-sm dark:border-white/8 dark:bg-white/8 dark:backdrop-blur-md">
+          <div className="overflow-hidden rounded-2xl border border-[#0d2118]/8 bg-white px-5 py-6 shadow-sm dark:border-white/8 dark:bg-white/8 dark:backdrop-blur-md">
             <TrendChart data={trendSeries} />
           </div>
 
@@ -251,7 +251,7 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
         </div>
 
         {/* Right: active budgets */}
-        <section className="flex flex-col gap-3">
+        <section className="flex min-w-0 flex-col gap-3">
           <div className="flex items-center justify-between">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
               Active Budgets
@@ -264,7 +264,7 @@ export default function DashboardClient({ initialTransactions, initialBudgets }:
             </Link>
           </div>
 
-          <div className="rounded-2xl border border-[#0d2118]/8 bg-white px-4 pt-4 pb-4 shadow-sm dark:border-white/8 dark:bg-white/8 dark:backdrop-blur-md">
+          <div className="overflow-hidden rounded-2xl border border-[#0d2118]/8 bg-white px-4 pt-4 pb-4 shadow-sm dark:border-white/8 dark:bg-white/8 dark:backdrop-blur-md">
             {initialBudgets.length > 0 ? (
               <div className="divide-y divide-slate-100 dark:divide-white/8">
                 {initialBudgets.slice(0, 5).map(budget => {
