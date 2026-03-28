@@ -12,8 +12,6 @@ export function RecentTransactions({ transactions }: Props) {
 
   return (
     <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-4 dark:border-white/8 dark:bg-white/5">
-      <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300">Recent Transactions</h3>
-
       {recent.length === 0 ? (
         <p className="rounded-md border border-dashed border-slate-300 bg-white px-3 py-4 text-sm text-gray-500 dark:border-white/10 dark:bg-white/5 dark:text-slate-400">
           No transactions yet.
