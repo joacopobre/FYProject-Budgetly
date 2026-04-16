@@ -7,7 +7,7 @@ export type TrendPoint = {
 }
 export function buildTrendSeries(transactions: Transaction[]): TrendPoint[] {
   const map = new Map<string, { income: number; expenses: number }>()
-  for (const tx of transactions) {
+  for (const tx of transactions.filter(t => t.type !== 'Transfer')) {
     const d = new Date(tx.date)
     const year = d.getFullYear()
     const month = String(d.getMonth() + 1).padStart(2, '0')
