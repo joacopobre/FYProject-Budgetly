@@ -127,11 +127,11 @@ export function TransactionModal({
 
   return (
     <div
-      className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 px-4 backdrop-blur-sm"
+      className="fixed inset-0 z-40 flex items-start justify-center overflow-y-auto bg-black/50 px-4 pt-20 pb-8 backdrop-blur-sm sm:items-center sm:pt-4 sm:pb-4"
       onClick={onClose}
     >
       <div
-        className="flex w-full max-w-lg flex-col gap-6 rounded-2xl border border-gray-200 bg-white p-8 shadow-2xl dark:border-white/10 dark:bg-[#0e2318] max-h-[90vh] overflow-y-auto"
+        className="mx-4 flex w-full max-w-lg flex-col gap-6 rounded-2xl border border-gray-200 bg-white p-8 shadow-2xl dark:border-white/10 dark:bg-[#0e2318]"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3">
