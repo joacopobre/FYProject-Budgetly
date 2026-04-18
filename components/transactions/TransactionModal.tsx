@@ -188,7 +188,7 @@ export function TransactionModal({
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-            Date <span className="text-red-500">*</span>
+            <span>Date <span className="text-red-500">*</span></span>
             <DatePicker
               value={date}
               onChange={v => { setDate(v); setErrors(prev => ({ ...prev, date: undefined })) }}
@@ -242,7 +242,7 @@ export function TransactionModal({
             className="flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-gray-300"
             htmlFor="description"
           >
-            Description <span className="text-red-500">*</span>
+            <span>Description <span className="text-red-500">*</span></span>
             <input
               id="description"
               type="text"
@@ -344,7 +344,7 @@ export function TransactionModal({
           className="flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-gray-300"
           htmlFor="amount"
         >
-          Amount <span className="text-red-500">*</span>
+          <span>Amount <span className="text-red-500">*</span></span>
           <input
             id="amount"
             type="number"
