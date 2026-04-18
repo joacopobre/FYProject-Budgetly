@@ -42,6 +42,7 @@ export default function AppNav() {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+  const toggleRef = useRef<HTMLButtonElement>(null)
   const { theme, toggleTheme } = useTheme()
   const { startTour } = useOnboarding()
 
@@ -90,7 +91,9 @@ export default function AppNav() {
   useEffect(() => {
     if (!open) return
     const onClickAway = (e: MouseEvent | TouchEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) close()
+      const target = e.target as Node
+      if (toggleRef.current?.contains(target)) return
+      if (menuRef.current && !menuRef.current.contains(target)) close()
     }
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') close()
@@ -398,6 +401,7 @@ export default function AppNav() {
           </button>
 
           <button
+            ref={toggleRef}
             type="button"
             aria-label={open ? 'Close navigation menu' : 'Open navigation menu'}
             onClick={toggle}
