@@ -105,7 +105,7 @@ export function BudgetModal({
 
         <div className="flex flex-col gap-4">
           <label className="flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-slate-300" htmlFor="name">
-            Budget name <span className="text-red-500">*</span>
+            <span>Budget name <span className="text-red-500">*</span></span>
             <input
               id="name"
               value={name}
@@ -168,7 +168,7 @@ export function BudgetModal({
 
           {budgetKind === 'SAVE' && (
             <label className="flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-slate-300" htmlFor="limit">
-              Goal amount <span className="text-red-500">*</span>
+              <span>Goal amount <span className="text-red-500">*</span></span>
               <input
                 id="limit"
                 value={limit}
@@ -187,7 +187,7 @@ export function BudgetModal({
               className="flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-slate-300"
               htmlFor="startingAmount"
             >
-              {budgetKind === 'SAVE' ? 'Initial deposit' : 'Starting amount'} <span className="text-red-500">*</span>
+              <span>{budgetKind === 'SAVE' ? 'Initial deposit' : 'Starting amount'} <span className="text-red-500">*</span></span>
               <input
                 id="startingAmount"
                 value={startingAmount}
