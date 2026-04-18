@@ -1,9 +1,9 @@
 import type { Transaction } from '@/types/transactions'
 
 export function calculateDashboardStats(transactions: Transaction[]) {
-  const balance = transactions.reduce((sum, tx) => {
-    return sum + tx.amount
-  }, 0)
+  const balance = transactions
+    .filter(tx => tx.type === 'Income' || tx.type === 'Expense')
+    .reduce((sum, tx) => sum + tx.amount, 0)
 
   const totalIncome = transactions
     .filter(tx => tx.type === 'Income')

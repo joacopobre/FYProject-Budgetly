@@ -143,7 +143,7 @@ export default function AppNav() {
           Budgetly
         </Link>
 
-        <div className="hidden items-center gap-1 md:flex">
+        <div className="relative hidden items-center gap-1 md:flex">
           {links.map(link => {
             const isActive = pathname === link.href
             return (
@@ -164,7 +164,7 @@ export default function AppNav() {
           })}
 
           {/* Notification bell */}
-          <div className="relative ml-1" ref={notifRef}>
+          <div className="ml-1" ref={notifRef}>
             <button
               type="button"
               aria-label="Notifications"
@@ -297,9 +297,9 @@ export default function AppNav() {
           </button>
         </div>
 
-        <div className="flex items-center gap-2 md:hidden">
+        <div className="relative flex items-center gap-2 md:hidden">
           {/* Notification bell mobile */}
-          <div className="relative" ref={notifRefMobile}>
+          <div ref={notifRefMobile}>
             <button
               type="button"
               aria-label="Notifications"
