@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 type Props = {
   value: string // YYYY-MM-DD
   onChange: (value: string) => void
+  error?: boolean
 }
 
 const DAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
@@ -40,7 +41,7 @@ function toDateStr(year: number, month: number, day: number): string {
   return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 }
 
-export function DatePicker({ value, onChange }: Props) {
+export function DatePicker({ value, onChange, error }: Props) {
   const today = todayStr()
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -120,6 +121,7 @@ export function DatePicker({ value, onChange }: Props) {
           'focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100',
           'dark:border-white/10 dark:bg-white/8 dark:text-slate-200',
           isOpen && 'border-emerald-400 ring-2 ring-emerald-100 dark:border-emerald-500/50 dark:ring-emerald-500/20',
+          error && !isOpen && 'border-red-500 dark:border-red-500/70',
         )}
       >
         <span className={cn('text-sm', !value && 'text-gray-400 dark:text-slate-500')}>

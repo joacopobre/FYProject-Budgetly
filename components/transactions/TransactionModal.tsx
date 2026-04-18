@@ -79,6 +79,14 @@ export function TransactionModal({
   const [isRecurrenceMenuOpen, setIsRecurrenceMenuOpen] = useState(false)
   const recurrenceMenuRef = useRef<HTMLDivElement>(null)
 
+  const [errors, setErrors] = useState<{
+    date?: string
+    description?: string
+    category?: string
+    amount?: string
+    from?: string
+  }>({})
+
   // get budgets via context
   const context = useContext(BudgetsContext)
   if (!context) throw new Error('BudgetsContext missing')
@@ -89,7 +97,10 @@ export function TransactionModal({
   const isRecurring = recurrence !== 'NONE'
 
   useEffect(() => {
-    if (!isOpen) return
+    if (!isOpen) {
+      setErrors({})
+      return
+    }
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
     }
@@ -101,6 +112,28 @@ export function TransactionModal({
       document.body.style.overflow = prev
     }
   }, [isOpen, onClose])
+
+  useEffect(() => {
+    if (category) setErrors(prev => ({ ...prev, category: undefined }))
+  }, [category])
+
+  useEffect(() => {
+    setErrors(prev => ({ ...prev, from: undefined }))
+  }, [source, budgetId])
+
+  function handleSave() {
+    const newErrors: typeof errors = {}
+    if (!date) newErrors.date = 'This field is required'
+    if (!description.trim()) newErrors.description = 'This field is required'
+    if (!category.trim()) newErrors.category = 'This field is required'
+    if (!amount.trim()) newErrors.amount = 'This field is required'
+    if (type !== 'Income' && source === 'BUDGET' && !budgetId) newErrors.from = 'This field is required'
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      return
+    }
+    onSave()
+  }
 
   useEffect(() => {
     if (!isTypeMenuOpen && !isFromMenuOpen && !isCategoryMenuOpen && !isRecurrenceMenuOpen) return
@@ -155,14 +188,19 @@ export function TransactionModal({
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-            Date
-            <DatePicker value={date} onChange={setDate} />
+            Date <span className="text-red-500">*</span>
+            <DatePicker
+              value={date}
+              onChange={v => { setDate(v); setErrors(prev => ({ ...prev, date: undefined })) }}
+              error={!!errors.date}
+            />
+            {errors.date && <p className="text-xs text-red-500">{errors.date}</p>}
           </div>
           <div
             className="relative flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-gray-300"
             ref={typeMenuRef}
           >
-            <span>Type</span>
+            <span>Type <span className="text-red-500">*</span></span>
             <button
               type="button"
               onClick={() => setIsTypeMenuOpen(prev => !prev)}
@@ -204,21 +242,22 @@ export function TransactionModal({
             className="flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-gray-300"
             htmlFor="description"
           >
-            Description
+            Description <span className="text-red-500">*</span>
             <input
               id="description"
               type="text"
               value={description}
-              onChange={e => setDescription(e.target.value)}
-              className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-white/10 dark:bg-white/8 dark:text-slate-200"
+              onChange={e => { setDescription(e.target.value); setErrors(prev => ({ ...prev, description: undefined })) }}
+              className={`rounded-xl border px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:bg-white/8 dark:text-slate-200 ${errors.description ? 'border-red-500 dark:border-red-500/70' : 'border-gray-200 dark:border-white/10'}`}
               placeholder="e.g. Coffee"
             />
+            {errors.description && <p className="text-xs text-red-500">{errors.description}</p>}
           </label>
           <div
             className="relative flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-gray-300"
             ref={categoryMenuRef}
           >
-            <span>Category</span>
+            <span>Category <span className="text-red-500">*</span></span>
             <button
               type="button"
               onClick={() => {
@@ -226,7 +265,7 @@ export function TransactionModal({
                 setCategorySearch('')
                 setTimeout(() => categoryInputRef.current?.focus(), 0)
               }}
-              className="flex items-center justify-between rounded-xl border border-gray-200 px-3 py-2 text-left text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-white/10 dark:bg-white/8 dark:text-slate-200"
+              className={`flex items-center justify-between rounded-xl border px-3 py-2 text-left text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:bg-white/8 dark:text-slate-200 ${errors.category ? 'border-red-500 dark:border-red-500/70' : 'border-gray-200 dark:border-white/10'}`}
             >
               <span className={category ? '' : 'text-gray-400 dark:text-gray-500'}>
                 {category
@@ -297,6 +336,7 @@ export function TransactionModal({
                 </div>
               </div>
             )}
+            {errors.category && <p className="text-xs text-red-500">{errors.category}</p>}
           </div>
         </div>
 
@@ -304,16 +344,17 @@ export function TransactionModal({
           className="flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-gray-300"
           htmlFor="amount"
         >
-          Amount
+          Amount <span className="text-red-500">*</span>
           <input
             id="amount"
             type="number"
             min="0"
             value={amount}
-            onChange={e => setAmount(e.target.value)}
-            className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-white/10 dark:bg-white/8 dark:text-slate-200"
+            onChange={e => { setAmount(e.target.value); setErrors(prev => ({ ...prev, amount: undefined })) }}
+            className={`rounded-xl border px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:bg-white/8 dark:text-slate-200 ${errors.amount ? 'border-red-500 dark:border-red-500/70' : 'border-gray-200 dark:border-white/10'}`}
             placeholder="0.00"
           />
+          {errors.amount && <p className="text-xs text-red-500">{errors.amount}</p>}
         </label>
 
         {type !== 'Income' && (
@@ -321,13 +362,13 @@ export function TransactionModal({
           className="relative flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-gray-300"
           ref={fromMenuRef}
         >
-          <span>From</span>
+          <span>From <span className="text-red-500">*</span></span>
           <button
             type="button"
             onClick={() => {
               setIsFromMenuOpen(prev => !prev)
             }}
-            className="flex items-center justify-between rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-white/10 dark:bg-white/8 dark:text-slate-200"
+            className={`flex items-center justify-between rounded-xl border px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:bg-white/8 dark:text-slate-200 ${errors.from ? 'border-red-500 dark:border-red-500/70' : 'border-gray-200 dark:border-white/10'}`}
           >
             {source === 'ACCOUNT'
               ? 'Account'
@@ -374,6 +415,7 @@ export function TransactionModal({
               ))}
             </div>
           )}
+          {errors.from && <p className="text-xs text-red-500">{errors.from}</p>}
         </div>
         )}
 
@@ -468,7 +510,7 @@ export function TransactionModal({
             <button
               type="button"
               className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
-              onClick={onSave}
+              onClick={handleSave}
             >
               Save
             </button>
