@@ -1,7 +1,7 @@
 'use client'
 
 import { X } from 'lucide-react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import type { BudgetKind } from '@/types/budgets'
 
 type Props = {
@@ -39,8 +39,17 @@ export function BudgetModal({
   setRollover,
   error,
 }: Props) {
+  const [errors, setErrors] = useState<{
+    name?: string
+    limit?: string
+    startingAmount?: string
+  }>({})
+
   useEffect(() => {
-    if (!isOpen) return
+    if (!isOpen) {
+      setErrors({})
+      return
+    }
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
     }
@@ -56,6 +65,18 @@ export function BudgetModal({
       document.body.style.overflow = prev
     }
   }, [isOpen])
+
+  function handleSave() {
+    const newErrors: typeof errors = {}
+    if (!name.trim()) newErrors.name = 'This field is required'
+    if (budgetKind === 'SAVE' && !limit.trim()) newErrors.limit = 'This field is required'
+    if (editingBudgetId === null && !startingAmount.trim()) newErrors.startingAmount = 'This field is required'
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      return
+    }
+    onSave()
+  }
 
   if (!isOpen) return null
 
@@ -84,15 +105,16 @@ export function BudgetModal({
 
         <div className="flex flex-col gap-4">
           <label className="flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-slate-300" htmlFor="name">
-            Budget name
+            Budget name <span className="text-red-500">*</span>
             <input
               id="name"
               value={name}
-              onChange={e => setName(e.currentTarget.value)}
+              onChange={e => { setName(e.currentTarget.value); setErrors(prev => ({ ...prev, name: undefined })) }}
               type="text"
-              className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-white/10 dark:bg-white/8 dark:text-slate-200"
+              className={`rounded-xl border px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:bg-white/8 dark:text-slate-200 ${errors.name ? 'border-red-500 dark:border-red-500/70' : 'border-gray-200 dark:border-white/10'}`}
               placeholder="e.g. Groceries"
             />
+            {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
           </label>
 
           <div className="flex gap-2">
@@ -146,16 +168,17 @@ export function BudgetModal({
 
           {budgetKind === 'SAVE' && (
             <label className="flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-slate-300" htmlFor="limit">
-              Goal amount
+              Goal amount <span className="text-red-500">*</span>
               <input
                 id="limit"
                 value={limit}
-                onChange={e => setLimit(e.currentTarget.value)}
+                onChange={e => { setLimit(e.currentTarget.value); setErrors(prev => ({ ...prev, limit: undefined })) }}
                 type="number"
                 min="0"
-                className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-white/10 dark:bg-white/8 dark:text-slate-200"
+                className={`rounded-xl border px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:bg-white/8 dark:text-slate-200 ${errors.limit ? 'border-red-500 dark:border-red-500/70' : 'border-gray-200 dark:border-white/10'}`}
                 placeholder="0.00"
               />
+              {errors.limit && <p className="text-xs text-red-500">{errors.limit}</p>}
             </label>
           )}
 
@@ -164,16 +187,17 @@ export function BudgetModal({
               className="flex flex-col gap-2 text-sm font-medium text-gray-700 dark:text-slate-300"
               htmlFor="startingAmount"
             >
-              {budgetKind === 'SAVE' ? 'Initial deposit' : 'Starting amount'}
+              {budgetKind === 'SAVE' ? 'Initial deposit' : 'Starting amount'} <span className="text-red-500">*</span>
               <input
                 id="startingAmount"
                 value={startingAmount}
-                onChange={e => setStartingAmount(e.currentTarget.value)}
+                onChange={e => { setStartingAmount(e.currentTarget.value); setErrors(prev => ({ ...prev, startingAmount: undefined })) }}
                 type="number"
                 min="0"
-                className="rounded-xl border border-gray-200 px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-white/10 dark:bg-white/8 dark:text-slate-200"
+                className={`rounded-xl border px-3 py-2 text-gray-800 shadow-sm transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:bg-white/8 dark:text-slate-200 ${errors.startingAmount ? 'border-red-500 dark:border-red-500/70' : 'border-gray-200 dark:border-white/10'}`}
                 placeholder="0.00"
               />
+              {errors.startingAmount && <p className="text-xs text-red-500">{errors.startingAmount}</p>}
             </label>
           )}
         </div>
@@ -195,7 +219,7 @@ export function BudgetModal({
           <button
             type="button"
             className="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(16,185,129,0.3)] transition hover:from-emerald-600 hover:to-teal-600"
-            onClick={onSave}
+            onClick={handleSave}
           >
             Save
           </button>
