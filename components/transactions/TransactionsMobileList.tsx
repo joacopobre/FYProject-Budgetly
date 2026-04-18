@@ -10,6 +10,14 @@ type Props = {
   getSourceLabel: (tx: Transaction) => string
 }
 
+function formatDate(dateStr: string): string {
+  const d = new Date(dateStr)
+  const now = new Date()
+  const opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' }
+  if (d.getFullYear() !== now.getFullYear()) opts.year = 'numeric'
+  return d.toLocaleDateString('en-GB', opts)
+}
+
 export function TransactionsMobileList({
   transactions,
   onEdit,
@@ -30,7 +38,7 @@ export function TransactionsMobileList({
           >
             <div className={`absolute top-0 left-0 right-0 h-[3px] ${accentBar}`} />
             <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
-              <span>{tx.date}</span>
+              <span>{formatDate(tx.date)}</span>
               <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 dark:bg-white/10 dark:text-slate-400">
                 {tx.type}
               </span>
