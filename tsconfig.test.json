@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": false,
+    "types": ["jest", "node", "@testing-library/jest-dom"],
+    "moduleResolution": "node",
+    "module": "commonjs"
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "jest.setup.ts"
+  ]
+}
